@@ -79,13 +79,12 @@ photosynthesis_outputs c3photoC(
     FvCB_outputs FvCB_res;
     stomata_outputs BB_res;
     double an_conductance{};  // mol / m^2 / s
-    double assim_adj{};       // mol / m^2 / s
     double Gs{1e3};           // mol / m^2 / s  (initial guess)
     double Ci{0.0};           // micromol / mol (initial guess)
 
     // this lambda function equals zero
     // only if assim satisfies both FvCB and Ball Berry model
-    auto check_assim_rate = [&](double assim) {
+    auto check_assim_rate = [=, &FvCB_res, &BB_res, &an_conductance, &Gs, &Ci](double const assim) {
         // The net CO2 assimilation is the smaller of the biochemistry-limited
         // and conductance-limited rates. This will prevent the calculated Ci
         // value from ever being < 0. This is an important restriction to
@@ -93,7 +92,8 @@ photosynthesis_outputs c3photoC(
         // seem to ever limit the net assimilation rate if the loop converges.
         an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
 
-        assim_adj = std::min(assim, an_conductance);  // micromol / m^2 / s
+        double const assim_adj =
+            std::min(assim, an_conductance);  // micromol / m^2 / s
 
         // If assim is correct, then Ball Berry gives the correct
         // CO2 at leaf surface (Cs) and correct stomatal conductance
@@ -136,7 +136,7 @@ photosynthesis_outputs c3photoC(
     assim_ub = std::min(Ca * gbw / dr_boundary, assim_ub);
 
     secant_parameters secpar;
-    double co2_assim_rate =
+    double const co2_assim_rate =
         find_root_secant_method(
             check_assim_rate, Rd, assim_ub, secpar);
 

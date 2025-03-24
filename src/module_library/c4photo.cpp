@@ -33,35 +33,35 @@ photosynthesis_outputs c4photoC(
 {
     constexpr double k_Q10 = 2;  // dimensionless. Increase in a reaction rate per temperature increase of 10 degrees Celsius.
 
-    double Ca_pa = Ca * 1e-6 * atmospheric_pressure;  // Pa
+    double const Ca_pa = Ca * 1e-6 * atmospheric_pressure;  // Pa
 
-    double kT = kparm * pow(k_Q10, (leaf_temperature - 25.0) / 10.0);  // dimensionless
-
-    // Collatz 1992. Appendix B. Equation set 5B.
-    double Vtn = vmax * pow(2, (leaf_temperature - 25.0) / 10.0);                                              // micromole / m^2 / s
-    double Vtd = (1 + exp(0.3 * (lowerT - leaf_temperature))) * (1 + exp(0.3 * (leaf_temperature - upperT)));  // dimensionless
-    double VT = Vtn / Vtd;                                                                                     // micromole / m^2 / s
+    double const kT = kparm * pow(k_Q10, (leaf_temperature - 25.0) / 10.0);  // dimensionless
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double Rtn = Rd * pow(2, (leaf_temperature - 25) / 10);  // micromole / m^2 / s
-    double Rtd = 1 + exp(1.3 * (leaf_temperature - 55));     // dimensionless
-    double RT = Rtn / Rtd;                                   // micromole / m^2 / s
+    double const Vtn = vmax * pow(2, (leaf_temperature - 25.0) / 10.0);                                              // micromole / m^2 / s
+    double const Vtd = (1 + exp(0.3 * (lowerT - leaf_temperature))) * (1 + exp(0.3 * (leaf_temperature - upperT)));  // dimensionless
+    double const VT = Vtn / Vtd;                                                                                     // micromole / m^2 / s
+
+    // Collatz 1992. Appendix B. Equation set 5B.
+    double const Rtn = Rd * pow(2, (leaf_temperature - 25) / 10);  // micromole / m^2 / s
+    double const Rtd = 1 + exp(1.3 * (leaf_temperature - 55));     // dimensionless
+    double const RT = Rtn / Rtd;                                   // micromole / m^2 / s
 
     // Collatz 1992. Appendix B. Quadratic coefficients from Equation 2B.
-    double b0 = VT * alpha * Qp;
-    double b1 = -(VT + alpha * Qp);
-    double b2 = theta;
+    double const b0 = VT * alpha * Qp;
+    double const b1 = -(VT + alpha * Qp);
+    double const b2 = theta;
 
     // Calculate the smaller of the two quadratic roots, as mentioned following
     // Equation 3B in Collatz 1992.
-    double M = quadratic_root_min(b2, b1, b0);  // micromol / m^2 / s
+    double const M = quadratic_root_min(b2, b1, b0);  // micromol / m^2 / s
 
     // Adjust Ball-Berry parameters in response to water stress
     double const bb0_adj = StomaWS * bb0 + Gs_min * (1.0 - StomaWS);
     double const bb1_adj = StomaWS * bb1;
 
     // Function to compute the biochemical assimilation rate.
-    auto collatz_assim = [&](double InterCellularCO2) {
+    auto collatz_assim = [=](double const InterCellularCO2) {
         // Collatz 1992. Appendix B. Quadratic coefficients from Equation 3B.
         double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / m^2 / s
         double a = beta;
@@ -79,13 +79,12 @@ photosynthesis_outputs c4photoC(
     // Here we make an initial guess that Ci = 0.4 * Ca.
     stomata_outputs BB_res;
     double an_conductance{};    // mol / m^2 / s
-    double assim_adj{};         // mol / m^2 / s
     double Ci_pa{0.4 * Ca_pa};  // Pa            (initial guess)
     double Gs{1e3};             // mol / m^2 / s (initial guess)
 
     // This lambda function equals zero
     // only if assim satisfies both collatz assim and Ball Berry model
-    auto check_assim_rate = [&](double assim) {
+    auto check_assim_rate = [=, &BB_res, &an_conductance, &Ci_pa, &Gs](double const assim) {
         // The net CO2 assimilation is the smaller of the biochemistry-limited
         // and conductance-limited rates. This will prevent the calculated Ci
         // value from ever being < 0. This is an important restriction to
@@ -93,7 +92,7 @@ photosynthesis_outputs c4photoC(
         // seem to ever limit the net assimilation rate if the loop converges.
         an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
 
-        assim_adj = std::min(assim, an_conductance);  // micromol / m^2 / s
+        double const assim_adj = std::min(assim, an_conductance);  // micromol / m^2 / s
 
         // If assim is correct, then Ball Berry gives the correct
         // CO2 at leaf surface (Cs) and correct stomatal conductance
@@ -122,12 +121,12 @@ photosynthesis_outputs c4photoC(
 
     secant_parameters secpar;
     // Initial guesses for the secant method
-    double A0 = collatz_assim(Ca_pa);
-    double A1 = collatz_assim(Ci_pa);
-    double Assim = find_root_secant_method(
+    double const A0 = collatz_assim(Ca_pa);
+    double const A1 = collatz_assim(Ci_pa);
+    double const Assim = find_root_secant_method(
         check_assim_rate, A0, A1, secpar);
     // unit change
-    double Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromole / mol
+    double const Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromole / mol
 
     return photosynthesis_outputs{
         /* .Assim = */ Assim,               // micromol / m^2 /s
