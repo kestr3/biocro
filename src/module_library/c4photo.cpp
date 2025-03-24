@@ -78,9 +78,8 @@ photosynthesis_outputs c4photoC(
     // during the secant method's iterations.
     // Here we make an initial guess that Ci = 0.4 * Ca.
     stomata_outputs BB_res;
-    double InterCellularCO2{0.4 * Ca_pa};  // Pa
-    double Assim{};                        // micromol / m^2 / s
-    double Gs{};                           // mol / m^2 / s
+    double Ci_pa{0.4 * Ca_pa};  // Pa
+    double Gs{};                // mol / m^2 / s
 
     // This lambda function equals zero
     // only if assim satisfies both collatz assim and Ball Berry model
@@ -102,22 +101,22 @@ photosynthesis_outputs c4photoC(
         // Using the value of stomatal conductance,
         // Calculate Ci using the total conductance across the boundary
         // layer and stomata
-        InterCellularCO2 =
-            Ca_pa - atmospheric_pressure * (Assim * 1e-6) *
+        Ci_pa =
+            Ca_pa - atmospheric_pressure * (assim * 1e-6) *
                         (dr_boundary / gbw + dr_stomata / Gs);  // Pa
 
-        double check = collatz_assim(InterCellularCO2) - assim;
+        double check = collatz_assim(Ci_pa) - assim;
         return check;  // equals zero if correct
     };
 
     secant_parameters secpar;
     // Initial guesses for the secant method
     double A0 = collatz_assim(Ca_pa);
-    double A1 = collatz_assim(InterCellularCO2);
-    Assim = find_root_secant_method(
+    double A1 = collatz_assim(Ci_pa);
+    double Assim = find_root_secant_method(
         check_assim_rate, A0, A1, secpar);
     // unit change
-    double Ci = InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / mol
+    double Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromole / mol
 
     return photosynthesis_outputs{
         /* .Assim = */ Assim,               // micromol / m^2 /s
