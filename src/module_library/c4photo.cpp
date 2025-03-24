@@ -78,16 +78,27 @@ photosynthesis_outputs c4photoC(
     // during the secant method's iterations.
     // Here we make an initial guess that Ci = 0.4 * Ca.
     stomata_outputs BB_res;
-    double Ci_pa{0.4 * Ca_pa};  // Pa
-    double Gs{};                // mol / m^2 / s
+    double an_conductance{};    // mol / m^2 / s
+    double assim_adj{};         // mol / m^2 / s
+    double Ci_pa{0.4 * Ca_pa};  // Pa            (initial guess)
+    double Gs{1e3};             // mol / m^2 / s (initial guess)
 
     // This lambda function equals zero
     // only if assim satisfies both collatz assim and Ball Berry model
     auto check_assim_rate = [&](double assim) {
+        // The net CO2 assimilation is the smaller of the biochemistry-limited
+        // and conductance-limited rates. This will prevent the calculated Ci
+        // value from ever being < 0. This is an important restriction to
+        // prevent numerical errors during the convergence loop, but does not
+        // seem to ever limit the net assimilation rate if the loop converges.
+        an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
+
+        assim_adj = std::min(assim, an_conductance);  // micromol / m^2 / s
+
         // If assim is correct, then Ball Berry gives the correct
         // CO2 at leaf surface (Cs) and correct stomatal conductance
         BB_res = ball_berry_gs(
-            assim * 1e-6,
+            assim_adj * 1e-6,
             Ca * 1e-6,
             relative_humidity,
             bb0_adj,
@@ -102,7 +113,7 @@ photosynthesis_outputs c4photoC(
         // Calculate Ci using the total conductance across the boundary
         // layer and stomata
         Ci_pa =
-            Ca_pa - atmospheric_pressure * (assim * 1e-6) *
+            Ca_pa - atmospheric_pressure * (assim_adj * 1e-6) *
                         (dr_boundary / gbw + dr_stomata / Gs);  // Pa
 
         double check = collatz_assim(Ci_pa) - assim;
