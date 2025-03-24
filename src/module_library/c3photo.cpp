@@ -78,16 +78,27 @@ photosynthesis_outputs c3photoC(
     // these are updated as a side effect in the secant method iterations
     FvCB_outputs FvCB_res;
     stomata_outputs BB_res;
-    double Gs{1e3};  // mol / m^2 / s      (initial guess)
-    double Ci{0.0};  // micromol / mol     (initial guess)
+    double an_conductance{};  // mol / m^2 / s
+    double assim_adj{};       // mol / m^2 / s
+    double Gs{1e3};           // mol / m^2 / s  (initial guess)
+    double Ci{0.0};           // micromol / mol (initial guess)
 
     // this lambda function equals zero
     // only if assim satisfies both FvCB and Ball Berry model
     auto check_assim_rate = [&](double assim) {
+        // The net CO2 assimilation is the smaller of the biochemistry-limited
+        // and conductance-limited rates. This will prevent the calculated Ci
+        // value from ever being < 0. This is an important restriction to
+        // prevent numerical errors during the convergence loop, but does not
+        // seem to ever limit the net assimilation rate if the loop converges.
+        an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
+
+        assim_adj = std::min(assim, an_conductance);  // micromol / m^2 / s
+
         // If assim is correct, then Ball Berry gives the correct
         // CO2 at leaf surface (Cs) and correct stomatal conductance
         BB_res = ball_berry_gs(
-            assim * 1e-6,
+            assim_adj * 1e-6,
             Ca * 1e-6,
             RH,
             b0_adj,
@@ -101,7 +112,7 @@ photosynthesis_outputs c3photoC(
         // Using the value of stomatal conductance,
         // Calculate Ci using the total conductance across the boundary layer
         // and stomata
-        Ci = Ca - assim *
+        Ci = Ca - assim_adj *
                       (dr_boundary / gbw + dr_stomata / Gs);  // micromol / mol
 
         // Using Ci compute the assim under the FvCB
