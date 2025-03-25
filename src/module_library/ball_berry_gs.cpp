@@ -1,7 +1,8 @@
-#include <cmath>
-#include <stdexcept>
+#include <cmath>      // for std::min, std::abs
+#include <limits>     // for std::numeric_limits
+#include <stdexcept>  // for std::range_error
 #include "ball_berry_gs.h"
-#include "../framework/constants.h"       // for dr_boundary
+#include "../framework/constants.h"       // for dr_boundary, eps_zero
 #include "../framework/quadratic_root.h"  // for quadratic_root_plus
 #include "water_and_air_properties.h"     // for saturation_vapor_pressure
 
@@ -115,8 +116,18 @@ stomata_outputs ball_berry_gs(
     const double Cs = ambient_c -
                       (dr_boundary / gbw) * assimilation;  // mol / mol.
 
-    if (Cs <= 0.0) {
-        throw std::range_error("Thrown in ball_berry_gs: Cs is not positive.");
+    // Check for error conditions (Cs = 0 or Cs < 0)
+    if (Cs < 0.0) {
+        throw std::range_error("Thrown in ball_berry_gs: Cs is negative.");
+    } else if (Cs <= eps_zero) {
+        // Stomatal conductance becomes infinite as Cs approaches zero from the
+        // right
+        double const inf = std::numeric_limits<double>::infinity();
+        return stomata_outputs{
+            /* .cs = */ 0,    // micromol / mol
+            /* .hs = */ 0,    // dimensionless
+            /* .gsw = */ inf  // mol / m^2 / s
+        };
     }
 
     // Calculate some variables that will be used in later equations
