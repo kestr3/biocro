@@ -31,6 +31,11 @@ struct secant_parameters {
     const size_t max_iter = 100;
     const double atol = 1e-12;
     const double rtol = 1e-12;
+
+    secant_parameters() {};
+    secant_parameters (size_t max_iter, double atol, double rtol) :
+        max_iter{max_iter}, atol{atol}, rtol{rtol}, check{0}, counter{0} {};
+
 };
 
 /**

@@ -110,7 +110,7 @@ photosynthesis_outputs c4photoC(
         return check;  // equals zero if correct
     };
 
-    secant_parameters secpar;
+    secant_parameters secpar{1000, 1e-12, 1e-12};
     // Initial guesses for the secant method
     double A0 = collatz_assim(Ca_pa);
     double A1 = collatz_assim(InterCellularCO2);

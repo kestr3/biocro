@@ -123,11 +123,12 @@ photosynthesis_outputs c3photoC(
         assim_ub = 0;
     }
     assim_ub = std::min(Ca * gbw / dr_boundary, assim_ub);
+    double assim_lb = 0.5 * -Rd;
 
-    secant_parameters secpar;
+    secant_parameters secpar{1000, 1e-12, 1e-12};
     double co2_assim_rate =
         find_root_secant_method(
-            check_assim_rate, Rd, assim_ub, secpar);
+            check_assim_rate, assim_lb, assim_ub, secpar);
 
     return photosynthesis_outputs{
         /* .Assim = */ co2_assim_rate,         // micromol / m^2 / s
