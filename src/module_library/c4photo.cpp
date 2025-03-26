@@ -129,14 +129,15 @@ photosynthesis_outputs c4photoC(
     double const Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromole / mol
 
     return photosynthesis_outputs{
-        /* .Assim = */ Assim,               // micromol / m^2 /s
-        /* .Assim_cehck = */ secpar.check,  // micromol / m^2 / s
-        /* .Ci = */ Ci,                     // micromol / mol
-        /* .GrossAssim = */ Assim + RT,     // micromol / m^2 / s
-        /* .Gs = */ Gs,                     // mol / m^2 / s
-        /* .Cs = */ BB_res.cs,              // micromol / m^2 / s
-        /* .RHs = */ BB_res.hs,             // dimensionless from Pa / Pa
-        /* .Rp = */ 0,                      // micromol / m^2 / s
-        /* .iterations = */ secpar.counter  // not a physical quantity
+        /* .Assim = */ Assim,                       // micromol / m^2 /s
+        /* .Assim_cehck = */ secpar.check,          // micromol / m^2 / s
+        /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
+        /* .Ci = */ Ci,                             // micromol / mol
+        /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
+        /* .GrossAssim = */ Assim + RT,             // micromol / m^2 / s
+        /* .Gs = */ Gs,                             // mol / m^2 / s
+        /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
+        /* .Rp = */ 0,                              // micromol / m^2 / s
+        /* .iterations = */ secpar.counter          // not a physical quantity
     };
 }

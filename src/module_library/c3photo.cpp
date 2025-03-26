@@ -142,15 +142,16 @@ photosynthesis_outputs c3photoC(
             check_assim_rate, assim_lb, assim_ub, secpar);
 
     return photosynthesis_outputs{
-        /* .Assim = */ co2_assim_rate,         // micromol / m^2 / s
-        /* .Assim_check = */ secpar.check,     // micromol / m^2 / s
-        /* .Ci = */ Ci,                        // micromol / mol
-        /* .GrossAssim = */ FvCB_res.Vc,       // micromol / m^2 / s
-        /* .Gs = */ Gs,                        // mol / m^2 / s
-        /* .Cs = */ BB_res.cs,                 // micromol / m^2 / s
-        /* .RHs = */ BB_res.hs,                // dimensionless from Pa / Pa
-        /* .Rp = */ FvCB_res.Vc * Gstar / Ci,  // micromol / m^2 / s
-        /* .iterations = */ secpar.counter     // not a physical quantity
+        /* .Assim = */ co2_assim_rate,              // micromol / m^2 / s
+        /* .Assim_check = */ secpar.check,          // micromol / m^2 / s
+        /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
+        /* .Ci = */ Ci,                             // micromol / mol
+        /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
+        /* .GrossAssim = */ FvCB_res.Vc,            // micromol / m^2 / s
+        /* .Gs = */ Gs,                             // mol / m^2 / s
+        /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
+        /* .Rp = */ FvCB_res.Vc * Gstar / Ci,       // micromol / m^2 / s
+        /* .iterations = */ secpar.counter          // not a physical quantity
     };
 }
 
