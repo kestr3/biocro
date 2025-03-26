@@ -1,12 +1,12 @@
-#include <cmath>                        // for pow, sqrt, std::abs
 #include <algorithm>                    // for std::min
-#include "ball_berry_gs.h"              // for ball_berry_gs
-#include "FvCB_assim.h"                 // for FvCB_assim
-#include "conductance_limited_assim.h"  // for conductance_limited_assim
-#include "c3_temperature_response.h"    // for c3_temperature_response
+#include <cmath>                        // for pow, sqrt
 #include "../framework/constants.h"     // for dr_stomata, dr_boundary
+#include "ball_berry_gs.h"              // for ball_berry_gs
+#include "c3_temperature_response.h"    // for c3_temperature_response
+#include "conductance_limited_assim.h"  // for conductance_limited_assim
+#include "FvCB_assim.h"                 // for FvCB_assim
+#include "secant_method.h"              // for find_root_secant_method
 #include "c3photo.h"
-#include "secant_method.h"
 
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;
@@ -78,16 +78,27 @@ photosynthesis_outputs c3photoC(
     // these are updated as a side effect in the secant method iterations
     FvCB_outputs FvCB_res;
     stomata_outputs BB_res;
-    double Gs{1e3};  // mol / m^2 / s      (initial guess)
-    double Ci{0.0};  // micromol / mol     (initial guess)
+    double an_conductance{};  // mol / m^2 / s
+    double Gs{1e3};           // mol / m^2 / s  (initial guess)
+    double Ci{0.0};           // micromol / mol (initial guess)
 
     // this lambda function equals zero
     // only if assim satisfies both FvCB and Ball Berry model
-    auto check_assim_rate = [&](double assim) {
+    auto check_assim_rate = [=, &FvCB_res, &BB_res, &an_conductance, &Gs, &Ci](double const assim) {
+        // The net CO2 assimilation is the smaller of the biochemistry-limited
+        // and conductance-limited rates. This will prevent the calculated Ci
+        // value from ever being < 0. This is an important restriction to
+        // prevent numerical errors during the convergence loop, but does not
+        // seem to ever limit the net assimilation rate if the loop converges.
+        an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
+
+        double const assim_adj =
+            std::min(assim, an_conductance);  // micromol / m^2 / s
+
         // If assim is correct, then Ball Berry gives the correct
         // CO2 at leaf surface (Cs) and correct stomatal conductance
         BB_res = ball_berry_gs(
-            assim * 1e-6,
+            assim_adj * 1e-6,
             Ca * 1e-6,
             RH,
             b0_adj,
@@ -101,7 +112,7 @@ photosynthesis_outputs c3photoC(
         // Using the value of stomatal conductance,
         // Calculate Ci using the total conductance across the boundary layer
         // and stomata
-        Ci = Ca - assim *
+        Ci = Ca - assim_adj *
                       (dr_boundary / gbw + dr_stomata / Gs);  // micromol / mol
 
         // Using Ci compute the assim under the FvCB
@@ -123,23 +134,24 @@ photosynthesis_outputs c3photoC(
         assim_ub = 0;
     }
     assim_ub = std::min(Ca * gbw / dr_boundary, assim_ub);
-    double assim_lb = 0.5 * -Rd;
+    double const assim_lb = 0.5 * -Rd;
 
     secant_parameters secpar{1000, 1e-12, 1e-12};
-    double co2_assim_rate =
+    double const co2_assim_rate =
         find_root_secant_method(
             check_assim_rate, assim_lb, assim_ub, secpar);
 
     return photosynthesis_outputs{
-        /* .Assim = */ co2_assim_rate,         // micromol / m^2 / s
-        /* .Assim_check = */ secpar.check,     // micromol / m^2 / s
-        /* .Ci = */ Ci,                        // micromol / mol
-        /* .GrossAssim = */ FvCB_res.Vc,       // micromol / m^2 / s
-        /* .Gs = */ Gs,                        // mol / m^2 / s
-        /* .Cs = */ BB_res.cs,                 // micromol / m^2 / s
-        /* .RHs = */ BB_res.hs,                // dimensionless from Pa / Pa
-        /* .Rp = */ FvCB_res.Vc * Gstar / Ci,  // micromol / m^2 / s
-        /* .iterations = */ secpar.counter     // not a physical quantity
+        /* .Assim = */ co2_assim_rate,              // micromol / m^2 / s
+        /* .Assim_check = */ secpar.check,          // micromol / m^2 / s
+        /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
+        /* .Ci = */ Ci,                             // micromol / mol
+        /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
+        /* .GrossAssim = */ FvCB_res.Vc,            // micromol / m^2 / s
+        /* .Gs = */ Gs,                             // mol / m^2 / s
+        /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
+        /* .Rp = */ FvCB_res.Vc * Gstar / Ci,       // micromol / m^2 / s
+        /* .iterations = */ secpar.counter          // not a physical quantity
     };
 }
 

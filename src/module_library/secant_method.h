@@ -1,9 +1,8 @@
 #ifndef SECANT_METHOD
 #define SECANT_METHOD
 
-#include <cmath>
-#include <stdexcept>
-#include <string>
+#include <cmath>      // for std::isfinite, std::abs
+#include <stdexcept>  // for std::runtime_error
 
 // Helper function declarations
 inline bool is_close(double x, double y, double atol, double rtol);
@@ -32,10 +31,9 @@ struct secant_parameters {
     const double atol = 1e-12;
     const double rtol = 1e-12;
 
-    secant_parameters() {};
-    secant_parameters (size_t max_iter, double atol, double rtol) :
-        check{0}, counter{0}, max_iter{max_iter}, atol{atol}, rtol{rtol} {};
-
+    secant_parameters(){};
+    secant_parameters(size_t max_iter, double atol, double rtol)
+        : check{0}, counter{0}, max_iter{max_iter}, atol{atol}, rtol{rtol} {};
 };
 
 /**
