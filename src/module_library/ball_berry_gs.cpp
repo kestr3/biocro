@@ -121,11 +121,12 @@ stomata_outputs ball_berry_gs(
         throw std::range_error("Thrown in ball_berry_gs: Cs is negative.");
     } else if (Cs <= eps_zero) {
         // Stomatal conductance becomes infinite as Cs approaches zero from the
-        // right
+        // right. In this case, there is no water vapor drawndown across the
+        // stomata, so hs becomes 1.
         double const inf = std::numeric_limits<double>::infinity();
         return stomata_outputs{
             /* .cs = */ 0,    // micromol / mol
-            /* .hs = */ 0,    // dimensionless
+            /* .hs = */ 1,    // dimensionless
             /* .gsw = */ inf  // mol / m^2 / s
         };
     }
