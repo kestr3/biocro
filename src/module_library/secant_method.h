@@ -34,7 +34,7 @@ struct secant_parameters {
 
     secant_parameters() {};
     secant_parameters (size_t max_iter, double atol, double rtol) :
-        max_iter{max_iter}, atol{atol}, rtol{rtol}, check{0}, counter{0} {};
+        check{0}, counter{0}, max_iter{max_iter}, atol{atol}, rtol{rtol} {};
 
 };
 
