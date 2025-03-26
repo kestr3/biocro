@@ -124,22 +124,28 @@ photosynthesis_outputs c3photoC(
         return FvCB_res.An - assim;  // equals zero if correct
     };
 
-    // compute upper bound as guess
-    double assim_ub = FvCB_assim(
-                          Ca, Gstar, J, Kc, Ko, Oi, Rd, TPU, Vcmax, alpha_TPU,
-                          electrons_per_carboxylation,
-                          electrons_per_oxygenation)
-                          .An;
-    if (assim_ub < 0) {
-        assim_ub = 0;
-    }
-    assim_ub = std::min(Ca * gbw / dr_boundary, assim_ub);
-    double const assim_lb = 0.5 * -Rd;
+    // Find starting guesses for the net CO2 assimilation rate. One is the
+    // predicted rate at Ci = 0, and the other is the predicted rate at
+    // Ci = infinity (neglecting TPU). The real rate is almost always between
+    // these two guesses.
+    double const assim_guess_0 = std::max(
+        -Gstar * Vcmax / (Kc * (1 + Oi / Ko)) - Rd,  // The value of Ac when Ci = 0
+        -J / (2.0 * electrons_per_oxygenation) - Rd  // The value of Aj when Ci = 0
+    );                                               // micromol / m^2 / s
+
+    double const assim_guess_1 = std::min(
+        std::min(
+            Vcmax - Rd,                             // The maximum value of Ac, which occurs at Ci = infinity
+            J / electrons_per_carboxylation - Rd),  // The maximum value of Aj, which occurs at Ci = infinity
+        Ca * gbw / dr_boundary                      // The maximum conductance-limited An, which occurs for gsw = infinity
+    );                                              // micromol / m^2 / s
 
     secant_parameters secpar{1000, 1e-12, 1e-12};
+
+    // find_root_secant_method will update secpar as a side-effect
     double const co2_assim_rate =
         find_root_secant_method(
-            check_assim_rate, assim_lb, assim_ub, secpar);
+            check_assim_rate, assim_guess_0, assim_guess_1, secpar);
 
     return photosynthesis_outputs{
         /* .Assim = */ co2_assim_rate,              // micromol / m^2 / s
