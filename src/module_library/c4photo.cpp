@@ -1,10 +1,10 @@
-#include <cmath>                          // for pow, exp, std::abs
-#include "ball_berry_gs.h"                // for ball_berry_gs
-#include "conductance_limited_assim.h"    // for conductance_limited_assim
+#include <cmath>                          // for pow, exp
 #include "../framework/constants.h"       // for dr_stomata, dr_boundary
 #include "../framework/quadratic_root.h"  // for quadratic_root_min
+#include "ball_berry_gs.h"                // for ball_berry_gs
+#include "conductance_limited_assim.h"    // for conductance_limited_assim
+#include "secant_method.h"                // for find_root_secant_method
 #include "c4photo.h"
-#include "secant_method.h"
 
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;

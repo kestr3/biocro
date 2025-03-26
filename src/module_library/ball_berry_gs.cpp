@@ -1,10 +1,10 @@
-#include <cmath>      // for std::min, std::abs
-#include <limits>     // for std::numeric_limits
-#include <stdexcept>  // for std::range_error
-#include "ball_berry_gs.h"
+#include <cmath>                          // for std::min
+#include <limits>                         // for std::numeric_limits
+#include <stdexcept>                      // for std::range_error
 #include "../framework/constants.h"       // for dr_boundary, eps_zero
 #include "../framework/quadratic_root.h"  // for quadratic_root_plus
 #include "water_and_air_properties.h"     // for saturation_vapor_pressure
+#include "ball_berry_gs.h"
 
 using calculation_constants::eps_zero;
 using physical_constants::dr_boundary;

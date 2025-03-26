@@ -1,12 +1,12 @@
-#include <cmath>                        // for pow, sqrt, std::abs
 #include <algorithm>                    // for std::min
-#include "ball_berry_gs.h"              // for ball_berry_gs
-#include "FvCB_assim.h"                 // for FvCB_assim
-#include "conductance_limited_assim.h"  // for conductance_limited_assim
-#include "c3_temperature_response.h"    // for c3_temperature_response
+#include <cmath>                        // for pow, sqrt
 #include "../framework/constants.h"     // for dr_stomata, dr_boundary
+#include "ball_berry_gs.h"              // for ball_berry_gs
+#include "c3_temperature_response.h"    // for c3_temperature_response
+#include "conductance_limited_assim.h"  // for conductance_limited_assim
+#include "FvCB_assim.h"                 // for FvCB_assim
+#include "secant_method.h"              // for find_root_secant_method
 #include "c3photo.h"
-#include "secant_method.h"
 
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;

@@ -1,9 +1,8 @@
 #ifndef SECANT_METHOD
 #define SECANT_METHOD
 
-#include <cmath>
-#include <stdexcept>
-#include <string>
+#include <cmath>      // for std::isfinite, std::abs
+#include <stdexcept>  // for std::runtime_error
 
 // Helper function declarations
 inline bool is_close(double x, double y, double atol, double rtol);
