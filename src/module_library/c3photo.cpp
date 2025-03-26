@@ -133,19 +133,17 @@ photosynthesis_outputs c3photoC(
         -J / (2.0 * electrons_per_oxygenation) - Rd  // The value of Aj when Ci = 0
     );                                               // micromol / m^2 / s
 
-    double const assim_guess_1 = std::min(
-        std::min(
-            Vcmax - Rd,                             // The maximum value of Ac, which occurs at Ci = infinity
-            J / electrons_per_carboxylation - Rd),  // The maximum value of Aj, which occurs at Ci = infinity
-        Ca * gbw / dr_boundary                      // The maximum conductance-limited An, which occurs for gsw = infinity
-    );                                              // micromol / m^2 / s
+    double const assim_guess_1 = std::min({
+        Vcmax - Rd,                            // The maximum value of Ac, which occurs at Ci = infinity
+        J / electrons_per_carboxylation - Rd,  // The maximum value of Aj, which occurs at Ci = infinity
+        Ca * gbw / dr_boundary                 // The maximum conductance-limited An, which occurs for gsw = infinity
+    });                                        // micromol / m^2 / s
 
     secant_parameters secpar{1000, 1e-12, 1e-12};
 
     // find_root_secant_method will update secpar as a side-effect
-    double const co2_assim_rate =
-        find_root_secant_method(
-            check_assim_rate, assim_guess_0, assim_guess_1, secpar);
+    double const co2_assim_rate = find_root_secant_method(
+        check_assim_rate, assim_guess_0, assim_guess_1, secpar);
 
     return photosynthesis_outputs{
         /* .Assim = */ co2_assim_rate,              // micromol / m^2 / s
