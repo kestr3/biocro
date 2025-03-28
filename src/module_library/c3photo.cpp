@@ -149,15 +149,23 @@ photosynthesis_outputs c3photoC(
         Ca * gbw / dr_boundary                 // The maximum conductance-limited An, which occurs for gsw = infinity
     });                                        // micromol / m^2 / s
 
-    secant_parameters secpar{1000, 1e-12, 1e-12};
+    // Run the secant method
+    double Assim_check{};  // Will be modified by find_root_secant_method
+    size_t iterations;     // Will be modified by find_root_secant_method
 
-    // find_root_secant_method will update secpar as a side-effect
     double const co2_assim_rate = find_root_secant_method(
-        check_assim_rate, assim_guess_0, assim_guess_1, secpar);
+        check_assim_rate,
+        assim_guess_0,
+        assim_guess_1,
+        1000,
+        1e-12,
+        1e-12,
+        Assim_check,
+        iterations);
 
     return photosynthesis_outputs{
         /* .Assim = */ co2_assim_rate,              // micromol / m^2 / s
-        /* .Assim_check = */ secpar.check,          // micromol / m^2 / s
+        /* .Assim_check = */ Assim_check,           // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
         /* .Ci = */ Ci,                             // micromol / mol
         /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
@@ -165,7 +173,7 @@ photosynthesis_outputs c3photoC(
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .Rp = */ FvCB_res.Vc * Gstar / Ci,       // micromol / m^2 / s
-        /* .iterations = */ secpar.counter          // not a physical quantity
+        /* .iterations = */ iterations              // not a physical quantity
     };
 }
 

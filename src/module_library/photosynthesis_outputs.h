@@ -15,7 +15,7 @@ struct photosynthesis_outputs {
     double Gs;                 //!< Stomatal conductance to water vapor (mol / m^2 / s)
     double RHs;                //!< Relative humidity at the leaf surface (dimensionless)
     double Rp;                 //!< Rate of photorespiration (micromol / m^2 / s)
-    int iterations;            //!< Number of iterations used by convergence loop
+    size_t iterations;         //!< Number of iterations used by convergence loop
 };
 
 #endif
