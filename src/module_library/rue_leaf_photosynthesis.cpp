@@ -72,11 +72,12 @@ photosynthesis_outputs rue_photo(
 
     return photosynthesis_outputs{
         /* .Assim = */ an * 1e6,                          // micromol / m^2 / s
+        /* .Assim_check */ 0,                             // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance * 1e6,  // micromol / m^2 / s
         /* .Ci = */ ci * 1e6,                             // micromol / mol
+        /* .Cs = */ BB_res.cs,                            // micromol / m^2 / s
         /* .GrossAssim = */ ag * 1e6,                     // micromol / m^2 / s
         /* .Gs = */ gs,                                   // mol / m^2 / s
-        /* .Cs = */ BB_res.cs,                            // micromol / m^2 / s
         /* .RHs = */ BB_res.hs,                           // dimensionless from Pa / Pa
         /* .Rp = */ 0.0,                                  // micromol / m^2 / s
         /* .iterations = */ 0                             // not a physical quantity
