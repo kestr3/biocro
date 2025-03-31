@@ -33,16 +33,23 @@ be directly added to this file to describe the related changes.
 
 # Unreleased
 
-- Swapped fixed point iteration for the secant method in Ci calculation.
-  To incorporate the effect of stomatal conductance, the Ball-Berry and FvCB model
-  require solving for the correct intercellular CO2 concentrations by identifying
-  the root of an equation. BioCro used fixed point iteration to find the root.
-  However, the fixed point iteration is known to be unstable. For more info,
-  see Sun et al. (2012) "A numerical issue in calculating the coupled carbon and
-  water fluxes in a climate model." *Journal of Geophysical Research*
-  https://dx.doi.org/10.1029/2012JD018059
-  This change only affects the solution at low Ci, and doesn't modify the interface
-  of any module.
+## Minor User-Facing Changes
+
+- Swapped fixed point iteration for the secant method in Ci calculation. To
+  incorporate the effect of stomatal conductance, the Ball-Berry and FvCB model
+  require solving for the correct intercellular CO2 concentrations by
+  identifying the root of an equation. BioCro previously used fixed point
+  iteration to find the root. However, the fixed point iteration method is known
+  to be unstable. For more info, see Sun et al. (2012) "A numerical issue in
+  calculating the coupled carbon and water fluxes in a climate model."
+  *Journal of Geophysical Research* https://dx.doi.org/10.1029/2012JD018059.
+  This change only affects the solution at low Ci, and does not modify the
+  interface of any module.
+
+## Bug fixes
+
+- Fixed a an issue where setting `adaptive_max_steps` to `NA` in R would cause
+  `run_biocro` to fail at the first time point.
 
 # Changes in BioCro version 3.2.0
 
