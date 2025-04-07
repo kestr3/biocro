@@ -60,13 +60,15 @@ regulaFalsi fun (left, right) = updateBracket fun c (left, right)
   where
     c = secantFormula fun left right
 
-dekker fun (b', a, b) = (b, a1, b1)
+dekker fun (a, b, previous) = (anew, bnew, b)
   where
-    (a1, b1) = if abs (fun ap) < abs (fun bp) then (bp, ap) else (ap, bp)
+    (anew, bnew) = if abs (fun ap) < abs (fun bp) then (bp, ap) else (ap, bp)
     ap = if not $ sameSign (fun b) (fun bp) then b else a
     bp = if liesBetween s (m, b) then s else m
     m = (a + b) / 2
-    s = secantFormula fun b' b
+    s = secantFormula fun previous b
+
+
 
 liesBetween :: (Ord a) => a -> (a, a) -> Bool
 liesBetween s (a, b) =

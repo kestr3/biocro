@@ -5,6 +5,7 @@
 
 
 #include <cmath>
+#include <limits>
 #include <iterator>
 
 
@@ -84,7 +85,50 @@ function_sequence<F, T> iterate(const F& function, T initial, size_t max_iter){
     return function_sequence<F, T>(function, initial, max_iter);
 }
 
+    template<typename Method>
+    class iterator {
 
+        Method::state current;
+        size_t iteration;
+
+    public:
+        // Iterator traits
+        using iterator_category = std::input_iterator_tag;
+        using value_type = Method::state;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const Method::state*;
+        using reference = const Method::state&;
+
+
+        iterator(Method::state& initial) : current{initial}, iteration{0} {}
+        iterator(size_t max_iter) : current{}, iteration{max_iter} {}
+        ~iterator()
+
+        reference operator*() const {
+            return current;
+        }
+
+        iterator& operator++() {
+            Method::update(current);
+            ++iteration;
+            return *this;
+        }
+
+        // Post-increment == Pre-increment
+        iterator operator++(int) {
+            function_iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        bool operator==(const iterator& other) const {
+            return (iteration == other.iteration);
+        }
+
+        bool operator!=(const iterator& other) const {
+            return !(*this == other);
+        }
+    };
 /*
 methods
 */
@@ -94,82 +138,110 @@ inline bool is_close(double x, double y, double tol, double rtol);
 inline bool is_zero(double x, double tol);
 inline bool same_signs(double x, double y);
 
+template<typename F, typename Method>
+class root_solver {
 
-
-struct root_result {
-    double root;
-    double residual;
-    size_t iteration;
-};
-
-template<typename Method>
-struct root_solver {
-
+    const F& fun;
     Method method;
 
     size_t max_iterations;
     double _abs_tol;
     double _rel_tol;
 
-    // Method& get_method() { return static_cast<Method&>(*this); }
-    // const Method& get_method() const  { return static_cast<const Method&>(*this); }
+    template<typename... Args>
+    root_solver(
+        const F& function, Args&&... args,
+        size_t max_iter, double abs_tol, double rel_tol) :
+        fun{function}, method{std::forward<Args>(args)...},
+        max_iterations{max_iter}, _abs_tol{abs_tol}, _rel_tol{rel_tol} {}
 
-    template<typename ...Types>
-    root_solver(Types... args, size_t max_iter, double abs_tol, double rel_tol) :
-        method{args}, max_iterations{max_iter}, _abs_tol{abs_tol}, _rel_tol{rel_tol} {}
+
 
 
 };
+
+template<typename Method>
+inline bool has_converged(Method method, double&& tol){
+    return is_zero(method.root(), tol);
+}
+
+template<typename Method>
+struct root_finder {
+
+    size_t max_iterations = 100;
+    double _abs_tol = std::numeric_limits<double>::epsilon();
+    double _rel_tol = 2*std::numeric_limits<double>::epsilon();
+
+    root_finder(size_t max_iter, double abs_tol, double rel_tol) :
+        max_iterations{max_iter}, _abs_tol{abs_tol}, _rel_tol{rel_tol} {}
+
+    template<typename F, typename ...Args>
+    root_result solve(const F& function, Args&& ...args){
+        Method method{function, std::forward<Args>(args)...};
+        for (size_t i = 0; i != max_iterations; ++i){
+            if (has_converged(method, _abs_tol)){
+                return root_result{method.root(), method.residual(), i};
+            };
+            method.iterate();
+        }
+        return root_result{method.root(), method.residual(), max_iterations};
+    }
+};
+
 
 template<typename F>
 struct secant {
+
     const F& fun;
 
+    double x0, y0;
+    double x1, y1;
 
-    struct iter_state {
-        double x0, y0;
-        double x1, y1;
-    };
+    secant(const F& function, double first_guess, double second_guess) :
+        fun{function}, x0{first_guess}, y0{fun(x0)}, x1{second_guess}, y1{fun(second_guess)} {}
 
-    secant(const F& function) : _fun{fun} {}
-
-    iter_state initialize(double x0, double x1){
-        iter_state{x0, _fun(x0), x1, _fun(x1)};
-    }
-
-    void update(iter_state& s){
-        double secant_slope = (s.y1 - s.y0) / (s.x1 - s.x0);
+    void iterate(){
+        double secant_slope = (y1 - y0) / (x1 - x0);
         double x2 = x1 - y1 / secant_slope;
         double y2 = fun(x2);
-        s.x0 = s.x1;
-        s.x1 = x2;
-        s.y0 = s.y1;
-        s.y1 = y2;
+        x0 = x1;
+        x1 = x2;
+        y0 = y1;
+        y1 = y2;
+    }
+
+    inline double root(){
+        return x1;
+    }
+
+    inline double residual(){
+        return y1;
     }
 
 };
-
-template<typename F, typename G>
+template<typename fun>
 struct newton {
 
     const F& fun;
-    const G& jac;
 
-    struct iter_state {
+    struct state {
         double x;
         double y;
     };
 
-    secant(const F& function, const G& jacobian) : fun{function}, jac{jacobian} {}
 
-    iter_state initialize(double x){
-        iter_state{x, fun(x)};
+    newton(const F& function) : fun{function} {}
+
+    state initialize(double x){
+        state{x, fun(x)};
     }
 
-    void update(iter_state& s){
-        s.x = s.x - s.y / jac(s.x);
+    void update(state& s){
+        s.x = s.x - s.y / fun.jac(s.x);
         s.y = fun(s.x);
     }
+
+
 
 };
 
@@ -382,6 +454,9 @@ std::array<double, max_iter> test_sequence(double x0){
     }
     return out;
 }
+
+
+
 
 
 
