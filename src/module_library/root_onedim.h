@@ -189,20 +189,26 @@ struct root_finder {
 };
 
 
-template<typename F>
 struct secant {
 
-    const F& fun;
+    struct state {
+        double x0;
+        double y0;
+        double x1;
+        double y1;
+    };
 
-    double x0, y0;
-    double x1, y1;
+    template<typename F>
+    state initialize(F&& fun, double x0, double x1){
+        double y0 = fun(x0);
+        double y1 = fun(x1);
+        return state{x0, y0, x1, y1};
+    }
 
-    secant(const F& function, double first_guess, double second_guess) :
-        fun{function}, x0{first_guess}, y0{fun(x0)}, x1{second_guess}, y1{fun(second_guess)} {}
-
-    void iterate(){
-        double secant_slope = (y1 - y0) / (x1 - x0);
-        double x2 = x1 - y1 / secant_slope;
+    template<typename F>
+    void update(F&& fun , state& s){
+        double secant_slope = (s.y1 - s.y0) / (s.x1 - s.x0);
+        double x2 = s.x1 - s.y1 / secant_slope;
         double y2 = fun(x2);
         x0 = x1;
         x1 = x2;
@@ -210,8 +216,10 @@ struct secant {
         y1 = y2;
     }
 
-    inline double root(){
-        return x1;
+    inline bool has_converged(state& s){
+        if is_close(s.x0, s.x1) {
+            return true;
+        }
     }
 
     inline double residual(){
