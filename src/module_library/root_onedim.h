@@ -89,7 +89,7 @@ struct root_finder {
     root_finder(size_t max_iter, double abs_tol, double rel_tol) : max_iterations{max_iter}, _abs_tol{abs_tol}, _rel_tol{rel_tol} {}
 
     template <typename F, typename... Args>
-    result_t solve(const F& func, Args&&... args)
+    result_t solve(F&& func, Args&&... args)
     {
         typename Method::state s = Method::initialize(func, std::forward<Args>(args)...);
 
@@ -114,7 +114,7 @@ struct secant {
     };
 
     template <typename F>
-    static state initialize(const F& fun, double x0, double x1)
+    static state initialize(F&& fun, double x0, double x1)
     {
         graph_t first{x0, fun(x0)};
         graph_t second{x1, fun(x1)};
@@ -122,7 +122,7 @@ struct secant {
     }
 
     template <typename F>
-    static state iterate(const F& fun, const state& s)
+    static state iterate(F&& fun, const state& s)
     {
         double secant_slope = (s.current.y - s.last.y) / (s.current.x - s.last.x);
         double x2 = s.current.x - s.current.y / secant_slope;
