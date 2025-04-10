@@ -158,8 +158,6 @@ test_that('c3photoC produces self-consistent outputs', {
         Catm / (1.37 / gbw + 1.6 / Gs)
     })
 
-    skip('conductance-limited assim values are not consistent; skipping for now')
-
     expect_equal(
         conductance_limited_assim,
         c3photo_res$Assim_conductance
