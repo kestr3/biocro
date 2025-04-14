@@ -130,7 +130,8 @@ struct root_finder : public Method {
     template <typename F, typename... Args>
     result_t solve(F&& func, Args&&... args)
     {
-        flagged_state s = Method::initialize(func, std::forward<Args>(args)...);
+        flagged_state s = Method::initialize(
+            std::forward<F>(func), std::forward<Args>(args)...);
 
         for (size_t i = 0; i < (max_iterations + 1); ++i) {
             if (is_valid(s)) {
@@ -141,7 +142,7 @@ struct root_finder : public Method {
                 return make_result(s, i);
             }
 
-            s = Method::iterate(func, s.state);
+            s = Method::iterate(std::forward<F>(func), s.state);
         }
 
         s.flag = Flag::max_iterations;
@@ -229,7 +230,7 @@ struct newton : public two_step_method {
     {
         state s;
         s.current = {x0, fun(x0)};
-        return iterate(fun, s);
+        return iterate(std::forward<F>(fun), s);
     }
 
     template <typename F>
@@ -252,7 +253,7 @@ struct steffensen : public two_step_method {
     {
         state s;
         s.current = {x0, fun(x0)};
-        return iterate(fun, s);
+        return iterate(std::forward<F>(fun), s);
     }
 
     template <typename F>
