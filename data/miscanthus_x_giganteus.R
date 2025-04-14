@@ -61,6 +61,8 @@ miscanthus_x_giganteus <- list(
         chil                        = 1,
         dry_biomass_per_carbon      = 30.026, # g CHO / mol C (glucose)
         emissivity_sky              = 1,
+        grc_leaf                    = 0.02,
+        grc_root                    = 0.03,
         Gs_min                      = 1e-3,
         heightf                     = 1.33, # LAI of 4 when canopy is 3 m tall
         hydrDist                    = 0,
@@ -111,8 +113,6 @@ miscanthus_x_giganteus <- list(
         longitude                   = -88,
         lowerT                      = 3,
         min_gbw_canopy              = 0.005,
-        mrc1                        = 0.02,
-        mrc2                        = 0.03,
         nalphab0                    = 0.02367,
         nalphab1                    = 0.000488,
         net_assimilation_rate_shell = 0.0,
