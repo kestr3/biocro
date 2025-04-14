@@ -62,7 +62,9 @@ miscanthus_x_giganteus <- list(
         dry_biomass_per_carbon      = 30.026, # g CHO / mol C (glucose)
         emissivity_sky              = 1,
         grc_leaf                    = 0.02,
+        grc_rhizome                 = 0.03,
         grc_root                    = 0.03,
+        grc_stem                    = 0.02,
         Gs_min                      = 1e-3,
         heightf                     = 1.33, # LAI of 4 when canopy is 3 m tall
         hydrDist                    = 0,

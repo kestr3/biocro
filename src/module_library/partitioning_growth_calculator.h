@@ -73,7 +73,9 @@ class partitioning_growth_calculator : public direct_module
           // Get pointers to input quantities
           canopy_assim{get_input(input_quantities, "canopy_assimilation_rate")},
           grc_leaf{get_input(input_quantities, "grc_leaf")},
+          grc_rhizome{get_input(input_quantities, "grc_rhizome")},
           grc_root{get_input(input_quantities, "grc_root")},
+          grc_stem{get_input(input_quantities, "grc_stem")},
           kGrain{get_input(input_quantities, "kGrain")},
           kLeaf{get_input(input_quantities, "kLeaf")},
           kRhizome{get_input(input_quantities, "kRhizome")},
@@ -98,7 +100,9 @@ class partitioning_growth_calculator : public direct_module
     // Pointers to input quantities
     const double& canopy_assim;
     const double& grc_leaf;
+    const double& grc_rhizome;
     const double& grc_root;
+    const double& grc_stem;
     const double& kGrain;
     const double& kLeaf;
     const double& kRhizome;
@@ -123,7 +127,9 @@ string_vector partitioning_growth_calculator::get_inputs()
     return {
         "canopy_assimilation_rate",  // Mg / ha / hour
         "grc_leaf",                  // dimensionless
+        "grc_rhizome",               // dimensionless
         "grc_root",                  // dimensionless
+        "grc_stem",                  // dimensionless
         "kGrain",                    // dimensionless
         "kLeaf",                     // dimensionless
         "kRhizome",                  // dimensionless
@@ -155,7 +161,7 @@ void partitioning_growth_calculator::do_operation() const
     // Calculate the rate of new stem production, accounting for respiratory
     // costs (Mg / ha / hr)
     double const net_assimilation_rate_stem{
-        kStem > 0 ? resp(canopy_assim * kStem, grc_leaf, temp) : 0};
+        kStem > 0 ? resp(canopy_assim * kStem, grc_stem, temp) : 0};
 
     // Calculate the rate of new root production, accounting for respiratory
     // costs (Mg / ha / hr)
@@ -165,7 +171,7 @@ void partitioning_growth_calculator::do_operation() const
     // Calculate the rate of new rhizome production, accounting for respiratory
     // costs (Mg / ha / hr)
     double const net_assimilation_rate_rhizome{
-        kRhizome > 0 ? resp(canopy_assim * kRhizome, grc_root, temp) : 0};
+        kRhizome > 0 ? resp(canopy_assim * kRhizome, grc_rhizome, temp) : 0};
 
     // Calculate the rate of new grain production without any respiratory costs
     // (Mg / ha / hr)

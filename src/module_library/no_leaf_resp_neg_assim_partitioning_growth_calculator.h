@@ -67,6 +67,7 @@ class no_leaf_resp_neg_assim_partitioning_growth_calculator : public direct_modu
 
           // Get references to input quantities
           canopy_assim{get_input(input_quantities, "canopy_assimilation_rate")},
+          grc_rhizome{get_input(input_quantities, "grc_rhizome")},
           grc_root{get_input(input_quantities, "grc_root")},
           grc_stem{get_input(input_quantities, "grc_stem")},
           kGrain{get_input(input_quantities, "kGrain")},
@@ -94,6 +95,7 @@ class no_leaf_resp_neg_assim_partitioning_growth_calculator : public direct_modu
    private:
     // References to input quantities
     const double& canopy_assim;
+    const double& grc_rhizome;
     const double& grc_root;
     const double& grc_stem;
     const double& kGrain;
@@ -121,6 +123,7 @@ string_vector no_leaf_resp_neg_assim_partitioning_growth_calculator::get_inputs(
 {
     return {
         "canopy_assimilation_rate",  // Mg / ha / hour
+        "grc_rhizome",               // dimensionless
         "grc_root",                  // dimensionless
         "grc_stem",                  // dimensionless
         "kGrain",                    // dimensionless
@@ -166,7 +169,7 @@ void no_leaf_resp_neg_assim_partitioning_growth_calculator::do_operation() const
     // Calculate the rate of new rhizome production, accounting for respiratory
     // costs (Mg / ha / hr)
     double const net_assimilation_rate_rhizome{
-        kRhizome > 0 ? resp(canopy_assim * kRhizome, grc_root, temp) : 0};
+        kRhizome > 0 ? resp(canopy_assim * kRhizome, grc_rhizome, temp) : 0};
 
     // Calculate the rate of new grain production without any respiratory costs
     // (Mg / ha / hr)

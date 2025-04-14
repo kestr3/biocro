@@ -199,8 +199,9 @@ soybean <- list(
         growth_respiration_fraction = 0,
 
         # no_leaf_resp_partitioning_growth_calculator_negative_assimilation_partitioned module
-        grc_stem                        = 0.02828,    # dimensionless, optimized. growth respiration coefficient
+        grc_rhizome                     = 0.00270,    # dimensionless, set to the value of grc_root
         grc_root                        = 0.00270,    # dimensionless, optimized
+        grc_stem                        = 0.02828,    # dimensionless, optimized. growth respiration coefficient
 
         # maintenance respiration module
         mrc_leaf                        = 0.00048836,    # kg / kg / hr maintenance respiration coefficient. optimized
