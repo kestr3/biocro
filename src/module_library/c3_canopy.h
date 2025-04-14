@@ -82,10 +82,10 @@ class c3_canopy : public direct_module
 
           // Get pointers to output quantities
           canopy_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_assimilation_rate_CO2")},
-          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
-          GrossAssim_CO2_op{get_op(output_quantities, "GrossAssim_CO2")},
-          canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")}
+          canopy_gross_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_gross_assimilation_rate_CO2")},
+          canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")},
+          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {
     }
     static string_vector get_inputs();
@@ -161,10 +161,10 @@ class c3_canopy : public direct_module
 
     // Pointers to output quantities
     double* canopy_assimilation_rate_CO2_op;
-    double* canopy_transpiration_rate_op;
     double* canopy_conductance_op;
-    double* GrossAssim_CO2_op;
+    double* canopy_gross_assimilation_rate_CO2_op;
     double* canopy_photorespiration_rate_CO2_op;
+    double* canopy_transpiration_rate_op;
 
     // Main operation
     void do_operation() const;

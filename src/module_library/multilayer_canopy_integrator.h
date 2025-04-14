@@ -52,10 +52,10 @@ class multilayer_canopy_integrator : public direct_module
 
           // Get pointers to output quantities
           canopy_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_assimilation_rate_CO2")},
-          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
-          GrossAssim_CO2_op{get_op(output_quantities, "GrossAssim_CO2")},
-          canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")}
+          canopy_gross_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_gross_assimilation_rate_CO2")},
+          canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")},
+          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {
     }
 
@@ -83,10 +83,10 @@ class multilayer_canopy_integrator : public direct_module
 
     // Pointers to output quantities
     double* canopy_assimilation_rate_CO2_op;
-    double* canopy_transpiration_rate_op;
     double* canopy_conductance_op;
-    double* GrossAssim_CO2_op;
+    double* canopy_gross_assimilation_rate_CO2_op;
     double* canopy_photorespiration_rate_CO2_op;
+    double* canopy_transpiration_rate_op;
 
     // Main operation
     virtual void do_operation() const;
@@ -107,18 +107,18 @@ string_vector multilayer_canopy_integrator::get_inputs(int nlayers)
 {
     // Define the multilayer inputs
     string_vector multilayer_inputs = {
-        "sunlit_fraction",    // dimensionless
-        "sunlit_Assim",       // micromol / m^2 /s
-        "sunlit_GrossAssim",  // micromol / m^2 /s
-        "sunlit_Gs",          // mmol / m^2 / s
-        "sunlit_Rp",          // micromol / m^2 /s
-        "sunlit_TransR",      // mmol / m^2 / s
-        "shaded_fraction",    // dimensionless
         "shaded_Assim",       // micromol / m^2 /s
+        "shaded_fraction",    // dimensionless
         "shaded_GrossAssim",  // micromol / m^2 /s
         "shaded_Gs",          // mmol / m^2 / s
         "shaded_Rp",          // micromol / m^2 /s
         "shaded_TransR",      // mmol / m^2 / s
+        "sunlit_Assim",       // micromol / m^2 /s
+        "sunlit_fraction",    // dimensionless
+        "sunlit_GrossAssim",  // micromol / m^2 /s
+        "sunlit_Gs",          // mmol / m^2 / s
+        "sunlit_Rp",          // micromol / m^2 /s
+        "sunlit_TransR"       // mmol / m^2 / s
     };
 
     // Get the full list by appending layer numbers
@@ -137,11 +137,11 @@ string_vector multilayer_canopy_integrator::get_inputs(int nlayers)
 string_vector multilayer_canopy_integrator::get_outputs(int /*nlayers*/)
 {
     return {
-        "canopy_assimilation_rate_CO2",     // micromol CO2 / m^2 / s
-        "canopy_transpiration_rate",        // Mg / ha / hr
-        "canopy_conductance",               // mmol / m^2 / s
-        "GrossAssim_CO2",                   // micromol CO2 / m^2 / s
-        "canopy_photorespiration_rate_CO2"  // micromol CO2 / m^2 / s
+        "canopy_assimilation_rate_CO2",        // micromol CO2 / m^2 / s
+        "canopy_conductance",                  // mmol / m^2 / s
+        "canopy_gross_assimilation_rate_CO2",  // micromol CO2 / m^2 / s
+        "canopy_photorespiration_rate_CO2",    // micromol CO2 / m^2 / s
+        "canopy_transpiration_rate"            // Mg / ha / hr
     };
 }
 
@@ -153,11 +153,12 @@ void multilayer_canopy_integrator::do_operation() const
 void multilayer_canopy_integrator::run() const
 {
     double const LAIc = lai / nlayers;
+
     double canopy_assimilation_rate{0.0};
-    double canopy_transpiration_rate{0.0};
     double canopy_conductance{0.0};
-    double GrossAssim{0.0};
     double canopy_photorespiration_rate{0.0};
+    double canopy_transpiration_rate{0.0};
+    double GrossAssim{0.0};
 
     // Integrate assimilation, transpiration, and conductance throughout the
     // canopy
@@ -199,14 +200,10 @@ void multilayer_canopy_integrator::run() const
     const double cf2 = physical_constants::molar_mass_of_water * 36;  // (Mg / ha / hr) / (mmol / m^2 / s)
 
     update(canopy_assimilation_rate_CO2_op, canopy_assimilation_rate);
-
-    update(GrossAssim_CO2_op, GrossAssim);
-
-    update(canopy_transpiration_rate_op, canopy_transpiration_rate * cf2);
-
     update(canopy_conductance_op, canopy_conductance);
-
+    update(canopy_gross_assimilation_rate_CO2_op, GrossAssim);
     update(canopy_photorespiration_rate_CO2_op, canopy_photorespiration_rate);
+    update(canopy_transpiration_rate_op, canopy_transpiration_rate * cf2);
 }
 
 ////////////////////////////////////////
