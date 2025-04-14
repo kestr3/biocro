@@ -8,7 +8,7 @@ photosynthesis_outputs c4photoC(
     double const leaf_temperature,
     double const ambient_temperature,
     double const relative_humidity,
-    double const vmax,
+    double const Vcmax_at_25,
     double const alpha,
     double const kparm,
     double const theta,

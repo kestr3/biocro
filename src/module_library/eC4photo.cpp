@@ -57,7 +57,7 @@ double eC4photoC(
     Kc = Kc2 * Q10Kc;
     Ko = Ko2 * Q10Ko;
     Vpmax = Vpmax1 * Q10p;
-    double Jmax = Jmax1 * pow(Q10cb, (AirTemp - 25) / 10);
+    double Jmax_at_25 = Jmax1 * pow(Q10cb, (AirTemp - 25) / 10);
 
     double Cm = 0.4 * Ca;
     double Om = Oa;
@@ -67,7 +67,7 @@ double eC4photoC(
 
     /* Light limited */
     double I2 = (Idir * 0.85) / 2;
-    double J = (Jmax + I2 - sqrt(pow(Jmax + I2, 2) - 4 * theta * I2 * Jmax)) / 2 * theta;
+    double J = (Jmax_at_25 + I2 - sqrt(pow(Jmax_at_25 + I2, 2) - 4 * theta * I2 * Jmax_at_25)) / 2 * theta;
     double Aj0 = 0.4 * J - Rm + gs * Cm;
     double Aj1 = (1 - 0.4) * J / 3 - RL;
 

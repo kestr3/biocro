@@ -26,27 +26,27 @@ canopy_photosynthesis_outputs c3CanAC(
     double growth_respiration_fraction,  // dimensionless
     double Gs_min,                       // mol / m^2 / s
     double heightf,                      // m^(-1)
-    double Jmax,                         // micromol / m^2 / s
+    double Jmax_at_25,                   // micromol / m^2 / s
+    double k_diffuse,                    // dimensionless
     double kpLN,
-    double k_diffuse,  // dimensionless
-    double LAI,        // dimensionless
-    double leafN,
+    double LAI,                     // dimensionless
     double leaf_reflectance_nir,    // dimensionless
     double leaf_reflectance_par,    // dimensionless
     double leaf_transmittance_nir,  // dimensionless
     double leaf_transmittance_par,  // dimensionless
     double leaf_width,              // m
-    double lnb0,                    // micromol / m^2 / s
+    double leafN,
+    double lnb0,  // micromol / m^2 / s
     double lnb1,
     double o2,                   // mmol / mol
     double par_energy_content,   // J / micromol
     double par_energy_fraction,  // dimensionless
     double RH,                   // Pa / Pa
-    double RL0,                  // micromol / m^2 / s
+    double RL_at_25,             // micromol / m^2 / s
     double solarR,               // micromol / m^2 / s
     double StomataWS,            // dimensionless
-    double tpu_rate_max,         // micromol / m^2 / s
-    double Vmax,                 // micromol / m^2 / s
+    double Tp_at_25,             // micromol / m^2 / s
+    double Vcmax_at_25,          // micromol / m^2 / s
     double WindSpeed,            // m / s
     double WindSpeedHeight,      // m
     int lnfun,                   // dimensionless switch
@@ -104,11 +104,8 @@ canopy_photosynthesis_outputs c3CanAC(
         int current_layer = nlayers - 1 - i;
         double leafN_lay = leafN_profile[current_layer];
 
-        double vmax1;
-        if (lnfun == 0) {
-            vmax1 = Vmax;
-        } else {
-            vmax1 = leafN_lay * lnb1 + lnb0;
+        if (lnfun != 0) {
+            Vcmax_at_25 = leafN_lay * lnb1 + lnb0;
         }
 
         double layer_wind_speed = wind_speed_profile[current_layer];  // m / s
@@ -126,8 +123,8 @@ canopy_photosynthesis_outputs c3CanAC(
         double direct_gsw_estimate =
             c3photoC(
                 tr_param, iabs_dir, ambient_temperature, ambient_temperature,
-                RH, vmax1, Jmax,
-                tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                RH, Vcmax_at_25, Jmax_at_25,
+                Tp_at_25, RL_at_25, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, gbw_guess)
@@ -149,8 +146,8 @@ canopy_photosynthesis_outputs c3CanAC(
         photosynthesis_outputs direct_photo =
             c3photoC(
                 tr_param, iabs_dir, leaf_temperature_dir, ambient_temperature,
-                RH, vmax1, Jmax,
-                tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                RH, Vcmax_at_25, Jmax_at_25,
+                Tp_at_25, RL_at_25, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, et_direct.gbw_molecular);
@@ -168,8 +165,8 @@ canopy_photosynthesis_outputs c3CanAC(
         double diffuse_gsw_estimate =
             c3photoC(
                 tr_param, iabs_diff, ambient_temperature, ambient_temperature,
-                RH, vmax1, Jmax,
-                tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                RH, Vcmax_at_25, Jmax_at_25,
+                Tp_at_25, RL_at_25, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, gbw_guess)
@@ -191,8 +188,8 @@ canopy_photosynthesis_outputs c3CanAC(
         photosynthesis_outputs diffuse_photo =
             c3photoC(
                 tr_param, iabs_diff, leaf_temperature_Idiffuse, ambient_temperature,
-                RH, vmax1,
-                Jmax, tpu_rate_max, RL0, b0, b1, Gs_min, Catm,
+                RH, Vcmax_at_25,
+                Jmax_at_25, Tp_at_25, RL_at_25, b0, b1, Gs_min, Catm,
                 atmospheric_pressure, o2, StomataWS,
                 electrons_per_carboxylation,
                 electrons_per_oxygenation, beta_PSII,

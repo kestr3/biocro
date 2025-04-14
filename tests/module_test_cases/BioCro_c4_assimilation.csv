@@ -1,5 +1,5 @@
 input,input,input,input,input,input,input,input,input,input,input,input,input,input,input,input,input,input,input,output,output,output,output,output,output,output,output,output,output,output,"description"
-Catm,Gs_min,Qp,RL0,StomataWS,Tleaf,alpha,atmospheric_pressure,b0,b1,beta,gbw,kparm,lowerT,rh,temp,theta,upperT,vmax,Assim,Assim_check,Assim_conductance,Ci,Cs,GrossAssim,Gs,RHs,RL,Rp,iterations,NA
+Catm,Gs_min,Qp,RL_at_25,StomataWS,Tleaf,alpha,atmospheric_pressure,b0,b1,beta,gbw,kparm,lowerT,rh,temp,theta,upperT,Vcmax_at_25,Assim,Assim_check,Assim_conductance,Ci,Cs,GrossAssim,Gs,RHs,RL,Rp,iterations,NA
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-0.14209842811035,0,0.729075532225138,1.42203233148774,1.19467484651118,0.04736614270345,1,1,0.1894645708138,0,0,"automatically-generated test case"
 420,0.001,900,0.8,1,32,0.04,101325,0.08,3,0.93,1.2,0.7,3,0.7,30,0.83,37.5,39,28.0239512235797,0,51.5416602761746,191.639884108592,388.005989019746,29.3235550577496,0.228340435728532,0.684616491291919,1.29960383416984,0,3,"typical miscanthus, bright light baseline"
 420,0.001,450,0.8,1,32,0.04,101325,0.08,3,0.93,1.2,0.7,3,0.7,30,0.83,37.5,39,15.3258197385872,2.30926389122033e-14,36.9097623356356,245.605913299559,402.503022465113,16.6254235727571,0.156289122930017,0.667862102088879,1.29960383416984,0,2,"typical miscanthus, mid light"

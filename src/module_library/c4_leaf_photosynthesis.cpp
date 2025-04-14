@@ -22,12 +22,12 @@ string_vector c4_leaf_photosynthesis::get_inputs()
         "leafwidth",             // m
         "lowerT",                // deg. C
         "rh",                    // dimensionless
-        "RL0",                   // micromol / m^2 / s
+        "RL_at_25",              // micromol / m^2 / s
         "StomataWS",             // dimensionless
         "temp",                  // deg. C
         "theta",                 // dimensionless
         "upperT",                // deg. C
-        "vmax1",                 // micromol / m^2 / s
+        "Vcmax_at_25",           // micromol / m^2 / s
         "windspeed"              // m / s
     };
 }
@@ -62,8 +62,8 @@ void c4_leaf_photosynthesis::do_operation() const
     const double initial_stomatal_conductance =
         c4photoC(
             incident_ppfd, ambient_temperature, ambient_temperature,
-            rh, vmax1, alpha1, kparm, theta, beta,
-            RL0, b0, b1, Gs_min, StomataWS, Catm, atmospheric_pressure,
+            rh, Vcmax_at_25, alpha1, kparm, theta, beta,
+            RL_at_25, b0, b1, Gs_min, StomataWS, Catm, atmospheric_pressure,
             upperT, lowerT, gbw_guess)
             .Gs;  // mol / m^2 / s
 
@@ -86,8 +86,8 @@ void c4_leaf_photosynthesis::do_operation() const
     const photosynthesis_outputs photo =
         c4photoC(
             incident_ppfd, leaf_temperature, ambient_temperature,
-            rh, vmax1, alpha1, kparm,
-            theta, beta, RL0, b0, b1, Gs_min, StomataWS, Catm,
+            rh, Vcmax_at_25, alpha1, kparm,
+            theta, beta, RL_at_25, b0, b1, Gs_min, StomataWS, Catm,
             atmospheric_pressure, upperT, lowerT,
             et.gbw_molecular);
 

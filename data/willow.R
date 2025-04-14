@@ -74,7 +74,7 @@ willow <- list(
         heightf                      = 3,        # LAI of 6 when canopy is 2 m tall
         hydrDist                     = 0,
         iSp                          = 1.1,
-        jmax                         = 180,
+        Jmax_at_25                   = 180,
         Jmax_c                       = 17.57,    # Table 1 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         Jmax_Ea                      = 43.54e3,  # Table 1 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         k_diffuse                    = 0.37,
@@ -141,7 +141,7 @@ willow <- list(
         retrans                      = 0.9,
         retrans_rhizome              = 1.0,
         rfl                          = 0.2,
-        RL0                          = 1.1,
+        RL_at_25                     = 1.1,
         RL_c                         = 18.72,    # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
         RL_Ea                        = 46.39e3,  # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
         rsdf                         = 0.44,
@@ -181,15 +181,14 @@ willow <- list(
         tp3                          = 900,
         tp4                          = 1200,
         tp5                          = 3939,
+        Tp_at_25                     = 23,
         Tp_c                         = 19.77399, # Chosen so that Tp_norm = 1 at 25 degrees C
         Tp_Ha                        = 62.99e3,  # Figure 7 of Yang et al. 2016 (https://doi.org/10.1007/s00425-015-2436-8)
         Tp_Hd                        = 182.14e3, # Figure 7 of Yang et al. 2016 (https://doi.org/10.1007/s00425-015-2436-8)
         Tp_S                         = 0.588e3,  # Figure 7 of Yang et al. 2016 (https://doi.org/10.1007/s00425-015-2436-8)
-        tpu_rate_max                 = 23,
+        Vcmax_at_25                  = 100,
         Vcmax_c                      = 26.35,    # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
         Vcmax_Ea                     = 65.33e3,  # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
-        vmax1                        = 100,
-        vmax_n_intercept             = 0,
         windspeed_height             = 5,
         wsFun                        = 2
     )

@@ -136,7 +136,7 @@ miscanthus_x_giganteus <- list(
         retrans                     = 0.9,
         retrans_rhizome             = 1.0,
         rfl                         = 0.2,
-        RL0                         = 0.8,
+        RL_at_25                    = 0.8,
         rsdf                        = 0.44,
         rsec                        = 0.2,
         seneLeaf                    = 3000,
@@ -171,8 +171,7 @@ miscanthus_x_giganteus <- list(
         tp4                         = 2676,
         tp5                         = 3211,
         upperT                      = 37.5,
-        vmax1                       = 39,
-        vmax_n_intercept            = 0,
+        Vcmax_at_25                 = 39,
         windspeed_height            = 10, # for SURFRAD
         wsFun                       = 2
     )

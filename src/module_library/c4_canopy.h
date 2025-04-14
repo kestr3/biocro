@@ -29,16 +29,16 @@ class c4_canopy : public direct_module
           cosine_zenith_angle{get_input(input_quantities, "cosine_zenith_angle")},
           gbw_canopy{get_input(input_quantities, "gbw_canopy")},
           Gs_min{get_input(input_quantities, "Gs_min")},
+          k_diffuse{get_input(input_quantities, "k_diffuse")},
           kparm{get_input(input_quantities, "kparm")},
           kpLN{get_input(input_quantities, "kpLN")},
-          k_diffuse{get_input(input_quantities, "k_diffuse")},
           lai{get_input(input_quantities, "lai")},
-          LeafN{get_input(input_quantities, "LeafN")},
-          leafwidth{get_input(input_quantities, "leafwidth")},
           leaf_reflectance_nir{get_input(input_quantities, "leaf_reflectance_nir")},
           leaf_reflectance_par{get_input(input_quantities, "leaf_reflectance_par")},
           leaf_transmittance_nir{get_input(input_quantities, "leaf_transmittance_nir")},
           leaf_transmittance_par{get_input(input_quantities, "leaf_transmittance_par")},
+          LeafN{get_input(input_quantities, "LeafN")},
+          leafwidth{get_input(input_quantities, "leafwidth")},
           lnfun{get_input(input_quantities, "lnfun")},
           lowerT{get_input(input_quantities, "lowerT")},
           nalphab0{get_input(input_quantities, "nalphab0")},
@@ -56,13 +56,13 @@ class c4_canopy : public direct_module
           par_energy_content{get_input(input_quantities, "par_energy_content")},
           par_energy_fraction{get_input(input_quantities, "par_energy_fraction")},
           rh{get_input(input_quantities, "rh")},
-          RL0{get_input(input_quantities, "RL0")},
+          RL_at_25{get_input(input_quantities, "RL_at_25")},
           solar{get_input(input_quantities, "solar")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           temp{get_input(input_quantities, "temp")},
           theta{get_input(input_quantities, "theta")},
           upperT{get_input(input_quantities, "upperT")},
-          vmax1{get_input(input_quantities, "vmax1")},
+          Vcmax_at_25{get_input(input_quantities, "Vcmax_at_25")},
           windspeed{get_input(input_quantities, "windspeed")},
 
           // Get pointers to output quantities
@@ -93,16 +93,16 @@ class c4_canopy : public direct_module
     double const& cosine_zenith_angle;
     double const& gbw_canopy;
     double const& Gs_min;
+    double const& k_diffuse;
     double const& kparm;
     double const& kpLN;
-    double const& k_diffuse;
     double const& lai;
-    double const& LeafN;
-    double const& leafwidth;
     double const& leaf_reflectance_nir;
     double const& leaf_reflectance_par;
     double const& leaf_transmittance_nir;
     double const& leaf_transmittance_par;
+    double const& LeafN;
+    double const& leafwidth;
     double const& lnfun;
     double const& lowerT;
     double const& nalphab0;
@@ -120,13 +120,13 @@ class c4_canopy : public direct_module
     double const& par_energy_content;
     double const& par_energy_fraction;
     double const& rh;
-    double const& RL0;
+    double const& RL_at_25;
     double const& solar;
     double const& StomataWS;
     double const& temp;
     double const& theta;
     double const& upperT;
-    double const& vmax1;
+    double const& Vcmax_at_25;
     double const& windspeed;
 
     // Pointers to output quantities
@@ -157,18 +157,18 @@ string_vector c4_canopy::get_inputs()
         "cosine_zenith_angle",        // dimensionless
         "gbw_canopy",                 // m / s
         "Gs_min",                     // mol / m^2 / s
+        "k_diffuse",                  // dimensionless
         "kparm",
         "kpLN",
-        "k_diffuse",  // dimensionless
-        "lai",        // dimensionless from m^2 leaf / m^2 ground
-        "LeafN",
-        "leafwidth",               // m
+        "lai",                     // dimensionless from m^2 leaf / m^2 ground
         "leaf_reflectance_nir",    // dimensionless
         "leaf_reflectance_par",    // dimensionless
         "leaf_transmittance_nir",  // dimensionless
         "leaf_transmittance_par",  // dimensionless
-        "lnfun",                   // not a physical quantity
-        "lowerT",                  // degrees C
+        "LeafN",
+        "leafwidth",  // m
+        "lnfun",      // not a physical quantity
+        "lowerT",     // degrees C
         "nalphab0",
         "nalphab1",
         "nileafn",
@@ -184,13 +184,13 @@ string_vector c4_canopy::get_inputs()
         "par_energy_content",   // J / micromol
         "par_energy_fraction",  // dimensionless
         "rh",                   // dimensionless from Pa / Pa
-        "RL0",                  // micromol / m^2 / s
+        "RL_at_25",             // micromol / m^2 / s
         "solar",                // micromol / m^2 / s
         "StomataWS",            // dimensionless
         "temp",                 // degrees C
         "theta",                // dimensionless
         "upperT",               // degrees C
-        "vmax1",                // micromol / m^2 / s
+        "Vcmax_at_25",          // micromol / m^2 / s
         "windspeed"             // m / s
     };
 }
@@ -239,26 +239,26 @@ void c4_canopy::do_operation() const
         cosine_zenith_angle,
         gbw_canopy,
         Gs_min,
+        k_diffuse,
         kparm,
         kpLN,
-        k_diffuse,
         lai,
-        LeafN,
-        leafwidth,
         leaf_reflectance_nir,
         leaf_reflectance_par,
         leaf_transmittance_nir,
         leaf_transmittance_par,
+        LeafN,
+        leafwidth,
         lowerT,
         par_energy_content,
         par_energy_fraction,
         rh,
-        RL0,
+        RL_at_25,
         solar,
         StomataWS,
         theta,
         upperT,
-        vmax1,
+        Vcmax_at_25,
         windspeed,
         lnfun,
         nlayers);

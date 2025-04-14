@@ -1290,7 +1290,7 @@ To test your understanding, you could try to complete the following tasks:
 \begin{itemize}
 
 \item Run the soybean simulation a few times with several different values of a
-key parameter (such as \texttt{vmax1}, which represents the maximum rate of
+key parameter (such as \texttt{Vcmax_at_25}, which represents the maximum rate of
 carboxylation $v_{\rm{c,max}}$) and compare plots of the time evolution of the
 \texttt{Grain} quantity (representing the pod mass per unit area) in each of the
 scenarios. (See Figure \ref{fig:soybean_vcmax} for a possible solution.)

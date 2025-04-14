@@ -27,10 +27,10 @@ photosynthesis_outputs c3photoC(
     double const Tleaf,                        // degrees C
     double const Tambient,                     // degrees C
     double const RH,                           // dimensionless
-    double const Vcmax0,                       // micromol / m^2 / s
-    double const Jmax0,                        // micromol / m^2 / s
+    double const Vcmax_at_25,                  // micromol / m^2 / s
+    double const Jmax_at_25,                   // micromol / m^2 / s
     double const TPU_rate_max,                 // micromol / m^2 / s
-    double const RL0,                          // micromol / m^2 / s
+    double const RL_at_25,                     // micromol / m^2 / s
     double const b0,                           // mol / m^2 / s
     double const b1,                           // dimensionless
     double const Gs_min,                       // mol / m^2 / s
@@ -49,13 +49,13 @@ photosynthesis_outputs c3photoC(
 
     double const dark_adapted_phi_PSII = c3_param.phi_PSII;  // dimensionless
     double const Gstar = c3_param.Gstar;                     // micromol / mol
-    double const Jmax = Jmax0 * c3_param.Jmax_norm;          // micromol / m^2 / s
+    double const Jmax = Jmax_at_25 * c3_param.Jmax_norm;     // micromol / m^2 / s
     double const Kc = c3_param.Kc;                           // micromol / mol
     double const Ko = c3_param.Ko;                           // mmol / mol
-    double const RL = RL0 * c3_param.RL_norm;                // micromol / m^2 / s
+    double const RL = RL_at_25 * c3_param.RL_norm;           // micromol / m^2 / s
     double const theta = c3_param.theta;                     // dimensionless
     double const TPU = TPU_rate_max * c3_param.Tp_norm;      // micromol / m^2 / s
-    double const Vcmax = Vcmax0 * c3_param.Vcmax_norm;       // micromol / m^2 / s
+    double const Vcmax = Vcmax_at_25 * c3_param.Vcmax_norm;  // micromol / m^2 / s
 
     // The variable that we call `I2` here has been described as "the useful
     // light absorbed by photosystem II" (S. von Caemmerer (2002)) and "the

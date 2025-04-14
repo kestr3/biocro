@@ -145,7 +145,7 @@ class rue_leaf_photosynthesis : public direct_module
           height{get_input(input_quantities, "height")},
           incident_ppfd{get_input(input_quantities, "incident_ppfd")},
           leafwidth{get_input(input_quantities, "leafwidth")},
-          RL0{get_input(input_quantities, "RL0")},
+          RL_at_25{get_input(input_quantities, "RL_at_25")},
           rh{get_input(input_quantities, "rh")},
           temp{get_input(input_quantities, "temp")},
           windspeed{get_input(input_quantities, "windspeed")},
@@ -182,7 +182,7 @@ class rue_leaf_photosynthesis : public direct_module
     double const& height;
     double const& incident_ppfd;
     double const& leafwidth;
-    double const& RL0;
+    double const& RL_at_25;
     double const& rh;
     double const& temp;
     double const& windspeed;

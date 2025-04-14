@@ -37,11 +37,11 @@ class c4_leaf_photosynthesis : public direct_module
           leafwidth{get_input(input_quantities, "leafwidth")},
           lowerT{get_input(input_quantities, "lowerT")},
           rh{get_input(input_quantities, "rh")},
-          RL0{get_input(input_quantities, "RL0")},
+          RL_at_25{get_input(input_quantities, "RL_at_25")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           theta{get_input(input_quantities, "theta")},
           upperT{get_input(input_quantities, "upperT")},
-          vmax1{get_input(input_quantities, "vmax1")},
+          Vcmax_at_25{get_input(input_quantities, "Vcmax_at_25")},
           windspeed{get_input(input_quantities, "windspeed")},
 
           // Get pointers to output quantities
@@ -83,11 +83,11 @@ class c4_leaf_photosynthesis : public direct_module
     double const& leafwidth;
     double const& lowerT;
     double const& rh;
-    double const& RL0;
+    double const& RL_at_25;
     double const& StomataWS;
     double const& theta;
     double const& upperT;
-    double const& vmax1;
+    double const& Vcmax_at_25;
     double const& windspeed;
 
     // Pointers to output quantities

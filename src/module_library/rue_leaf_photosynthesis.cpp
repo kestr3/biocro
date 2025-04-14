@@ -23,7 +23,7 @@ photosynthesis_outputs rue_photo(
     double alpha_rue,  // dimensionless
     double Tleaf,      // degrees C
     double RH,         // dimensionless from Pa / Pa
-    double RL0,        // mol / m^2 / s
+    double RL_at_25,        // mol / m^2 / s
     double bb0,        // mol / m^2 / s
     double bb1,        // dimensionless
     double Ca,         // dimensionless from mol / mol
@@ -40,7 +40,7 @@ photosynthesis_outputs rue_photo(
     // Determine respiration from the leaf temperature using Arrhenius exponents
     // from Bernacchi et al. (2001) Plant, Cell and Environment, 24(2), 253-259.
     // https://doi.org/10.1111/j.1365-3040.2001.00668.x
-    double const RL = RL0 *
+    double const RL = RL_at_25 *
                       arrhenius_exponential(
                           18.72,
                           46.39e3,
@@ -99,7 +99,7 @@ string_vector rue_leaf_photosynthesis::get_inputs()
         "height",                // m
         "incident_ppfd",         // micromol / (m^2 leaf) / s
         "leafwidth",             // m
-        "RL0",                   // micromol / m^2 / s
+        "RL_at_25",                   // micromol / m^2 / s
         "rh",                    // dimensionless
         "temp",                  // degrees C
         "windspeed",             // m / s
@@ -137,7 +137,7 @@ void rue_leaf_photosynthesis::do_operation() const
             alpha_rue,             // dimensionless
             temp,                  // degrees C
             rh,                    // dimensionless from Pa / Pa
-            RL0 * 1e-6,            // mol / m^2 / s
+            RL_at_25 * 1e-6,            // mol / m^2 / s
             b0,                    // mol / m^2 / s
             b1,                    // dimensionless
             Catm * 1e-6,           // dimensionless from mol / mol
@@ -167,7 +167,7 @@ void rue_leaf_photosynthesis::do_operation() const
             alpha_rue,             // dimensionless
             leaf_temperature,      // degrees C
             rh,                    // dimensionless from Pa / Pa
-            RL0 * 1e-6,            // mol / m^2 / s
+            RL_at_25 * 1e-6,            // mol / m^2 / s
             b0,                    // mol / m^2 / s
             b1,                    // dimensionless
             Catm * 1e-6,           // dimensionless from mol / mol

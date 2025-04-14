@@ -23,7 +23,7 @@ string_vector c3_leaf_photosynthesis::get_inputs()
         "Gstar_c",                      // dimensionless
         "Gstar_Ea",                     // J / mol
         "height",                       // m
-        "jmax",                         // micromol / m^2 / s
+        "Jmax_at_25",                   // micromol / m^2 / s
         "Jmax_c",                       // dimensionless
         "Jmax_Ea",                      // J / mol
         "Kc_c",                         // dimensionless
@@ -36,7 +36,7 @@ string_vector c3_leaf_photosynthesis::get_inputs()
         "phi_PSII_1",                   // (degrees C)^(-1)
         "phi_PSII_2",                   // (degrees C)^(-2)
         "rh",                           // dimensionless
-        "RL0",                          // micromol / m^2 / s
+        "RL_at_25",                     // micromol / m^2 / s
         "RL_c",                         // dimensionless
         "RL_Ea",                        // J / mol
         "StomataWS",                    // dimensionless
@@ -44,14 +44,14 @@ string_vector c3_leaf_photosynthesis::get_inputs()
         "theta_0",                      // dimensionless
         "theta_1",                      // (degrees C)^(-1)
         "theta_2",                      // (degrees C)^(-2)
+        "Tp_at_25",                     // micromol / m^2 / s
         "Tp_c",                         // dimensionless
         "Tp_Ha",                        // J / mol
         "Tp_Hd",                        // J / mol
         "Tp_S",                         // J / K / mol
-        "tpu_rate_max",                 // micromol / m^2 / s
+        "Vcmax_at_25",                  // micromol / m^2 / s
         "Vcmax_c",                      // dimensionless
         "Vcmax_Ea",                     // J / mol
-        "vmax1",                        // micromol / m^2 / s
         "windspeed"                     // m / s
     };
 }
@@ -111,7 +111,7 @@ void c3_leaf_photosynthesis::do_operation() const
     double const initial_stomatal_conductance =
         c3photoC(
             tr_param, absorbed_ppfd, ambient_temperature, ambient_temperature,
-            rh, vmax1, jmax, tpu_rate_max, RL0, b0,
+            rh, Vcmax_at_25, Jmax_at_25, Tp_at_25, RL_at_25, b0,
             b1, Gs_min, Catm, atmospheric_pressure, O2, StomataWS,
             electrons_per_carboxylation,
             electrons_per_oxygenation, beta_PSII, gbw_guess)
@@ -137,8 +137,8 @@ void c3_leaf_photosynthesis::do_operation() const
     const photosynthesis_outputs photo =
         c3photoC(
             tr_param, absorbed_ppfd, leaf_temperature, ambient_temperature,
-            rh, vmax1, jmax,
-            tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure, O2,
+            rh, Vcmax_at_25, Jmax_at_25,
+            Tp_at_25, RL_at_25, b0, b1, Gs_min, Catm, atmospheric_pressure, O2,
             StomataWS,
             electrons_per_carboxylation, electrons_per_oxygenation, beta_PSII,
             et.gbw_molecular);

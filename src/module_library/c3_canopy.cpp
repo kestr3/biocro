@@ -26,7 +26,7 @@ string_vector c3_canopy::get_inputs()
         "Gstar_c",                      // dimensionless
         "Gstar_Ea",                     // J / mol
         "heightf",                      // m^(-1)
-        "jmax",                         // micromol / m^2 / s
+        "Jmax_at_25",                   // micromol / m^2 / s
         "Jmax_c",                       // dimensionless
         "Jmax_Ea",                      // J / mol
         "k_diffuse",                    // dimensionless
@@ -53,7 +53,7 @@ string_vector c3_canopy::get_inputs()
         "phi_PSII_1",           // (degrees C)^(-1)
         "phi_PSII_2",           // (degrees C)^(-2)
         "rh",                   // dimensionless
-        "RL0",                  // micromol / m^2 / s
+        "RL_at_25",             // micromol / m^2 / s
         "RL_c",                 // dimensionless
         "RL_Ea",                // J / mol
         "solar",                // micromol / m^2 / s
@@ -62,16 +62,16 @@ string_vector c3_canopy::get_inputs()
         "theta_0",              // dimensionless
         "theta_1",              // (degrees C)^(-1)
         "theta_2",              // (degrees C)^(-2)
+        "Tp_at_25",             // micromol / m^2 / s
         "Tp_c",                 // dimensionless
         "Tp_Ha",                // J / mol
         "Tp_Hd",                // J / mol
         "Tp_S",                 // J / K / mol
-        "tpu_rate_max",         // micromol / m^2 / s
+        "Vcmax_at_25",          // micromol / m^2 / s
         "Vcmax_c",              // dimensionless
         "Vcmax_Ea",             // J / mol
-        "vmax",                 // micromol / m^2 / s
         "windspeed",            // m / s
-        "windspeed_height",     // m
+        "windspeed_height"      // m
     };
 }
 
@@ -133,27 +133,27 @@ void c3_canopy::do_operation() const
         growth_respiration_fraction,
         Gs_min,
         heightf,
-        jmax,
-        kpLN,
+        Jmax_at_25,
         k_diffuse,
+        kpLN,
         lai,
-        LeafN,
         leaf_reflectance_nir,
         leaf_reflectance_par,
         leaf_transmittance_nir,
         leaf_transmittance_par,
         leafwidth,
+        LeafN,
         lnb0,
         lnb1,
         O2,
         par_energy_content,
         par_energy_fraction,
         rh,
-        RL0,
+        RL_at_25,
         solar,
         StomataWS,
-        tpu_rate_max,
-        vmax,
+        Tp_at_25,
+        Vcmax_at_25,
         windspeed,
         windspeed_height,
         lnfun,

@@ -85,7 +85,7 @@ parameter_list parameters {
   { "acceleration_from_gravity"         , {"Accerlation from gravity"                                                 ,"m / s^2"                      }},
   { "lai"                               , {"Leaf area index"                                                          ,"m^2 / m^2"                    }},
   { "Catm"                              , {"Atmospheric CO2 concentration"                                            ,"micromol / mol"               }},
-  { "vmax"                              , {"Maximum carboxylation rate of C4 photosynthesis."                         ,"micromol / m^2 / s"           }},
+  { "Vcmax_at_25"                       , {"Maximum carboxylation rate of C4 photosynthesis."                         ,"micromol / m^2 / s"           }},
   { "alpha"                             , {"Quantum efficiency of CO2 assimiliation for incident radiation."          ,"mol / mol"                    }},  // This is for *incident* not absorbed radiation.
   { "kparm"                             , {"Slope of the roughly linear portion of an A-Ci curve."                    ,"mol / m^2 / s / Pa"           }},
   { "slope_water_vapor"                 , {"Slope of the saturation water vapor density vs air temperature curve."    ,"kg / m^3 / K"                 }},  // It is also kg / m^3 / degrees C since it is a change in temperature.

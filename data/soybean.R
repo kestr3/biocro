@@ -73,12 +73,11 @@ soybean <- list(
         Sp_thermal_time_decay       = 0,           # not used in Soybean-BioCro, but must be defined
 
         # parameter_calculator module
+        alpha1                      = 0,           # not used in Soybean-BioCro, but must be defined
+        alphab1                     = 0,           # not used in Soybean-BioCro, but must be defined
         LeafN                       = 2,           # not used in Soybean-BioCro, but must be defined
         LeafN_0                     = 2,           # not used in Soybean-BioCro, but must be defined
-        vmax_n_intercept            = 0,           # not used in Soybean-BioCro, but must be defined
-        vmax1                       = 110,         # Bernacchi et. al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
-        alphab1                     = 0,           # not used in Soybean-BioCro, but must be defined
-        alpha1                      = 0,           # not used in Soybean-BioCro, but must be defined
+        Vcmax_at_25                 = 110,         # Bernacchi et. al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
 
         # soybean_development_rate_calculator module
         maturity_group              = 3,           # dimensionless; soybean cultivar maturity group
@@ -186,13 +185,13 @@ soybean <- list(
         electrons_per_carboxylation = 4.5,         # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         electrons_per_oxygenation   = 5.25,        # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         Gs_min                      = 1e-3,
-        jmax                        = 195,         # Bernacchi et al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
-        jmax_mature                 = 195,         # Needed in the varying_Jmax25 module
+        Jmax_at_25                  = 195,         # Bernacchi et al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
+        Jmax_at_25_mature           = 195,         # Needed in the varying_Jmax25 module
         leafwidth                   = 0.1,         # Large mature leaflets can reach 10 cm in width
         O2                          = 210,         # millimol / mol
-        RL0                         = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
-        sf_jmax                     = 0.2,         # Scaling factor for jmax. Needed in the varying_Jmax25 module
-        tpu_rate_max                = 13,          # Fitted value based on the A-Ci data measured at UIUC in 2019-08 by Delgrado (unpublished data)
+        RL_at_25                    = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
+        sf_jmax                     = 0.2,         # Scaling factor for Jmax_at_25. Needed in the varying_Jmax25 module
+        Tp_at_25                    = 13,          # Fitted value based on the A-Ci data measured at UIUC in 2019-08 by Delgrado (unpublished data)
         windspeed_height            = 5,
 
         # ten_layer_canopy_integrator module

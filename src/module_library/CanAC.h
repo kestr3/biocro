@@ -20,29 +20,29 @@ canopy_photosynthesis_outputs CanAC(
     double cosine_zenith_angle,        // dimensionless
     double gbw_canopy,                 // m / s
     double Gs_min,                     // mol / m^2 / s
+    double k_diffuse,                  // dimensionless
     double Kparm,
     double kpLN,
-    double k_diffuse,  // dimensionless
-    double LAI,        // dimensionless from m^2 / m^2
-    double leafN,
-    double leafwidth,               // m
+    double LAI,                     // dimensionless from m^2 / m^2
     double leaf_reflectance_nir,    // dimensionless
     double leaf_reflectance_par,    // dimensionless
     double leaf_transmittance_nir,  // dimensionless
     double leaf_transmittance_par,  // dimensionless
-    double lowerT,                  // degrees C
-    double par_energy_content,      // J / micromol
-    double par_energy_fraction,     // dimensionless
-    double RH,                      // dimensionless from Pa / Pa
-    double RL0,                     // micromol / m^2 / s
-    double solarR,                  // micromol / m^2 / s
-    double StomataWS,               // dimensionless
-    double theta,                   // dimensionless
-    double upperT,                  // degrees C
-    double Vmax,                    // micromol / m^2 / s
-    double WindSpeed,               // m / s
-    int lnfun,                      // dimensionless switch
-    int nlayers                     // dimensionless
+    double leafN,
+    double leafwidth,            // m
+    double lowerT,               // degrees C
+    double par_energy_content,   // J / micromol
+    double par_energy_fraction,  // dimensionless
+    double RH,                   // dimensionless from Pa / Pa
+    double RL_at_25,             // micromol / m^2 / s
+    double solarR,               // micromol / m^2 / s
+    double StomataWS,            // dimensionless
+    double theta,                // dimensionless
+    double upperT,               // degrees C
+    double Vcmax_at_25,          // micromol / m^2 / s
+    double WindSpeed,            // m / s
+    int lnfun,                   // dimensionless switch
+    int nlayers                  // dimensionless
 );
 
 #endif

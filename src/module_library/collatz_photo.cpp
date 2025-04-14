@@ -4,7 +4,7 @@
 struct collatz_result collatz_photo(
     double Qp,                // micromol / m^2 / s. Incident photon flux density.
     double leaf_temperature,  // degrees C
-    double vmax,              // micromol / m^2 / s
+    double Vcmax_at_25,       // micromol / m^2 / s
     double alpha,             // mol / mol. CO2 fixed per incident photon flux density.
     double kparm,             // mol / m%2 / s
     double theta,
@@ -19,7 +19,7 @@ struct collatz_result collatz_photo(
     double kT = kparm * pow(k_Q10, (leaf_temperature - 25.0) / 10.0);  // dimensionless
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double Vtn = vmax * pow(2, (leaf_temperature - 25.0) / 10.0);                                              // micromol / m^2 / s
+    double Vtn = Vcmax_at_25 * pow(2, (leaf_temperature - 25.0) / 10.0);                                       // micromol / m^2 / s
     double Vtd = (1 + exp(0.3 * (lowerT - leaf_temperature))) * (1 + exp(0.3 * (leaf_temperature - upperT)));  // dimensionless
     double VT = Vtn / Vtd;                                                                                     // micromol / m^2 / s
 
