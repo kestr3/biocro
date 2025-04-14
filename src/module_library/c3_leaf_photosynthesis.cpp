@@ -36,7 +36,7 @@ string_vector c3_leaf_photosynthesis::get_inputs()
         "phi_PSII_1",                   // (degrees C)^(-1)
         "phi_PSII_2",                   // (degrees C)^(-2)
         "rh",                           // dimensionless
-        "RL",                           // micromol / m^2 / s
+        "RL0",                          // micromol / m^2 / s
         "RL_c",                         // dimensionless
         "RL_Ea",                        // J / mol
         "StomataWS",                    // dimensionless
@@ -70,6 +70,7 @@ string_vector c3_leaf_photosynthesis::get_outputs()
         "leaf_temperature",  // degrees C
         "RHs",               // dimensionless from Pa / Pa
         "RH_canopy",         // dimensionless
+        "RL",                // micromol / m^2 / s
         "Rp",                // micromol / m^2 / s
         "TransR"             // mmol / m^2 / s
     };
@@ -110,7 +111,7 @@ void c3_leaf_photosynthesis::do_operation() const
     double const initial_stomatal_conductance =
         c3photoC(
             tr_param, absorbed_ppfd, ambient_temperature, ambient_temperature,
-            rh, vmax1, jmax, tpu_rate_max, RL, b0,
+            rh, vmax1, jmax, tpu_rate_max, RL0, b0,
             b1, Gs_min, Catm, atmospheric_pressure, O2, StomataWS,
             electrons_per_carboxylation,
             electrons_per_oxygenation, beta_PSII, gbw_guess)
@@ -137,7 +138,7 @@ void c3_leaf_photosynthesis::do_operation() const
         c3photoC(
             tr_param, absorbed_ppfd, leaf_temperature, ambient_temperature,
             rh, vmax1, jmax,
-            tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure, O2,
+            tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure, O2,
             StomataWS,
             electrons_per_carboxylation, electrons_per_oxygenation, beta_PSII,
             et.gbw_molecular);
@@ -154,6 +155,7 @@ void c3_leaf_photosynthesis::do_operation() const
     update(leaf_temperature_op, leaf_temperature);
     update(RHs_op, photo.RHs);
     update(RH_canopy_op, et.RH_canopy);
+    update(RL_op, photo.RL);
     update(Rp_op, photo.Rp);
     update(TransR_op, et.TransR);
 }

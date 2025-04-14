@@ -136,7 +136,7 @@ miscanthus_x_giganteus <- list(
         retrans                     = 0.9,
         retrans_rhizome             = 1.0,
         rfl                         = 0.2,
-        RL                          = 0.8,
+        RL0                         = 0.8,
         rsdf                        = 0.44,
         rsec                        = 0.2,
         seneLeaf                    = 3000,

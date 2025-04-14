@@ -39,7 +39,7 @@ canopy_photosynthesis_outputs c3CanAC(
     double par_energy_content,   // J / micromol
     double par_energy_fraction,  // dimensionless
     double RH,                   // Pa / Pa
-    double RL,                   // micromol / m^2 / s
+    double RL0,                  // micromol / m^2 / s
     double solarR,               // micromol / m^2 / s
     double StomataWS,            // dimensionless
     double tpu_rate_max,         // micromol / m^2 / s

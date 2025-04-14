@@ -42,7 +42,7 @@ canopy_photosynthesis_outputs c3CanAC(
     double par_energy_content,   // J / micromol
     double par_energy_fraction,  // dimensionless
     double RH,                   // Pa / Pa
-    double RL,                   // micromol / m^2 / s
+    double RL0,                  // micromol / m^2 / s
     double solarR,               // micromol / m^2 / s
     double StomataWS,            // dimensionless
     double tpu_rate_max,         // micromol / m^2 / s
@@ -91,6 +91,7 @@ canopy_photosynthesis_outputs c3CanAC(
     double CanopyA{0.0};             // micromol / m^2 / s
     double GCanopyA{0.0};            // micromol / m^2 / s
     double canopy_rp{0.0};           // micromol / m^2 / s
+    double canopy_RL{0.0};           // micromol / m^2 / s
     double CanopyT{0.0};             // mmol / m^2 / s
     double CanopyPe{0.0};            // mmol / m^2 / s
     double CanopyPr{0.0};            // mmol / m^2 / s
@@ -126,7 +127,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_dir, ambient_temperature, ambient_temperature,
                 RH, vmax1, Jmax,
-                tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, gbw_guess)
@@ -149,7 +150,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_dir, leaf_temperature_dir, ambient_temperature,
                 RH, vmax1, Jmax,
-                tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, et_direct.gbw_molecular);
@@ -168,7 +169,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_diff, ambient_temperature, ambient_temperature,
                 RH, vmax1, Jmax,
-                tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                tpu_rate_max, RL0, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, gbw_guess)
@@ -191,7 +192,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_diff, leaf_temperature_Idiffuse, ambient_temperature,
                 RH, vmax1,
-                Jmax, tpu_rate_max, RL, b0, b1, Gs_min, Catm,
+                Jmax, tpu_rate_max, RL0, b0, b1, Gs_min, Catm,
                 atmospheric_pressure, o2, StomataWS,
                 electrons_per_carboxylation,
                 electrons_per_oxygenation, beta_PSII,
@@ -202,6 +203,7 @@ canopy_photosynthesis_outputs c3CanAC(
         CanopyT += Leafsun * et_direct.TransR + Leafshade * et_diffuse.TransR;                 // mmol / m^2 / s
         GCanopyA += Leafsun * direct_photo.GrossAssim + Leafshade * diffuse_photo.GrossAssim;  // micromol / m^2 / s
         canopy_rp += Leafsun * direct_photo.Rp + Leafshade * diffuse_photo.Rp;                 // micromol / m^2 / s
+        canopy_RL += Leafsun * direct_photo.RL + Leafshade * diffuse_photo.RL;                 // micromol / m^2 / s
 
         CanopyPe += Leafsun * et_direct.EPenman + Leafshade * et_diffuse.EPenman;        // mmol / m^2 / s
         CanopyPr += Leafsun * et_direct.EPriestly + Leafshade * et_diffuse.EPriestly;    // mmol / m^2 / s
@@ -217,12 +219,13 @@ canopy_photosynthesis_outputs c3CanAC(
 
     canopy_photosynthesis_outputs ans;
     ans.Assim = CanopyA * (1.0 - growth_respiration_fraction);  // micromol / m^2 / s
-    ans.GrossAssim = GCanopyA;                                  // micromol / m^2 / s
-    ans.Rp = canopy_rp;                                         // micromol / m^2 / s
-    ans.Trans = CanopyT * cf2;                                  // Mg / ha / hr
+    ans.canopy_conductance = canopy_conductance;                // mol / m^2 / s
     ans.canopy_transpiration_penman = CanopyPe;                 // mmol / m^2 / s
     ans.canopy_transpiration_priestly = CanopyPr;               // mmol / m^2 / s
-    ans.canopy_conductance = canopy_conductance;                // mol / m^2 / s
+    ans.GrossAssim = GCanopyA;                                  // micromol / m^2 / s
+    ans.Rp = canopy_rp;                                         // micromol / m^2 / s
+    ans.RL = canopy_RL;                                         // micromol / m^2 / s
+    ans.Trans = CanopyT * cf2;                                  // Mg / ha / hr
 
     return ans;
 }

@@ -95,7 +95,7 @@ test_that('new values must agree with old values', {
     expect_error(
         run_model_test_cases(
             list(
-                within(example_test_case, {parameters$RL = parameters$RL * 1.1})
+                within(example_test_case, {parameters$RL0 = parameters$RL0 * 1.1})
             )
         ),
         'The new `miscanthus_x_giganteus` simulation result does not agree with the stored result for the following columns:'

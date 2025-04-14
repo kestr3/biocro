@@ -190,7 +190,7 @@ soybean <- list(
         jmax_mature                 = 195,         # Needed in the varying_Jmax25 module
         leafwidth                   = 0.1,         # Large mature leaflets can reach 10 cm in width
         O2                          = 210,         # millimol / mol
-        RL                          = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
+        RL0                         = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
         sf_jmax                     = 0.2,         # Scaling factor for jmax. Needed in the varying_Jmax25 module
         tpu_rate_max                = 13,          # Fitted value based on the A-Ci data measured at UIUC in 2019-08 by Delgrado (unpublished data)
         windspeed_height            = 5,

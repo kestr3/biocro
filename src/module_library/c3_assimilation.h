@@ -44,7 +44,7 @@ namespace standardBML
  * - ``'O2'`` for the atmospheric O2 concentration
  * - ``'Qabs'`` for the absorbed quantum flux density of photosynthetically active radiation
  * - ``'rh'`` for the atmospheric relative humidity
- * - ``'RL'`` for the rate of non-photorespiratory CO2 release at 25 degrees C
+ * - ``'RL0'`` for the rate of non-photorespiratory CO2 release at 25 degrees C
  * - ``'StomataWS'`` for the water stress factor
  * - ``'temp'`` for the ambient temperature
  * - ``'theta'`` for the ???
@@ -61,6 +61,7 @@ namespace standardBML
  * - ``'GrossAssim'`` for the gross CO2 assimilation rate
  * - ``'Gs'`` for the stomatal conductance for H2O
  * - ``'RHs'`` for the relative humidity at the leaf surface
+ * - ``'RL'`` for the rate of non-photorespiratory CO2 release
  * - ``'Rp'`` for the rate of photorespiration
  * - ``'iterations'`` for the number of iterations required for the convergence loop
  */
@@ -97,7 +98,7 @@ class c3_assimilation : public direct_module
           phi_PSII_2{get_input(input_quantities, "phi_PSII_2")},
           Qabs{get_input(input_quantities, "Qabs")},
           rh{get_input(input_quantities, "rh")},
-          RL{get_input(input_quantities, "RL")},
+          RL0{get_input(input_quantities, "RL0")},
           RL_c{get_input(input_quantities, "RL_c")},
           RL_Ea{get_input(input_quantities, "RL_Ea")},
           StomataWS{get_input(input_quantities, "StomataWS")},
@@ -124,6 +125,7 @@ class c3_assimilation : public direct_module
           GrossAssim_op{get_op(output_quantities, "GrossAssim")},
           Gs_op{get_op(output_quantities, "Gs")},
           RHs_op{get_op(output_quantities, "RHs")},
+          RL_op{get_op(output_quantities, "RL")},
           Rp_op{get_op(output_quantities, "Rp")},
           iterations_op{get_op(output_quantities, "iterations")}
     {
@@ -158,7 +160,7 @@ class c3_assimilation : public direct_module
     double const& phi_PSII_2;
     double const& Qabs;
     double const& rh;
-    double const& RL;
+    double const& RL0;
     double const& RL_c;
     double const& RL_Ea;
     double const& StomataWS;
@@ -185,6 +187,7 @@ class c3_assimilation : public direct_module
     double* GrossAssim_op;
     double* Gs_op;
     double* RHs_op;
+    double* RL_op;
     double* Rp_op;
     double* iterations_op;
 
@@ -219,7 +222,7 @@ string_vector c3_assimilation::get_inputs()
         "phi_PSII_2",                   // (degrees C)^(-2)
         "Qabs",                         // micromol / m^2 / s
         "rh",                           // dimensionless
-        "RL",                           // micromol / m^2 / s
+        "RL0",                           // micromol / m^2 / s
         "RL_c",                         // dimensionless
         "RL_Ea",                        // J / mol
         "StomataWS",                    // dimensionless
@@ -250,6 +253,7 @@ string_vector c3_assimilation::get_outputs()
         "GrossAssim",         // micromol / m^2 / s
         "Gs",                 // mol / m^2 / s
         "RHs",                // dimensionless from Pa / Pa
+        "RL",                 // micromol / m^2 / s
         "Rp",                 // micromol / m^2 / s
         "iterations"          // not a physical quantity
     };
@@ -291,7 +295,7 @@ void c3_assimilation::do_operation() const
         vmax1,
         jmax,
         tpu_rate_max,
-        RL,
+        RL0,
         b0,
         b1,
         Gs_min,
@@ -305,14 +309,15 @@ void c3_assimilation::do_operation() const
         gbw);
 
     // Update the output quantity list
-    update(Assim_op, c3_results.Assim);
     update(Assim_check_op, c3_results.Assim_check);
     update(Assim_conductance_op, c3_results.Assim_conductance);
+    update(Assim_op, c3_results.Assim);
     update(Ci_op, c3_results.Ci);
     update(Cs_op, c3_results.Cs);
     update(GrossAssim_op, c3_results.GrossAssim);
     update(Gs_op, c3_results.Gs);
     update(RHs_op, c3_results.RHs);
+    update(RL_op, c3_results.RL);
     update(Rp_op, c3_results.Rp);
     update(iterations_op, c3_results.iterations);
 }

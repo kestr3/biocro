@@ -37,7 +37,7 @@ canopy_photosynthesis_outputs CanAC(
     double par_energy_content,      // J / micromol
     double par_energy_fraction,     // dimensionless
     double RH,                      // dimensionless from Pa / Pa
-    double RL,                      // micromol / m^2 / s
+    double RL0,                     // micromol / m^2 / s
     double solarR,                  // micromol / m^2 / s
     double StomataWS,               // dimensionless
     double theta,                   // dimensionless
@@ -88,6 +88,7 @@ canopy_photosynthesis_outputs CanAC(
     double CanopyA{0.0};             // micromol / m^2 / s
     double GCanopyA{0.0};            // micromol / m^2 / s
     double canopy_rp{0.0};           // micromol / m^2 / s
+    double canopy_RL{0.0};           // micromol / m^2 / s
     double CanopyT{0.0};             // mmol / m^2 / s
     double CanopyPe{0.0};            // mmol / m^2 / s
     double CanopyPr{0.0};            // mmol / m^2 / s
@@ -112,7 +113,7 @@ canopy_photosynthesis_outputs CanAC(
                 vmax1 = Vmax;
             }
             Alpha = nitroP.alphab1 * leafN_lay + nitroP.alphab0;
-            RL = nitroP.Rdb1 * leafN_lay + nitroP.Rdb0;
+            RL0 = nitroP.Rdb1 * leafN_lay + nitroP.Rdb0;
         }
 
         double layer_wind_speed = wind_speed_profile[current_layer];  // m / s
@@ -131,7 +132,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_dir, ambient_temperature, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL0, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 gbw_guess)
                 .Gs;  // mol / m^2 / s
@@ -153,7 +154,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_dir, leaf_temperature_dir, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL0, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 et_direct.gbw_molecular);
 
@@ -171,7 +172,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_diff, ambient_temperature, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL0, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 gbw_guess)
                 .Gs;  // mol / m^2 / s
@@ -193,7 +194,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_diff, leaf_temperature_diff, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL0, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 et_diffuse.gbw_molecular);
 
@@ -202,6 +203,7 @@ canopy_photosynthesis_outputs CanAC(
         CanopyT += Leafsun * et_direct.TransR + Leafshade * et_diffuse.TransR;                 // mmol / m^2 / s
         GCanopyA += Leafsun * direct_photo.GrossAssim + Leafshade * diffuse_photo.GrossAssim;  // micromol / m^2 / s
         canopy_rp += Leafsun * direct_photo.Rp + Leafshade * diffuse_photo.Rp;                 // micromol / m^2 / s
+        canopy_RL += Leafsun * direct_photo.RL + Leafshade * diffuse_photo.RL;                 // micromol / m^2 / s
 
         CanopyPe += Leafsun * et_direct.EPenman + Leafshade * et_diffuse.EPenman;        // mmol / m^2 / s
         CanopyPr += Leafsun * et_direct.EPriestly + Leafshade * et_diffuse.EPriestly;    // mmol / m^2 / s
@@ -219,6 +221,7 @@ canopy_photosynthesis_outputs CanAC(
     ans.Assim = CanopyA;                           // micromol / m^2 / s
     ans.GrossAssim = GCanopyA;                     // micromol / m^2 / s
     ans.Rp = canopy_rp;                            // micromol / m^2 / s
+    ans.RL = canopy_RL;                            // micromol / m^2 / s
     ans.Trans = CanopyT * cf2;                     // Mg / ha / hr
     ans.canopy_transpiration_penman = CanopyPe;    // mmol / m^2 / s
     ans.canopy_transpiration_priestly = CanopyPr;  // mmol / m^2 / s

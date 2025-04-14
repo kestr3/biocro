@@ -22,7 +22,7 @@ string_vector c4_leaf_photosynthesis::get_inputs()
         "leafwidth",             // m
         "lowerT",                // deg. C
         "rh",                    // dimensionless
-        "RL",                    // micromol / m^2 / s
+        "RL0",                   // micromol / m^2 / s
         "StomataWS",             // dimensionless
         "temp",                  // deg. C
         "theta",                 // dimensionless
@@ -46,6 +46,7 @@ string_vector c4_leaf_photosynthesis::get_outputs()
         "leaf_temperature",  // deg. C
         "RHs",               // dimensionless from Pa / Pa
         "RH_canopy",         // dimensionless
+        "RL",                // micromol / m^2 / s
         "Rp",                // micromol / m^2 / s
         "TransR"             // mmol / m^2 / s
     };
@@ -62,7 +63,7 @@ void c4_leaf_photosynthesis::do_operation() const
         c4photoC(
             incident_ppfd, ambient_temperature, ambient_temperature,
             rh, vmax1, alpha1, kparm, theta, beta,
-            RL, b0, b1, Gs_min, StomataWS, Catm, atmospheric_pressure,
+            RL0, b0, b1, Gs_min, StomataWS, Catm, atmospheric_pressure,
             upperT, lowerT, gbw_guess)
             .Gs;  // mol / m^2 / s
 
@@ -86,7 +87,7 @@ void c4_leaf_photosynthesis::do_operation() const
         c4photoC(
             incident_ppfd, leaf_temperature, ambient_temperature,
             rh, vmax1, alpha1, kparm,
-            theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
+            theta, beta, RL0, b0, b1, Gs_min, StomataWS, Catm,
             atmospheric_pressure, upperT, lowerT,
             et.gbw_molecular);
 
@@ -102,6 +103,7 @@ void c4_leaf_photosynthesis::do_operation() const
     update(leaf_temperature_op, leaf_temperature);
     update(RHs_op, photo.RHs);
     update(RH_canopy_op, et.RH_canopy);
+    update(RL_op, photo.RL);
     update(Rp_op, photo.Rp);
     update(TransR_op, et.TransR);
 }

@@ -172,6 +172,7 @@ photosynthesis_outputs c3photoC(
         /* .GrossAssim = */ FvCB_res.Vc,            // micromol / m^2 / s
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
+        /* .RL = */ RL,                             // micromol / m^2 / s
         /* .Rp = */ FvCB_res.Vc * Gstar / Ci,       // micromol / m^2 / s
         /* .iterations = */ iterations              // not a physical quantity
     };

@@ -43,7 +43,7 @@ namespace standardBML
  * - ``'lowerT'`` for the low temperature cutoff for rubisco activity
  * - ``'Qp'`` for the incident quantum flux density of photosynthetically active radiation
  * - ``'rh'`` for the atmospheric relative humidity
- * - ``'RL'`` for the rate of non-photorespiratory CO2 release at 25 degrees C
+ * - ``'RL0'`` for the rate of non-photorespiratory CO2 release at 25 degrees C
  * - ``'StomataWS'`` for the water stress factor
  * - ``'temp'`` for the ambient temperature
  * - ``'theta'`` for the first quadratic mixing parameter
@@ -60,6 +60,7 @@ namespace standardBML
  * - ``'GrossAssim'`` for the gross CO2 assimilation rate
  * - ``'Gs'`` for the stomatal conductance for H2O
  * - ``'RHs'`` for the relative humidity at the leaf surface
+ * - ``'RL'`` for the rate of non-photorespiratory CO2 release
  * - ``'Rp'`` for the rate of photorespiration
  * - ``'iterations'`` for the number of iterations required for the convergence loop
  */
@@ -84,7 +85,7 @@ class c4_assimilation : public direct_module
           lowerT{get_input(input_quantities, "lowerT")},
           Qp{get_input(input_quantities, "Qp")},
           rh{get_input(input_quantities, "rh")},
-          RL{get_input(input_quantities, "RL")},
+          RL0{get_input(input_quantities, "RL0")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           Tambient{get_input(input_quantities, "temp")},
           theta{get_input(input_quantities, "theta")},
@@ -101,6 +102,7 @@ class c4_assimilation : public direct_module
           GrossAssim_op{get_op(output_quantities, "GrossAssim")},
           Gs_op{get_op(output_quantities, "Gs")},
           RHs_op{get_op(output_quantities, "RHs")},
+          RL_op{get_op(output_quantities, "RL")},
           Rp_op{get_op(output_quantities, "Rp")},
           iterations_op{get_op(output_quantities, "iterations")}
     {
@@ -123,7 +125,7 @@ class c4_assimilation : public direct_module
     double const& lowerT;
     double const& Qp;
     double const& rh;
-    double const& RL;
+    double const& RL0;
     double const& StomataWS;
     double const& Tambient;
     double const& theta;
@@ -140,6 +142,7 @@ class c4_assimilation : public direct_module
     double* GrossAssim_op;
     double* Gs_op;
     double* RHs_op;
+    double* RL_op;
     double* Rp_op;
     double* iterations_op;
 
@@ -162,7 +165,7 @@ string_vector c4_assimilation::get_inputs()
         "lowerT",                // degrees C
         "Qp",                    // micromol / m^2 / s
         "rh",                    // dimensionless
-        "RL",                    // micromol / m^2 / s
+        "RL0",                   // micromol / m^2 / s
         "StomataWS",             // dimensionless
         "temp",                  // degrees C
         "theta",                 // dimensionless
@@ -183,6 +186,7 @@ string_vector c4_assimilation::get_outputs()
         "GrossAssim",         // micromol / m^2 / s
         "Gs",                 // mol / m^2 / s
         "RHs",                // dimensionless from Pa / Pa
+        "RL",                 // micromol / m^2 / s
         "Rp",                 // micromol / m^2 / s
         "iterations"          // not a physical quantity
     };
@@ -200,7 +204,7 @@ void c4_assimilation::do_operation() const
         kparm,
         theta,
         beta,
-        RL,
+        RL0,
         b0,
         b1,
         Gs_min,
@@ -220,6 +224,7 @@ void c4_assimilation::do_operation() const
     update(GrossAssim_op, c4_results.GrossAssim);
     update(Gs_op, c4_results.Gs);
     update(RHs_op, c4_results.RHs);
+    update(RL_op, c4_results.RL);
     update(Rp_op, c4_results.Rp);
     update(iterations_op, c4_results.iterations);
 }

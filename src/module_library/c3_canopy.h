@@ -60,7 +60,7 @@ class c3_canopy : public direct_module
           phi_PSII_1{get_input(input_quantities, "phi_PSII_1")},
           phi_PSII_2{get_input(input_quantities, "phi_PSII_2")},
           rh{get_input(input_quantities, "rh")},
-          RL{get_input(input_quantities, "RL")},
+          RL0{get_input(input_quantities, "RL0")},
           RL_c{get_input(input_quantities, "RL_c")},
           RL_Ea{get_input(input_quantities, "RL_Ea")},
           solar{get_input(input_quantities, "solar")},
@@ -84,6 +84,7 @@ class c3_canopy : public direct_module
           canopy_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_assimilation_rate_CO2")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
           canopy_gross_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_gross_assimilation_rate_CO2")},
+          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate")},
           canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")},
           canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {
@@ -139,7 +140,7 @@ class c3_canopy : public direct_module
     double const& phi_PSII_1;
     double const& phi_PSII_2;
     double const& rh;
-    double const& RL;
+    double const& RL0;
     double const& RL_c;
     double const& RL_Ea;
     double const& solar;
@@ -163,6 +164,7 @@ class c3_canopy : public direct_module
     double* canopy_assimilation_rate_CO2_op;
     double* canopy_conductance_op;
     double* canopy_gross_assimilation_rate_CO2_op;
+    double* canopy_non_photorespiratory_CO2_release_rate_op;
     double* canopy_photorespiration_rate_CO2_op;
     double* canopy_transpiration_rate_op;
 

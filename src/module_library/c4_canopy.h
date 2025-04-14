@@ -56,7 +56,7 @@ class c4_canopy : public direct_module
           par_energy_content{get_input(input_quantities, "par_energy_content")},
           par_energy_fraction{get_input(input_quantities, "par_energy_fraction")},
           rh{get_input(input_quantities, "rh")},
-          RL{get_input(input_quantities, "RL")},
+          RL0{get_input(input_quantities, "RL0")},
           solar{get_input(input_quantities, "solar")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           temp{get_input(input_quantities, "temp")},
@@ -69,6 +69,7 @@ class c4_canopy : public direct_module
           canopy_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_assimilation_rate_CO2")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
           canopy_gross_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_gross_assimilation_rate_CO2")},
+          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate")},
           canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")},
           canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {
@@ -119,7 +120,7 @@ class c4_canopy : public direct_module
     double const& par_energy_content;
     double const& par_energy_fraction;
     double const& rh;
-    double const& RL;
+    double const& RL0;
     double const& solar;
     double const& StomataWS;
     double const& temp;
@@ -132,6 +133,7 @@ class c4_canopy : public direct_module
     double* canopy_assimilation_rate_CO2_op;
     double* canopy_conductance_op;
     double* canopy_gross_assimilation_rate_CO2_op;
+    double* canopy_non_photorespiratory_CO2_release_rate_op;
     double* canopy_photorespiration_rate_CO2_op;
     double* canopy_transpiration_rate_op;
 
@@ -182,7 +184,7 @@ string_vector c4_canopy::get_inputs()
         "par_energy_content",   // J / micromol
         "par_energy_fraction",  // dimensionless
         "rh",                   // dimensionless from Pa / Pa
-        "RL",                   // micromol / m^2 / s
+        "RL0",                  // micromol / m^2 / s
         "solar",                // micromol / m^2 / s
         "StomataWS",            // dimensionless
         "temp",                 // degrees C
@@ -196,11 +198,12 @@ string_vector c4_canopy::get_inputs()
 string_vector c4_canopy::get_outputs()
 {
     return {
-        "canopy_assimilation_rate_CO2",        // micromol CO2 / m^2 / s
-        "canopy_conductance",                  // mol / m^2 / s
-        "canopy_gross_assimilation_rate_CO2",  // micromol CO2 / m^2 / s
-        "canopy_photorespiration_rate_CO2",    // micromol / m^2 / s
-        "canopy_transpiration_rate"            // Mg / ha / hr
+        "canopy_assimilation_rate_CO2",                  // micromol / m^2 / s
+        "canopy_conductance",                            // mol / m^2 / s
+        "canopy_gross_assimilation_rate_CO2",            // micromol / m^2 / s
+        "canopy_non_photorespiratory_CO2_release_rate",  // micromol / m^2 / s
+        "canopy_photorespiration_rate_CO2",              // micromol / m^2 / s
+        "canopy_transpiration_rate"                      // Mg / ha / hr
     };
 }
 
@@ -250,7 +253,7 @@ void c4_canopy::do_operation() const
         par_energy_content,
         par_energy_fraction,
         rh,
-        RL,
+        RL0,
         solar,
         StomataWS,
         theta,
@@ -261,11 +264,12 @@ void c4_canopy::do_operation() const
         nlayers);
 
     // Update the parameter list
-    update(canopy_assimilation_rate_CO2_op, can_result.Assim);             // micromol / m^2 /s
-    update(canopy_conductance_op, can_result.canopy_conductance);          // mol / m^2 / s
-    update(canopy_gross_assimilation_rate_CO2_op, can_result.GrossAssim);  // micromol / m^2 /s
-    update(canopy_photorespiration_rate_CO2_op, can_result.Rp);            // micromol / m^2 /s
-    update(canopy_transpiration_rate_op, can_result.Trans);                // Mg / ha / hr
+    update(canopy_assimilation_rate_CO2_op, can_result.Assim);               // micromol / m^2 /s
+    update(canopy_conductance_op, can_result.canopy_conductance);            // mol / m^2 / s
+    update(canopy_gross_assimilation_rate_CO2_op, can_result.GrossAssim);    // micromol / m^2 /s
+    update(canopy_non_photorespiratory_CO2_release_rate_op, can_result.RL);  // micromol / m^2 / s
+    update(canopy_photorespiration_rate_CO2_op, can_result.Rp);              // micromol / m^2 /s
+    update(canopy_transpiration_rate_op, can_result.Trans);                  // Mg / ha / hr
 }
 }  // namespace standardBML
 #endif

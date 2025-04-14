@@ -50,7 +50,7 @@ class c3_leaf_photosynthesis : public direct_module
           phi_PSII_1{get_input(input_quantities, "phi_PSII_1")},
           phi_PSII_2{get_input(input_quantities, "phi_PSII_2")},
           rh{get_input(input_quantities, "rh")},
-          RL{get_input(input_quantities, "RL")},
+          RL0{get_input(input_quantities, "RL0")},
           RL_c{get_input(input_quantities, "RL_c")},
           RL_Ea{get_input(input_quantities, "RL_Ea")},
           StomataWS{get_input(input_quantities, "StomataWS")},
@@ -79,6 +79,7 @@ class c3_leaf_photosynthesis : public direct_module
           leaf_temperature_op{get_op(output_quantities, "leaf_temperature")},
           RHs_op{get_op(output_quantities, "RHs")},
           RH_canopy_op{get_op(output_quantities, "RH_canopy")},
+          RL_op{get_op(output_quantities, "RL")},
           Rp_op{get_op(output_quantities, "Rp")},
           TransR_op{get_op(output_quantities, "TransR")}
     {
@@ -118,7 +119,7 @@ class c3_leaf_photosynthesis : public direct_module
     double const& phi_PSII_1;
     double const& phi_PSII_2;
     double const& rh;
-    double const& RL;
+    double const& RL0;
     double const& RL_c;
     double const& RL_Ea;
     double const& StomataWS;
@@ -147,6 +148,7 @@ class c3_leaf_photosynthesis : public direct_module
     double* leaf_temperature_op;
     double* RHs_op;
     double* RH_canopy_op;
+    double* RL_op;
     double* Rp_op;
     double* TransR_op;
 

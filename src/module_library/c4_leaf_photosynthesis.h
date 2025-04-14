@@ -37,7 +37,7 @@ class c4_leaf_photosynthesis : public direct_module
           leafwidth{get_input(input_quantities, "leafwidth")},
           lowerT{get_input(input_quantities, "lowerT")},
           rh{get_input(input_quantities, "rh")},
-          RL{get_input(input_quantities, "RL")},
+          RL0{get_input(input_quantities, "RL0")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           theta{get_input(input_quantities, "theta")},
           upperT{get_input(input_quantities, "upperT")},
@@ -56,6 +56,7 @@ class c4_leaf_photosynthesis : public direct_module
           leaf_temperature_op{get_op(output_quantities, "leaf_temperature")},
           RHs_op{get_op(output_quantities, "RHs")},
           RH_canopy_op{get_op(output_quantities, "RH_canopy")},
+          RL_op{get_op(output_quantities, "RL")},
           Rp_op{get_op(output_quantities, "Rp")},
           TransR_op{get_op(output_quantities, "TransR")}
     {
@@ -82,7 +83,7 @@ class c4_leaf_photosynthesis : public direct_module
     double const& leafwidth;
     double const& lowerT;
     double const& rh;
-    double const& RL;
+    double const& RL0;
     double const& StomataWS;
     double const& theta;
     double const& upperT;
@@ -101,6 +102,7 @@ class c4_leaf_photosynthesis : public direct_module
     double* leaf_temperature_op;
     double* RHs_op;
     double* RH_canopy_op;
+    double* RL_op;
     double* Rp_op;
     double* TransR_op;
 

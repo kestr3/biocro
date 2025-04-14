@@ -27,7 +27,7 @@ photosynthesis_outputs c4photoC(
     double const kparm,                 // mol / m^2 / s
     double const theta,                 // dimensionless
     double const beta,                  // dimensionless
-    double const RL,                    // micromol / m^2 / s
+    double const RL0,                   // micromol / m^2 / s
     double const bb0,                   // mol / m^2 / s
     double const bb1,                   // dimensionless from [mol / m^2 / s] / [mol / m^2 / s]
     double const Gs_min,                // mol / m^2 / s
@@ -51,9 +51,9 @@ photosynthesis_outputs c4photoC(
     double const VT = Vtn / Vtd;                                                                                     // micromol / m^2 / s
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double const Rtn = RL * pow(2, (leaf_temperature - 25) / 10);  // micromol / m^2 / s
-    double const Rtd = 1 + exp(1.3 * (leaf_temperature - 55));     // dimensionless
-    double const RT = Rtn / Rtd;                                   // micromol / m^2 / s
+    double const Rtn = RL0 * pow(2, (leaf_temperature - 25) / 10);  // micromol / m^2 / s
+    double const Rtd = 1 + exp(1.3 * (leaf_temperature - 55));      // dimensionless
+    double const RT = Rtn / Rtd;                                    // micromol / m^2 / s
 
     // Collatz 1992. Appendix B. Quadratic coefficients from Equation 2B.
     double const b0 = VT * alpha * Qp;
@@ -159,6 +159,7 @@ photosynthesis_outputs c4photoC(
         /* .GrossAssim = */ Assim + RT,             // micromol / m^2 / s
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
+        /* .RL = */ RT,                             // micromol / m^2 / s
         /* .Rp = */ 0,                              // micromol / m^2 / s
         /* .iterations = */ iterations              // not a physical quantity
     };
