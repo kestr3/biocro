@@ -117,7 +117,7 @@ canopy_photosynthesis_outputs c3CanAC(
         // energy balance to get a better temperature estimate using that value
         // of stomatal conductance. Get the final estimate of stomatal
         // conductance using the new value of the leaf temperature.
-        double iabs_dir = light_profile.sunlit_absorbed_ppfd[current_layer];    // micromole / m^2 / s
+        double iabs_dir = light_profile.sunlit_absorbed_ppfd[current_layer];    // micromol / m^2 / s
         double j_dir = light_profile.sunlit_absorbed_shortwave[current_layer];  // J / m^2 / s
         double pLeafsun = light_profile.sunlit_fraction[current_layer];         // dimensionless
         double Leafsun = LAIc * pLeafsun;                                       // dimensionless
@@ -159,7 +159,7 @@ canopy_photosynthesis_outputs c3CanAC(
         // energy balance to get a better temperature estimate using that value
         // of stomatal conductance. Get the final estimate of stomatal
         // conductance using the new value of the leaf temperature.
-        double iabs_diff = light_profile.shaded_absorbed_ppfd[current_layer];    // micromole / m^2 /s
+        double iabs_diff = light_profile.shaded_absorbed_ppfd[current_layer];    // micromol / m^2 /s
         double j_diff = light_profile.shaded_absorbed_shortwave[current_layer];  // J / m^2 / s
         double pLeafshade = light_profile.shaded_fraction[current_layer];        // dimensionless
         double Leafshade = LAIc * pLeafshade;                                    // dimensionless

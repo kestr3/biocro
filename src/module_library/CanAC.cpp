@@ -56,8 +56,8 @@ canopy_photosynthesis_outputs CanAC(
 
     // q_dir: flux through a plane perpendicular to the rays of the sun
     // q_diff: flux through any surface
-    double q_dir = light_model.direct_fraction * solarR;    // micromole / m^2 / s
-    double q_diff = light_model.diffuse_fraction * solarR;  // micromole / m^2 / s
+    double q_dir = light_model.direct_fraction * solarR;    // micromol / m^2 / s
+    double q_diff = light_model.diffuse_fraction * solarR;  // micromol / m^2 / s
 
     // Here we set `heightf = 1`. The value used for `heightf` does not matter,
     // since the canopy height is not used anywhere in this function.
@@ -122,7 +122,7 @@ canopy_photosynthesis_outputs CanAC(
         // energy balance to get a better temperature estimate using that value
         // of stomatal conductance. Get the final estimate of stomatal
         // conductance using the new value of the leaf temperature.
-        double i_dir = light_profile.sunlit_incident_ppfd[current_layer];       // micromole / m^2 / s
+        double i_dir = light_profile.sunlit_incident_ppfd[current_layer];       // micromol / m^2 / s
         double j_dir = light_profile.sunlit_absorbed_shortwave[current_layer];  // J / m^2 / s
         double pLeafsun = light_profile.sunlit_fraction[current_layer];         // dimensionless. Fraction of LAI that is sunlit.
         double Leafsun = LAIc * pLeafsun;                                       // dimensionless
@@ -162,7 +162,7 @@ canopy_photosynthesis_outputs CanAC(
         // energy balance to get a better temperature estimate using that value
         // of stomatal conductance. Get the final estimate of stomatal
         // conductance using the new value of the leaf temperature.
-        double i_diff = light_profile.shaded_incident_ppfd[current_layer];       // micromole / m^2 / s
+        double i_diff = light_profile.shaded_incident_ppfd[current_layer];       // micromol / m^2 / s
         double j_diff = light_profile.shaded_absorbed_shortwave[current_layer];  // J / m^2 / s
         double pLeafshade = light_profile.shaded_fraction[current_layer];        // dimensionless. Fraction of LAI that is shaded.
         double Leafshade = LAIc * pLeafshade;                                    // dimensionless

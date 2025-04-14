@@ -125,7 +125,7 @@ soybean <- list(
 
         # incident_shortwave_from_ground_par module
         par_energy_fraction         = 0.5,
-        par_energy_content          = 0.219,       # W * s / micromole. Also J / micromole. Conversion
+        par_energy_content          = 0.219,       # W * s / micromol. Also J / micromol. Conversion
                                                    # from photon flux density to to irradiance for
                                                    # PAR. Equals 1/4.57. Plant Growth Chamber
                                                    # Handbook. CHAPTER 1 – RADIATION– John C. Sager and

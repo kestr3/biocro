@@ -46,14 +46,14 @@ photosynthesis_outputs c4photoC(
     double const kT = kparm * pow(k_Q10, (leaf_temperature - 25.0) / 10.0);  // dimensionless
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double const Vtn = vmax * pow(2, (leaf_temperature - 25.0) / 10.0);                                              // micromole / m^2 / s
+    double const Vtn = vmax * pow(2, (leaf_temperature - 25.0) / 10.0);                                              // micromol / m^2 / s
     double const Vtd = (1 + exp(0.3 * (lowerT - leaf_temperature))) * (1 + exp(0.3 * (leaf_temperature - upperT)));  // dimensionless
-    double const VT = Vtn / Vtd;                                                                                     // micromole / m^2 / s
+    double const VT = Vtn / Vtd;                                                                                     // micromol / m^2 / s
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double const Rtn = RL * pow(2, (leaf_temperature - 25) / 10);  // micromole / m^2 / s
+    double const Rtn = RL * pow(2, (leaf_temperature - 25) / 10);  // micromol / m^2 / s
     double const Rtd = 1 + exp(1.3 * (leaf_temperature - 55));     // dimensionless
-    double const RT = Rtn / Rtd;                                   // micromole / m^2 / s
+    double const RT = Rtn / Rtd;                                   // micromol / m^2 / s
 
     // Collatz 1992. Appendix B. Quadratic coefficients from Equation 2B.
     double const b0 = VT * alpha * Qp;
@@ -71,7 +71,7 @@ photosynthesis_outputs c4photoC(
     // Function to compute the biochemical assimilation rate.
     auto collatz_assim = [=](double const InterCellularCO2) {
         // Collatz 1992. Appendix B. Quadratic coefficients from Equation 3B.
-        double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / m^2 / s
+        double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromol / m^2 / s
         double a = beta;
         double b = -(M + kT_IC_P);
         double c = M * kT_IC_P;

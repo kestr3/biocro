@@ -609,7 +609,7 @@ absorbed_ppfd <- incident_ppfd *
         cmi_soybean$parameters$leaf_transmittance_par)
 
 # Determine corresponding incident PAR values (J / m^2 / s) using the average
-# energy per micromole of photosynthetically active photons in sunlight
+# energy per micromol of photosynthetically active photons in sunlight
 incident_par <- incident_ppfd * cmi_soybean$parameters$par_energy_content
 
 # Determine the corresponding incident NIR values using the fraction of

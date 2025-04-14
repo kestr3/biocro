@@ -6,9 +6,9 @@ struct collatz_result {
     double gross_assimilation;
 };
 
-struct collatz_result collatz_photo(double Qp,  // micromole / m^2 / s
+struct collatz_result collatz_photo(double Qp,  // micromol / m^2 / s
                             double leaf_temperature,  // degrees C
-                            double vmax,  // micromole / m^2 / s
+                            double vmax,  // micromol / m^2 / s
                             double alpha,  // mol / mol
                             double kparm,  // mol / m%2 / s
                             double theta,
@@ -17,7 +17,7 @@ struct collatz_result collatz_photo(double Qp,  // micromole / m^2 / s
                             double upperT,
                             double lowerT,
                             double k_Q10, // dimensionless
-                            double intercellular_co2_molar_fraction  // micromole / mol
+                            double intercellular_co2_molar_fraction  // micromol / mol
                             );
 
 #endif
