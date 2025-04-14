@@ -71,7 +71,7 @@ class partitioning_growth_calculator : public direct_module
         : direct_module{},
 
           // Get pointers to input quantities
-          canopy_assimilation_rate{get_input(input_quantities, "canopy_assimilation_rate")},
+          canopy_assim{get_input(input_quantities, "canopy_assimilation_rate")},
           grc_leaf{get_input(input_quantities, "grc_leaf")},
           grc_root{get_input(input_quantities, "grc_root")},
           kGrain{get_input(input_quantities, "kGrain")},
@@ -96,7 +96,7 @@ class partitioning_growth_calculator : public direct_module
 
    private:
     // Pointers to input quantities
-    const double& canopy_assimilation_rate;
+    const double& canopy_assim;
     const double& grc_leaf;
     const double& grc_root;
     const double& kGrain;
@@ -147,50 +147,30 @@ string_vector partitioning_growth_calculator::get_outputs()
 
 void partitioning_growth_calculator::do_operation() const
 {
-    double net_assimilation_rate_grain{0.0};
-    double net_assimilation_rate_leaf{0.0};
-    double net_assimilation_rate_rhizome{0.0};
-    double net_assimilation_rate_root{0.0};
-    double net_assimilation_rate_stem{0.0};
+    // Calculate the rate of new leaf production, accounting for water stress
+    // and additional respiratory costs due to growth (Mg / ha / hr)
+    double const net_assimilation_rate_leaf{
+        kLeaf > 0 ? resp(canopy_assim * kLeaf * LeafWS, grc_leaf, temp) : 0};
 
-    // Calculate the rate of new leaf production
-    if (kLeaf > 0) {
-        net_assimilation_rate_leaf = canopy_assimilation_rate * kLeaf * LeafWS;
-        net_assimilation_rate_leaf = resp(net_assimilation_rate_leaf, grc_leaf, temp);
-    } else {
-        net_assimilation_rate_leaf = 0.0;
-    }
+    // Calculate the rate of new stem production, accounting for respiratory
+    // costs (Mg / ha / hr)
+    double const net_assimilation_rate_stem{
+        kStem > 0 ? resp(canopy_assim * kStem, grc_leaf, temp) : 0};
 
-    // Calculate the rate of new stem production
-    if (kStem >= 0) {
-        net_assimilation_rate_stem = canopy_assimilation_rate * kStem;
-        net_assimilation_rate_stem = resp(net_assimilation_rate_stem, grc_leaf, temp);
-    } else {
-        net_assimilation_rate_stem = 0.0;
-    }
+    // Calculate the rate of new root production, accounting for respiratory
+    // costs (Mg / ha / hr)
+    double const net_assimilation_rate_root{
+        kRoot > 0 ? resp(canopy_assim * kRoot, grc_root, temp) : 0};
 
-    // Calculate the rate of new root production
-    if (kRoot > 0) {
-        net_assimilation_rate_root = canopy_assimilation_rate * kRoot;
-        net_assimilation_rate_root = resp(net_assimilation_rate_root, grc_root, temp);
-    } else {
-        net_assimilation_rate_root = 0.0;
-    }
+    // Calculate the rate of new rhizome production, accounting for respiratory
+    // costs (Mg / ha / hr)
+    double const net_assimilation_rate_rhizome{
+        kRhizome > 0 ? resp(canopy_assim * kRhizome, grc_root, temp) : 0};
 
-    // Calculate the rate of new rhizome production
-    if (kRhizome > 0) {
-        net_assimilation_rate_rhizome = canopy_assimilation_rate * kRhizome;
-        net_assimilation_rate_rhizome = resp(net_assimilation_rate_rhizome, grc_root, temp);
-    } else {
-        net_assimilation_rate_rhizome = 0.0;
-    }
-
-    // Calculate the rate of grain production
-    if (kGrain > 0 && canopy_assimilation_rate > 0) {
-        net_assimilation_rate_grain = canopy_assimilation_rate * kGrain;
-    } else {
-        net_assimilation_rate_grain = 0.0;
-    }
+    // Calculate the rate of new grain production without any respiratory costs
+    // (Mg / ha / hr)
+    double const net_assimilation_rate_grain{
+        kGrain > 0 ? canopy_assim * kGrain : 0};
 
     // Update the output quantity list
     update(net_assimilation_rate_grain_op, net_assimilation_rate_grain);
