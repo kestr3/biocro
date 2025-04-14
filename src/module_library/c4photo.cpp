@@ -27,7 +27,7 @@ photosynthesis_outputs c4photoC(
     double const kparm,                 // mol / m^2 / s
     double const theta,                 // dimensionless
     double const beta,                  // dimensionless
-    double const Rd,                    // micromol / m^2 / s
+    double const RL,                    // micromol / m^2 / s
     double const bb0,                   // mol / m^2 / s
     double const bb1,                   // dimensionless from [mol / m^2 / s] / [mol / m^2 / s]
     double const Gs_min,                // mol / m^2 / s
@@ -51,7 +51,7 @@ photosynthesis_outputs c4photoC(
     double const VT = Vtn / Vtd;                                                                                     // micromole / m^2 / s
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double const Rtn = Rd * pow(2, (leaf_temperature - 25) / 10);  // micromole / m^2 / s
+    double const Rtn = RL * pow(2, (leaf_temperature - 25) / 10);  // micromole / m^2 / s
     double const Rtd = 1 + exp(1.3 * (leaf_temperature - 55));     // dimensionless
     double const RT = Rtn / Rtd;                                   // micromole / m^2 / s
 

@@ -41,8 +41,8 @@ canopy_photosynthesis_outputs c3CanAC(
     double o2,                   // mmol / mol
     double par_energy_content,   // J / micromol
     double par_energy_fraction,  // dimensionless
-    double Rd,                   // micromol / m^2 / s
     double RH,                   // Pa / Pa
+    double RL,                   // micromol / m^2 / s
     double solarR,               // micromol / m^2 / s
     double StomataWS,            // dimensionless
     double tpu_rate_max,         // micromol / m^2 / s
@@ -126,7 +126,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_dir, ambient_temperature, ambient_temperature,
                 RH, vmax1, Jmax,
-                tpu_rate_max, Rd, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, gbw_guess)
@@ -149,7 +149,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_dir, leaf_temperature_dir, ambient_temperature,
                 RH, vmax1, Jmax,
-                tpu_rate_max, Rd, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, et_direct.gbw_molecular);
@@ -168,7 +168,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_diff, ambient_temperature, ambient_temperature,
                 RH, vmax1, Jmax,
-                tpu_rate_max, Rd, b0, b1, Gs_min, Catm, atmospheric_pressure,
+                tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure,
                 o2, StomataWS,
                 electrons_per_carboxylation, electrons_per_oxygenation,
                 beta_PSII, gbw_guess)
@@ -191,7 +191,7 @@ canopy_photosynthesis_outputs c3CanAC(
             c3photoC(
                 tr_param, iabs_diff, leaf_temperature_Idiffuse, ambient_temperature,
                 RH, vmax1,
-                Jmax, tpu_rate_max, Rd, b0, b1, Gs_min, Catm,
+                Jmax, tpu_rate_max, RL, b0, b1, Gs_min, Catm,
                 atmospheric_pressure, o2, StomataWS,
                 electrons_per_carboxylation,
                 electrons_per_oxygenation, beta_PSII,

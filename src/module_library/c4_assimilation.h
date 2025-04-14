@@ -42,8 +42,8 @@ namespace standardBML
  * - ``'kparm'`` for the initial slope of the photosynthetic CO2 response
  * - ``'lowerT'`` for the low temperature cutoff for rubisco activity
  * - ``'Qp'`` for the incident quantum flux density of photosynthetically active radiation
- * - ``'Rd'`` for the respiration rate at 25 degrees C
  * - ``'rh'`` for the atmospheric relative humidity
+ * - ``'RL'`` for the rate of non-photorespiratory CO2 release at 25 degrees C
  * - ``'StomataWS'`` for the water stress factor
  * - ``'temp'`` for the ambient temperature
  * - ``'theta'`` for the first quadratic mixing parameter
@@ -83,8 +83,8 @@ class c4_assimilation : public direct_module
           kparm{get_input(input_quantities, "kparm")},
           lowerT{get_input(input_quantities, "lowerT")},
           Qp{get_input(input_quantities, "Qp")},
-          Rd{get_input(input_quantities, "Rd")},
           rh{get_input(input_quantities, "rh")},
+          RL{get_input(input_quantities, "RL")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           Tambient{get_input(input_quantities, "temp")},
           theta{get_input(input_quantities, "theta")},
@@ -122,8 +122,8 @@ class c4_assimilation : public direct_module
     double const& kparm;
     double const& lowerT;
     double const& Qp;
-    double const& Rd;
     double const& rh;
+    double const& RL;
     double const& StomataWS;
     double const& Tambient;
     double const& theta;
@@ -161,8 +161,8 @@ string_vector c4_assimilation::get_inputs()
         "kparm",                 // mol / mol
         "lowerT",                // degrees C
         "Qp",                    // micromol / m^2 / s
-        "Rd",                    // micromol / m^2 / s
         "rh",                    // dimensionless
+        "RL",                    // micromol / m^2 / s
         "StomataWS",             // dimensionless
         "temp",                  // degrees C
         "theta",                 // dimensionless
@@ -200,7 +200,7 @@ void c4_assimilation::do_operation() const
         kparm,
         theta,
         beta,
-        Rd,
+        RL,
         b0,
         b1,
         Gs_min,

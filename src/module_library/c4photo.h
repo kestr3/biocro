@@ -13,7 +13,7 @@ photosynthesis_outputs c4photoC(
     double const kparm,
     double const theta,
     double const beta,
-    double const Rd,
+    double const RL,
     double const bb0,
     double const bb1,
     double const Gs_min,

@@ -52,10 +52,10 @@ string_vector c3_canopy::get_inputs()
         "phi_PSII_0",           // dimensionless
         "phi_PSII_1",           // (degrees C)^(-1)
         "phi_PSII_2",           // (degrees C)^(-2)
-        "Rd",                   // micromol / m^2 / s
-        "Rd_c",                 // dimensionless
-        "Rd_Ea",                // J / mol
         "rh",                   // dimensionless
+        "RL",                   // micromol / m^2 / s
+        "RL_c",                 // dimensionless
+        "RL_Ea",                // J / mol
         "solar",                // micromol / m^2 / s
         "StomataWS",            // dimensionless
         "temp",                 // degrees C
@@ -101,8 +101,8 @@ void c3_canopy::do_operation() const
         phi_PSII_0,
         phi_PSII_1,
         phi_PSII_2,
-        Rd_c,
-        Rd_Ea,
+        RL_c,
+        RL_Ea,
         theta_0,
         theta_1,
         theta_2,
@@ -147,8 +147,8 @@ void c3_canopy::do_operation() const
         O2,
         par_energy_content,
         par_energy_fraction,
-        Rd,
         rh,
+        RL,
         solar,
         StomataWS,
         tpu_rate_max,

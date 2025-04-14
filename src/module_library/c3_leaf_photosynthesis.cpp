@@ -35,10 +35,10 @@ string_vector c3_leaf_photosynthesis::get_inputs()
         "phi_PSII_0",                   // dimensionless
         "phi_PSII_1",                   // (degrees C)^(-1)
         "phi_PSII_2",                   // (degrees C)^(-2)
-        "Rd",                           // micromol / m^2 / s
-        "Rd_c",                         // dimensionless
-        "Rd_Ea",                        // J / mol
         "rh",                           // dimensionless
+        "RL",                           // micromol / m^2 / s
+        "RL_c",                         // dimensionless
+        "RL_Ea",                        // J / mol
         "StomataWS",                    // dimensionless
         "temp",                         // degrees C
         "theta_0",                      // dimensionless
@@ -90,8 +90,8 @@ void c3_leaf_photosynthesis::do_operation() const
         phi_PSII_0,
         phi_PSII_1,
         phi_PSII_2,
-        Rd_c,
-        Rd_Ea,
+        RL_c,
+        RL_Ea,
         theta_0,
         theta_1,
         theta_2,
@@ -110,7 +110,7 @@ void c3_leaf_photosynthesis::do_operation() const
     double const initial_stomatal_conductance =
         c3photoC(
             tr_param, absorbed_ppfd, ambient_temperature, ambient_temperature,
-            rh, vmax1, jmax, tpu_rate_max, Rd, b0,
+            rh, vmax1, jmax, tpu_rate_max, RL, b0,
             b1, Gs_min, Catm, atmospheric_pressure, O2, StomataWS,
             electrons_per_carboxylation,
             electrons_per_oxygenation, beta_PSII, gbw_guess)
@@ -137,7 +137,7 @@ void c3_leaf_photosynthesis::do_operation() const
         c3photoC(
             tr_param, absorbed_ppfd, leaf_temperature, ambient_temperature,
             rh, vmax1, jmax,
-            tpu_rate_max, Rd, b0, b1, Gs_min, Catm, atmospheric_pressure, O2,
+            tpu_rate_max, RL, b0, b1, Gs_min, Catm, atmospheric_pressure, O2,
             StomataWS,
             electrons_per_carboxylation, electrons_per_oxygenation, beta_PSII,
             et.gbw_molecular);

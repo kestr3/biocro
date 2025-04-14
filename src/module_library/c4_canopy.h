@@ -55,8 +55,8 @@ class c4_canopy : public direct_module
           nvmaxb1{get_input(input_quantities, "nvmaxb1")},
           par_energy_content{get_input(input_quantities, "par_energy_content")},
           par_energy_fraction{get_input(input_quantities, "par_energy_fraction")},
-          Rd{get_input(input_quantities, "Rd")},
           rh{get_input(input_quantities, "rh")},
+          RL{get_input(input_quantities, "RL")},
           solar{get_input(input_quantities, "solar")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           temp{get_input(input_quantities, "temp")},
@@ -118,8 +118,8 @@ class c4_canopy : public direct_module
     double const& nvmaxb1;
     double const& par_energy_content;
     double const& par_energy_fraction;
-    double const& Rd;
     double const& rh;
+    double const& RL;
     double const& solar;
     double const& StomataWS;
     double const& temp;
@@ -181,8 +181,8 @@ string_vector c4_canopy::get_inputs()
         "nvmaxb1",
         "par_energy_content",   // J / micromol
         "par_energy_fraction",  // dimensionless
-        "Rd",                   // micromol / m^2 / s
         "rh",                   // dimensionless from Pa / Pa
+        "RL",                   // micromol / m^2 / s
         "solar",                // micromol / m^2 / s
         "StomataWS",            // dimensionless
         "temp",                 // degrees C
@@ -249,8 +249,8 @@ void c4_canopy::do_operation() const
         lowerT,
         par_energy_content,
         par_energy_fraction,
-        Rd,
         rh,
+        RL,
         solar,
         StomataWS,
         theta,

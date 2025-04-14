@@ -27,9 +27,9 @@ test_that("c3photoC is sensitive to changes in vcmax", {
         phi_PSII_1 = 0.022,
         phi_PSII_2 = -3.4e-4,
         Qabs = 1500,
-        Rd = 1.1,
-        Rd_c = 18.72,
-        Rd_Ea = 46.39e3,
+        RL = 1.1,
+        RL_c = 18.72,
+        RL_Ea = 46.39e3,
         rh = 0.7,
         StomataWS = 1,
         temp = 10,
@@ -126,7 +126,7 @@ test_that('c3photoC produces self-consistent outputs', {
             Kc = c3_parameters_res$Kc,
             Ko = c3_parameters_res$Ko,
             Oi = Oi,
-            Rd = c3_parameters_res$Rd_norm * soybean$parameters$Rd,
+            RL = c3_parameters_res$RL_norm * soybean$parameters$RL,
             TPU = c3_parameters_res$Tp_norm * soybean$parameters$tpu_rate_max,
             Vcmax = c3_parameters_res$Vcmax_norm * soybean$parameters$vmax1,
             electrons_per_carboxylation = c3photo_res$electrons_per_carboxylation,
@@ -147,7 +147,7 @@ test_that('c3photoC produces self-consistent outputs', {
     )
 
     expect_equal(
-        fvcb_res$Vc - fvcb_res$Rd - fvcb_res$An,
+        fvcb_res$Vc - fvcb_res$RL - fvcb_res$An,
         c3photo_res$Rp
     )
 

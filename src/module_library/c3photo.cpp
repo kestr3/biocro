@@ -30,7 +30,7 @@ photosynthesis_outputs c3photoC(
     double const Vcmax0,                       // micromol / m^2 / s
     double const Jmax0,                        // micromol / m^2 / s
     double const TPU_rate_max,                 // micromol / m^2 / s
-    double const Rd0,                          // micromol / m^2 / s
+    double const RL0,                          // micromol / m^2 / s
     double const b0,                           // mol / m^2 / s
     double const b1,                           // dimensionless
     double const Gs_min,                       // mol / m^2 / s
@@ -52,7 +52,7 @@ photosynthesis_outputs c3photoC(
     double const Jmax = Jmax0 * c3_param.Jmax_norm;          // micromol / m^2 / s
     double const Kc = c3_param.Kc;                           // micromol / mol
     double const Ko = c3_param.Ko;                           // mmol / mol
-    double const Rd = Rd0 * c3_param.Rd_norm;                // micromol / m^2 / s
+    double const RL = RL0 * c3_param.RL_norm;                // micromol / m^2 / s
     double const theta = c3_param.theta;                     // dimensionless
     double const TPU = TPU_rate_max * c3_param.Tp_norm;      // micromol / m^2 / s
     double const Vcmax = Vcmax0 * c3_param.Vcmax_norm;       // micromol / m^2 / s
@@ -127,7 +127,7 @@ photosynthesis_outputs c3photoC(
 
         // Using Ci compute the assim under the FvCB
         FvCB_res = FvCB_assim(
-            Ci, Gstar, J, Kc, Ko, Oi, Rd, TPU, Vcmax, alpha_TPU,
+            Ci, Gstar, J, Kc, Ko, Oi, RL, TPU, Vcmax, alpha_TPU,
             electrons_per_carboxylation,
             electrons_per_oxygenation);
 
@@ -139,13 +139,13 @@ photosynthesis_outputs c3photoC(
     // Ci = infinity (neglecting TPU). The real rate is almost always between
     // these two guesses.
     double const assim_guess_0 = std::max(
-        -Gstar * Vcmax / (Kc * (1 + Oi / Ko)) - Rd,  // The value of Ac when Ci = 0
-        -J / (2.0 * electrons_per_oxygenation) - Rd  // The value of Aj when Ci = 0
+        -Gstar * Vcmax / (Kc * (1 + Oi / Ko)) - RL,  // The value of Ac when Ci = 0
+        -J / (2.0 * electrons_per_oxygenation) - RL  // The value of Aj when Ci = 0
     );                                               // micromol / m^2 / s
 
     double const assim_guess_1 = std::min({
-        Vcmax - Rd,                            // The maximum value of Ac, which occurs at Ci = infinity
-        J / electrons_per_carboxylation - Rd,  // The maximum value of Aj, which occurs at Ci = infinity
+        Vcmax - RL,                            // The maximum value of Ac, which occurs at Ci = infinity
+        J / electrons_per_carboxylation - RL,  // The maximum value of Aj, which occurs at Ci = infinity
         Ca * gbw / dr_boundary                 // The maximum conductance-limited An, which occurs for gsw = infinity
     });                                        // micromol / m^2 / s
 

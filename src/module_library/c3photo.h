@@ -13,7 +13,7 @@ photosynthesis_outputs c3photoC(
     double const Vcmax0,
     double const Jmax0,
     double const TPU_rate_max,
-    double const Rd0,
+    double const RL0,
     double const bb0,
     double const bb1,
     double const Gs_min,

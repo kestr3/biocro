@@ -137,13 +137,13 @@ willow <- list(
         phi_PSII_0                   = 0.352,    # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         phi_PSII_1                   = 0.022,    # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         phi_PSII_2                   = -3.4e-4,  # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
-        Rd                           = 1.1,
-        Rd_c                         = 18.72,    # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
-        Rd_Ea                        = 46.39e3,  # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
         remobilization_fraction      = 0.6,
         retrans                      = 0.9,
         retrans_rhizome              = 1.0,
         rfl                          = 0.2,
+        RL                           = 1.1,
+        RL_c                         = 18.72,    # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
+        RL_Ea                        = 46.39e3,  # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
         rsdf                         = 0.44,
         rsec                         = 0.2,
         seneLeaf                     = 1600,

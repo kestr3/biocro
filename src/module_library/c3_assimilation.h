@@ -43,8 +43,8 @@ namespace standardBML
  * - ``'jmax'`` for the electron transport rate
  * - ``'O2'`` for the atmospheric O2 concentration
  * - ``'Qabs'`` for the absorbed quantum flux density of photosynthetically active radiation
- * - ``'Rd'`` for the respiration rate at 25 degrees C
  * - ``'rh'`` for the atmospheric relative humidity
+ * - ``'RL'`` for the rate of non-photorespiratory CO2 release at 25 degrees C
  * - ``'StomataWS'`` for the water stress factor
  * - ``'temp'`` for the ambient temperature
  * - ``'theta'`` for the ???
@@ -96,10 +96,10 @@ class c3_assimilation : public direct_module
           phi_PSII_1{get_input(input_quantities, "phi_PSII_1")},
           phi_PSII_2{get_input(input_quantities, "phi_PSII_2")},
           Qabs{get_input(input_quantities, "Qabs")},
-          Rd{get_input(input_quantities, "Rd")},
-          Rd_c{get_input(input_quantities, "Rd_c")},
-          Rd_Ea{get_input(input_quantities, "Rd_Ea")},
           rh{get_input(input_quantities, "rh")},
+          RL{get_input(input_quantities, "RL")},
+          RL_c{get_input(input_quantities, "RL_c")},
+          RL_Ea{get_input(input_quantities, "RL_Ea")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           Tambient{get_input(input_quantities, "temp")},
           theta_0{get_input(input_quantities, "theta_0")},
@@ -157,10 +157,10 @@ class c3_assimilation : public direct_module
     double const& phi_PSII_1;
     double const& phi_PSII_2;
     double const& Qabs;
-    double const& Rd;
-    double const& Rd_c;
-    double const& Rd_Ea;
     double const& rh;
+    double const& RL;
+    double const& RL_c;
+    double const& RL_Ea;
     double const& StomataWS;
     double const& Tambient;
     double const& theta_0;
@@ -218,10 +218,10 @@ string_vector c3_assimilation::get_inputs()
         "phi_PSII_1",                   // (degrees C)^(-1)
         "phi_PSII_2",                   // (degrees C)^(-2)
         "Qabs",                         // micromol / m^2 / s
-        "Rd",                           // micromol / m^2 / s
-        "Rd_c",                         // dimensionless
-        "Rd_Ea",                        // J / mol
         "rh",                           // dimensionless
+        "RL",                           // micromol / m^2 / s
+        "RL_c",                         // dimensionless
+        "RL_Ea",                        // J / mol
         "StomataWS",                    // dimensionless
         "temp",                         // degrees C
         "theta_0",                      // dimensionless
@@ -270,8 +270,8 @@ void c3_assimilation::do_operation() const
         phi_PSII_0,
         phi_PSII_1,
         phi_PSII_2,
-        Rd_c,
-        Rd_Ea,
+        RL_c,
+        RL_Ea,
         theta_0,
         theta_1,
         theta_2,
@@ -291,7 +291,7 @@ void c3_assimilation::do_operation() const
         vmax1,
         jmax,
         tpu_rate_max,
-        Rd,
+        RL,
         b0,
         b1,
         Gs_min,

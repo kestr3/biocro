@@ -166,8 +166,8 @@ soybean <- list(
         phi_PSII_0 = 0.352,       # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         phi_PSII_1 = 0.022,       # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         phi_PSII_2 = -3.4e-4,     # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
-        Rd_c       = 18.72,       # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
-        Rd_Ea      = 46.39e3,     # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
+        RL_c       = 18.72,       # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
+        RL_Ea      = 46.39e3,     # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
         theta_0    = 0.76,        # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         theta_1    = 0.018,       # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         theta_2    = -3.7e-4,     # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
@@ -179,21 +179,21 @@ soybean <- list(
         Vcmax_Ea   = 65.33e3,     # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
 
         # ten_layer_c3_canopy module
-        jmax                        = 195,         # Bernacchi et al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
-        jmax_mature                 = 195,         # Needed in the varying_Jmax25 module
-        sf_jmax                     = 0.2,         # Scaling factor for jmax. Needed in the varying_Jmax25 module
-        electrons_per_carboxylation = 4.5,         # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
-        electrons_per_oxygenation   = 5.25,        # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
-        tpu_rate_max                = 13,          # Fitted value based on the A-Ci data measured at UIUC in 2019-08 by Delgrado (unpublished data)
-        Rd                          = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
-        Catm                        = 372.59,      # micromol / mol, CO2 level in 2002
-        O2                          = 210,         # millimol / mol
         b0                          = 0.008,       # Leakey et al. 2006 (https://10.1111/j.1365-3040.2006.01556.x)
         b1                          = 10.6,        # Leakey et al. 2006 (https://10.1111/j.1365-3040.2006.01556.x)
-        Gs_min                      = 1e-3,
-        windspeed_height            = 5,
         beta_PSII                   = 0.5,         # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
+        Catm                        = 372.59,      # micromol / mol, CO2 level in 2002
+        electrons_per_carboxylation = 4.5,         # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
+        electrons_per_oxygenation   = 5.25,        # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
+        Gs_min                      = 1e-3,
+        jmax                        = 195,         # Bernacchi et al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
+        jmax_mature                 = 195,         # Needed in the varying_Jmax25 module
         leafwidth                   = 0.1,         # Large mature leaflets can reach 10 cm in width
+        O2                          = 210,         # millimol / mol
+        RL                          = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
+        sf_jmax                     = 0.2,         # Scaling factor for jmax. Needed in the varying_Jmax25 module
+        tpu_rate_max                = 13,          # Fitted value based on the A-Ci data measured at UIUC in 2019-08 by Delgrado (unpublished data)
+        windspeed_height            = 5,
 
         # ten_layer_canopy_integrator module
         growth_respiration_fraction = 0,

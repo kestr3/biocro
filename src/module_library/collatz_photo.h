@@ -13,7 +13,7 @@ struct collatz_result collatz_photo(double Qp,  // micromole / m^2 / s
                             double kparm,  // mol / m%2 / s
                             double theta,
                             double beta,
-                            double Rd,
+                            double RL,
                             double upperT,
                             double lowerT,
                             double k_Q10, // dimensionless

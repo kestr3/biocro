@@ -49,10 +49,10 @@ class c3_leaf_photosynthesis : public direct_module
           phi_PSII_0{get_input(input_quantities, "phi_PSII_0")},
           phi_PSII_1{get_input(input_quantities, "phi_PSII_1")},
           phi_PSII_2{get_input(input_quantities, "phi_PSII_2")},
-          Rd{get_input(input_quantities, "Rd")},
-          Rd_c{get_input(input_quantities, "Rd_c")},
-          Rd_Ea{get_input(input_quantities, "Rd_Ea")},
           rh{get_input(input_quantities, "rh")},
+          RL{get_input(input_quantities, "RL")},
+          RL_c{get_input(input_quantities, "RL_c")},
+          RL_Ea{get_input(input_quantities, "RL_Ea")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           theta_0{get_input(input_quantities, "theta_0")},
           theta_1{get_input(input_quantities, "theta_1")},
@@ -117,10 +117,10 @@ class c3_leaf_photosynthesis : public direct_module
     double const& phi_PSII_0;
     double const& phi_PSII_1;
     double const& phi_PSII_2;
-    double const& Rd;
-    double const& Rd_c;
-    double const& Rd_Ea;
     double const& rh;
+    double const& RL;
+    double const& RL_c;
+    double const& RL_Ea;
     double const& StomataWS;
     double const& theta_0;
     double const& theta_1;

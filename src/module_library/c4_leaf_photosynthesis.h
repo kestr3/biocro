@@ -36,8 +36,8 @@ class c4_leaf_photosynthesis : public direct_module
           kparm{get_input(input_quantities, "kparm")},
           leafwidth{get_input(input_quantities, "leafwidth")},
           lowerT{get_input(input_quantities, "lowerT")},
-          Rd{get_input(input_quantities, "Rd")},
           rh{get_input(input_quantities, "rh")},
+          RL{get_input(input_quantities, "RL")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           theta{get_input(input_quantities, "theta")},
           upperT{get_input(input_quantities, "upperT")},
@@ -81,8 +81,8 @@ class c4_leaf_photosynthesis : public direct_module
     double const& kparm;
     double const& leafwidth;
     double const& lowerT;
-    double const& Rd;
     double const& rh;
+    double const& RL;
     double const& StomataWS;
     double const& theta;
     double const& upperT;

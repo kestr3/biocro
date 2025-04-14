@@ -36,8 +36,8 @@ canopy_photosynthesis_outputs CanAC(
     double lowerT,                  // degrees C
     double par_energy_content,      // J / micromol
     double par_energy_fraction,     // dimensionless
-    double Rd,                      // micromol / m^2 / s
     double RH,                      // dimensionless from Pa / Pa
+    double RL,                      // micromol / m^2 / s
     double solarR,                  // micromol / m^2 / s
     double StomataWS,               // dimensionless
     double theta,                   // dimensionless
@@ -112,7 +112,7 @@ canopy_photosynthesis_outputs CanAC(
                 vmax1 = Vmax;
             }
             Alpha = nitroP.alphab1 * leafN_lay + nitroP.alphab0;
-            Rd = nitroP.Rdb1 * leafN_lay + nitroP.Rdb0;
+            RL = nitroP.Rdb1 * leafN_lay + nitroP.Rdb0;
         }
 
         double layer_wind_speed = wind_speed_profile[current_layer];  // m / s
@@ -131,7 +131,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_dir, ambient_temperature, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, Rd, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 gbw_guess)
                 .Gs;  // mol / m^2 / s
@@ -153,7 +153,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_dir, leaf_temperature_dir, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, Rd, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 et_direct.gbw_molecular);
 
@@ -171,7 +171,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_diff, ambient_temperature, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, Rd, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 gbw_guess)
                 .Gs;  // mol / m^2 / s
@@ -193,7 +193,7 @@ canopy_photosynthesis_outputs CanAC(
             c4photoC(
                 i_diff, leaf_temperature_diff, ambient_temperature,
                 RH, vmax1, Alpha, Kparm,
-                theta, beta, Rd, b0, b1, Gs_min, StomataWS, Catm,
+                theta, beta, RL, b0, b1, Gs_min, StomataWS, Catm,
                 atmospheric_pressure, upperT, lowerT,
                 et_diffuse.gbw_molecular);
 

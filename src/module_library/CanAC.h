@@ -33,8 +33,8 @@ canopy_photosynthesis_outputs CanAC(
     double lowerT,                  // degrees C
     double par_energy_content,      // J / micromol
     double par_energy_fraction,     // dimensionless
-    double Rd,                      // micromol / m^2 / s
     double RH,                      // dimensionless from Pa / Pa
+    double RL,                      // micromol / m^2 / s
     double solarR,                  // micromol / m^2 / s
     double StomataWS,               // dimensionless
     double theta,                   // dimensionless

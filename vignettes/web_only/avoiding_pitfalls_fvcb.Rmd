@@ -61,22 +61,23 @@ developed from the following considerations:
 Putting this all together, we can write down an initial equation for the net
 assimilation rate:
 \begin{equation}
-A_n = V_c - 0.5 \cdot V_o - R_d, (\#eq:an)
+A_n = V_c - 0.5 \cdot V_o - R_L, (\#eq:an)
 \end{equation}
 where $V_c$ is the RuBP carboxylation rate, $V_o$ is the RuBP oxygenation rate,
-and $R_d$ is the mitochondrial respiration rate. As written, $V_c$, $V_o$, and
-$R_d$ are all non-negative rates, typically with units of $\mu$mol m$^{-2}$
-s$^{-1}$. The first two terms in the equation ($V_c - 0.5 \cdot V_o$)
-represent the contribution of photosynthesis (or Rubisco) to the net CO~2~
-assimilation, while the remaining term ($-R_d$) is the result of mitochondrial
-respiration, a separate process.
+and $R_L$ is the rate of non-photorespiratory CO2 release in the light. As
+written, $V_c$, $V_o$, and $R_L$ are all non-negative rates, typically with
+units of $\mu$mol m$^{-2}$ s$^{-1}$. The first two terms in the equation
+($V_c - 0.5 \cdot V_o$) represent the contribution of photosynthesis (or
+Rubisco) to the net CO~2~ assimilation, while the remaining term ($-R_L$) is the
+result of non-photorespiratory CO2 release, a separate process that includes
+mitochondrial respiration as well as the pentose phosphate pathway.
 
 In its current form, this equation is not very easy to interpret or use. There
 are a few modifications we can use to improve it. One change is to introduce
 $\phi$, the ratio of RuBP oxygenation to carboxylation: $\phi = V_o / V_c$. Now
 we can rewrite Equation \@ref(eq:an) as follows:
 \begin{equation}
-A_n = V_c \cdot \left( 1 - 0.5 \cdot \phi \right) - R_d. (\#eq:anphi)
+A_n = V_c \cdot \left( 1 - 0.5 \cdot \phi \right) - R_L. (\#eq:anphi)
 \end{equation}
 
 This version of the equation makes it clear that $\phi$ plays a key role in
@@ -128,7 +129,7 @@ decreased during gas exchange measurements in order to reduce $V_o$.)
 With this new concept, we can use Equations \@ref(eq:s) and \@ref(eq:gstar) to
 rewrite Equation \@ref(eq:anphi) as follows:
 \begin{equation}
-A_n = V_c \cdot (1 - \Gamma^* / C) - R_d (\#eq:anfinal)
+A_n = V_c \cdot (1 - \Gamma^* / C) - R_L (\#eq:anfinal)
 \end{equation}
 This equation contains a great deal of useful information, and we will refer to
 it as the central equation of the FvCB model. (This is our terminology, and not
@@ -364,13 +365,13 @@ When carboxylation is RuBP-saturated, the corresponding net CO~2~ assimilation
 rate (called $A_c$ rather than $A_n$ to indicate the type of limitation) can be
 found by combining Equations \@ref(eq:anfinal) and \@ref(eq:wc) as follows:
 \begin{equation}
-A_c = W_c \cdot (1 - \Gamma^* / C) - R_d = \frac{V_{cmax} \cdot \left( C - \Gamma^* \right)}{C + K_c \cdot \left( 1 + O / K_o \right)} - R_d. (\#eq:ac)
+A_c = W_c \cdot (1 - \Gamma^* / C) - R_L = \frac{V_{cmax} \cdot \left( C - \Gamma^* \right)}{C + K_c \cdot \left( 1 + O / K_o \right)} - R_L. (\#eq:ac)
 \end{equation}
 Likewise, when carboxylation is RuBP-regeneration-limited, the corresponding net
 CO~2~ assimilation rate (called $A_j$) can be found by combining Equations
 \@ref(eq:anfinal) and \@ref(eq:wj) as follows:
 \begin{equation}
-A_j = W_j \cdot (1 - \Gamma^* / C) - R_d = \frac{J \cdot \left( C - \Gamma^* \right)}{4 \cdot C + 8 \cdot \Gamma^*} - R_d. (\#eq:aj)
+A_j = W_j \cdot (1 - \Gamma^* / C) - R_L = \frac{J \cdot \left( C - \Gamma^* \right)}{4 \cdot C + 8 \cdot \Gamma^*} - R_L. (\#eq:aj)
 \end{equation}
 
 With this in mind, the FvCB model is sometimes expressed in the following form,
@@ -396,7 +397,7 @@ Equation \@ref(eq:analt).
 To see why, suppose that $W_c < W_j$ and $C < \Gamma^*$. In this case,
 $\min \{ W_c, W_j \} = W_c$ and so $A_n = A_c$ according to the FvCB model.
 However, $1 - \Gamma^* / C$ is negative, so
-$A_c = W_c \cdot \left( 1 - \Gamma^* / C \right) - R_d$ is also negative.
+$A_c = W_c \cdot \left( 1 - \Gamma^* / C \right) - R_L$ is also negative.
 Likewise, $A_j$ is negative, but its magnitude is larger than $A_c$ because
 $W_c < W_j$. So, in this case, $\min \{ A_c, A_j \} = A_j$. Thus, Equation
 \@ref(eq:analt) has chosen the incorrect limiting factor. In fact, Equation
@@ -505,7 +506,7 @@ When carboxylation is TPU-limited, the corresponding net CO~2~ assimilation
 rate (called $A_p$ rather than $A_n$ to indicate the type of limitation) can be
 found by combining Equations \@ref(eq:anfinal) and \@ref(eq:wp) as follows:
 \begin{equation}
-A_p = W_p \cdot (1 - \Gamma^* / C) - R_d = \frac{3 \cdot T_p \cdot \left( C - \Gamma^* \right)}{C - \Gamma^* \cdot \left( 1 + 3 \cdot \alpha \right)} - R_d. (\#eq:ap)
+A_p = W_p \cdot (1 - \Gamma^* / C) - R_L = \frac{3 \cdot T_p \cdot \left( C - \Gamma^* \right)}{C - \Gamma^* \cdot \left( 1 + 3 \cdot \alpha \right)} - R_L. (\#eq:ap)
 \end{equation}
 This equation is often incorporated into the pseudo-FvCB model discussed in
 Section \@ref(sec:pitfallassim); in this case, Equation \@ref(eq:analt) is
@@ -539,11 +540,11 @@ $1 - \Gamma^* / C$ is undefined when $C = 0$, $A_c$ and $A_j$ (Equations
 \@ref(eq:ac) and \@ref(eq:aj)) are not. In fact, we have the following when
 $C = 0$:
 \begin{equation}
-A_c \big|_{C = 0} = - \frac{\Gamma^* \cdot V_{cmax}}{K_c \cdot \left( 1 + O / K_o\right)} - R_d
+A_c \big|_{C = 0} = - \frac{\Gamma^* \cdot V_{cmax}}{K_c \cdot \left( 1 + O / K_o\right)} - R_L
 \end{equation}
 and
 \begin{equation}
-A_j \big|_{C = 0} = - \frac{J}{8} - R_d.
+A_j \big|_{C = 0} = - \frac{J}{8} - R_L.
 \end{equation}
 Remembering that Equation \@ref(eq:analt) _always_ makes the wrong choice for
 $C < \Gamma^*$, we can reverse its behavior to find $A_n$ when $C = 0$:
@@ -568,7 +569,7 @@ fvcb_model <- function(
   Gstar, # microbar
   Tp,    # micromol / m^2 / s
   alpha, # dimensionless
-  Rd     # micromol / m^2 / s
+  RL     # micromol / m^2 / s
 )
 {
   Wc <- Vcmax * C / (C + Kc * (1 + O / Ko))
@@ -580,7 +581,7 @@ fvcb_model <- function(
 
   Vc <- pmin(Wc, Wj, Wp)
 
-  An <- (1 - Gstar / C) * Vc - Rd
+  An <- (1 - Gstar / C) * Vc - RL
 
   list(Wc = Wc, Wj = Wj, Wp = Wp, Vc = Vc, An = An)
 }
@@ -601,14 +602,14 @@ pseudo_fvcb_model <- function(
   Gstar, # microbar
   Tp,    # micromol / m^2 / s
   alpha, # dimensionless
-  Rd     # micromol / m^2 / s
+  RL     # micromol / m^2 / s
 )
 {
-  Ac <- Vcmax * (C - Gstar) / (C + Kc * (1 + O / Ko)) - Rd
+  Ac <- Vcmax * (C - Gstar) / (C + Kc * (1 + O / Ko)) - RL
 
-  Aj <- J * (C - Gstar) / (4 * C + 8 * Gstar) - Rd
+  Aj <- J * (C - Gstar) / (4 * C + 8 * Gstar) - RL
 
-  Ap <- 3 * Tp * (C - Gstar) / (C - Gstar * (1 + 3 * alpha)) - Rd
+  Ap <- 3 * Tp * (C - Gstar) / (C - Gstar * (1 + 3 * alpha)) - RL
 
   An <- pmin(Ac, Aj, Ap)
 
@@ -637,7 +638,7 @@ fvcb_compare <- function(
   Gstar, # microbar
   Tp,    # micromol / m^2 / s
   alpha, # dimensionless
-  Rd,    # micromol / m^2 / s
+  RL,    # micromol / m^2 / s
   plot_type
 )
 {
@@ -653,7 +654,7 @@ fvcb_compare <- function(
     Gstar,
     Tp,
     alpha,
-    Rd
+    RL
   )
 
   pseudo_fvcb_model_res <- pseudo_fvcb_model(
@@ -666,7 +667,7 @@ fvcb_compare <- function(
     Gstar,
     Tp,
     alpha,
-    Rd
+    RL
   )
 
   clim <- c(0, 1000)
@@ -766,7 +767,7 @@ defaults <- list(
   Gstar = 38.6, # microbar
   Tp = 11.8,    # micromol / m^2 / s
   alpha = 0,    # dimensionless
-  Rd = 1        # micromol / m^2 / s
+  RL = 1        # micromol / m^2 / s
 )
 ```
 

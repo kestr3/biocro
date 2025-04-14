@@ -142,7 +142,7 @@ string_vector no_leaf_resp_partitioning_growth_calculator::get_outputs()
 void no_leaf_resp_partitioning_growth_calculator::do_operation() const
 {
     // Calculate the rate of new leaf production, including _all_ losses due to
-    // photorespiration and Rd, but not accounting for water stress or any
+    // photorespiration and RL, but not accounting for water stress or any
     // additional respiration (Mg / ha / hr)
     double const net_assimilation_rate_leaf{
         kLeaf <= 0         ? 0
