@@ -41,9 +41,9 @@ struct with_flag {
     Flag flag;
 
     with_flag() {}
-    with_flag(T x) : state{x}, flag{Flag::valid} {}
-    with_flag(T x, Flag f) : state{x}, flag{f} {}
-    with_flag(Flag f) : flag{f} {}
+    with_flag(T x) : state(x), flag(Flag::valid) {}
+    with_flag(T x, Flag f) : state(x), flag(f) {}
+    with_flag(Flag f) : flag(f) {}
 
 
 };
