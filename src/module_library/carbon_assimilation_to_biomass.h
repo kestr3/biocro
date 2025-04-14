@@ -136,12 +136,14 @@ class carbon_assimilation_to_biomass : public direct_module
           canopy_assimilation_rate_CO2{get_input(input_quantities, "canopy_assimilation_rate_CO2")},
           canopy_gross_assimilation_rate_CO2{get_input(input_quantities, "canopy_gross_assimilation_rate_CO2")},
           canopy_photorespiration_rate_CO2{get_input(input_quantities, "canopy_photorespiration_rate_CO2")},
+          canopy_RL_CO2{get_input(input_quantities, "canopy_non_photorespiratory_CO2_release_rate_CO2")},
           dry_biomass_per_carbon{get_input(input_quantities, "dry_biomass_per_carbon")},
 
           // Get pointers to output quantities
           canopy_assimilation_rate_op{get_op(output_quantities, "canopy_assimilation_rate")},
           canopy_gross_assimilation_rate_op{get_op(output_quantities, "canopy_gross_assimilation_rate")},
-          canopy_photorespiration_rate_op{get_op(output_quantities, "canopy_photorespiration_rate")}
+          canopy_photorespiration_rate_op{get_op(output_quantities, "canopy_photorespiration_rate")},
+          canopy_RL_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate")}
     {
     }
     static string_vector get_inputs();
@@ -153,12 +155,14 @@ class carbon_assimilation_to_biomass : public direct_module
     double const& canopy_assimilation_rate_CO2;
     double const& canopy_gross_assimilation_rate_CO2;
     double const& canopy_photorespiration_rate_CO2;
+    double const& canopy_RL_CO2;
     double const& dry_biomass_per_carbon;
 
     // Pointers to output quantities
     double* canopy_assimilation_rate_op;
     double* canopy_gross_assimilation_rate_op;
     double* canopy_photorespiration_rate_op;
+    double* canopy_RL_op;
 
     // Main operation
     void do_operation() const;
@@ -167,19 +171,21 @@ class carbon_assimilation_to_biomass : public direct_module
 string_vector carbon_assimilation_to_biomass::get_inputs()
 {
     return {
-        "canopy_assimilation_rate_CO2",        // micromol CO2 / m^2 / s
-        "canopy_gross_assimilation_rate_CO2",  // micromol CO2 / m^2 / s
-        "canopy_photorespiration_rate_CO2",    // micromol CO2 / m^2 / s
-        "dry_biomass_per_carbon"               // g biomass / mol C
+        "canopy_assimilation_rate_CO2",                      // micromol CO2 / m^2 / s
+        "canopy_gross_assimilation_rate_CO2",                // micromol CO2 / m^2 / s
+        "canopy_non_photorespiratory_CO2_release_rate_CO2",  // micromol CO2 / m^2 / s
+        "canopy_photorespiration_rate_CO2",                  // micromol CO2 / m^2 / s
+        "dry_biomass_per_carbon"                             // g biomass / mol C
     };
 }
 
 string_vector carbon_assimilation_to_biomass::get_outputs()
 {
     return {
-        "canopy_assimilation_rate",        // Mg / ha / hr
-        "canopy_gross_assimilation_rate",  // Mg / ha / hr
-        "canopy_photorespiration_rate"     // Mg / ha / hr
+        "canopy_assimilation_rate",                      // Mg / ha / hr
+        "canopy_gross_assimilation_rate",                // Mg / ha / hr
+        "canopy_non_photorespiratory_CO2_release_rate",  // Mg / ha / hr
+        "canopy_photorespiration_rate"                   // Mg / ha / hr
     };
 }
 
@@ -199,6 +205,7 @@ void carbon_assimilation_to_biomass::do_operation() const
     update(canopy_assimilation_rate_op, canopy_assimilation_rate_CO2 * cf);
     update(canopy_gross_assimilation_rate_op, canopy_gross_assimilation_rate_CO2 * cf);
     update(canopy_photorespiration_rate_op, canopy_photorespiration_rate_CO2 * cf);
+    update(canopy_RL_op, canopy_RL_CO2 * cf);
 }
 
 }  // namespace standardBML

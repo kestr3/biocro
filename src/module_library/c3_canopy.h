@@ -84,7 +84,7 @@ class c3_canopy : public direct_module
           canopy_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_assimilation_rate_CO2")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
           canopy_gross_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_gross_assimilation_rate_CO2")},
-          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate")},
+          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate_CO2")},
           canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")},
           canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {

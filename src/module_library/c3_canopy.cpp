@@ -78,12 +78,12 @@ string_vector c3_canopy::get_inputs()
 string_vector c3_canopy::get_outputs()
 {
     return {
-        "canopy_assimilation_rate_CO2",                  // micromol / m^2 / s
-        "canopy_conductance",                            // mol / m^2 / s
-        "canopy_gross_assimilation_rate_CO2",            // micromol / m^2 / s
-        "canopy_non_photorespiratory_CO2_release_rate",  // micromol / m^2 / s
-        "canopy_photorespiration_rate_CO2",              // micromol / m^2 / s
-        "canopy_transpiration_rate"                      // Mg / ha / hr
+        "canopy_assimilation_rate_CO2",                      // micromol / m^2 / s
+        "canopy_conductance",                                // mol / m^2 / s
+        "canopy_gross_assimilation_rate_CO2",                // micromol / m^2 / s
+        "canopy_non_photorespiratory_CO2_release_rate_CO2",  // micromol / m^2 / s
+        "canopy_photorespiration_rate_CO2",                  // micromol / m^2 / s
+        "canopy_transpiration_rate"                          // Mg / ha / hr
     };
 }
 
