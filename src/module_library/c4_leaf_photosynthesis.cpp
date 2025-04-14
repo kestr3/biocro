@@ -20,13 +20,13 @@ string_vector c4_leaf_photosynthesis::get_inputs()
         "incident_ppfd",         // micromol / (m^2 leaf) / s
         "kparm",                 // mol / m^2 / s
         "leafwidth",             // m
-        "lowerT",                // deg. C
+        "lowerT",                // degrees C
         "rh",                    // dimensionless
         "RL_at_25",              // micromol / m^2 / s
         "StomataWS",             // dimensionless
-        "temp",                  // deg. C
+        "temp",                  // degrees C
         "theta",                 // dimensionless
-        "upperT",                // deg. C
+        "upperT",                // degrees C
         "Vcmax_at_25",           // micromol / m^2 / s
         "windspeed"              // m / s
     };
@@ -43,7 +43,7 @@ string_vector c4_leaf_photosynthesis::get_outputs()
         "gbw",               // mol / m^2 / s
         "GrossAssim",        // micromol / m^2 /s
         "Gs",                // mol / m^2 / s
-        "leaf_temperature",  // deg. C
+        "leaf_temperature",  // degrees C
         "RHs",               // dimensionless from Pa / Pa
         "RH_canopy",         // dimensionless
         "RL",                // micromol / m^2 / s
@@ -79,7 +79,7 @@ void c4_leaf_photosynthesis::do_operation() const
         initial_stomatal_conductance,
         windspeed);
 
-    const double leaf_temperature = ambient_temperature + et.Deltat;  // deg. C
+    const double leaf_temperature = ambient_temperature + et.Deltat;  // degrees C
 
     // Calculate final values for assimilation, stomatal conductance, and Ci
     // using the new leaf temperature
