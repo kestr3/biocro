@@ -73,12 +73,11 @@ soybean <- list(
         Sp_thermal_time_decay       = 0,           # not used in Soybean-BioCro, but must be defined
 
         # parameter_calculator module
+        alpha1                      = 0,           # not used in Soybean-BioCro, but must be defined
+        alphab1                     = 0,           # not used in Soybean-BioCro, but must be defined
         LeafN                       = 2,           # not used in Soybean-BioCro, but must be defined
         LeafN_0                     = 2,           # not used in Soybean-BioCro, but must be defined
-        vmax_n_intercept            = 0,           # not used in Soybean-BioCro, but must be defined
-        vmax1                       = 110,         # Bernacchi et. al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
-        alphab1                     = 0,           # not used in Soybean-BioCro, but must be defined
-        alpha1                      = 0,           # not used in Soybean-BioCro, but must be defined
+        Vcmax_at_25                 = 110,         # Bernacchi et. al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
 
         # soybean_development_rate_calculator module
         maturity_group              = 3,           # dimensionless; soybean cultivar maturity group
@@ -125,7 +124,7 @@ soybean <- list(
 
         # incident_shortwave_from_ground_par module
         par_energy_fraction         = 0.5,
-        par_energy_content          = 0.219,       # W * s / micromole. Also J / micromole. Conversion
+        par_energy_content          = 0.219,       # W * s / micromol. Also J / micromol. Conversion
                                                    # from photon flux density to to irradiance for
                                                    # PAR. Equals 1/4.57. Plant Growth Chamber
                                                    # Handbook. CHAPTER 1 – RADIATION– John C. Sager and
@@ -166,8 +165,8 @@ soybean <- list(
         phi_PSII_0 = 0.352,       # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         phi_PSII_1 = 0.022,       # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         phi_PSII_2 = -3.4e-4,     # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
-        Rd_c       = 18.72,       # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
-        Rd_Ea      = 46.39e3,     # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
+        RL_c       = 18.72,       # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
+        RL_Ea      = 46.39e3,     # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
         theta_0    = 0.76,        # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         theta_1    = 0.018,       # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
         theta_2    = -3.7e-4,     # Table 2 of Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
@@ -179,34 +178,37 @@ soybean <- list(
         Vcmax_Ea   = 65.33e3,     # Table 1 of Bernacchi et al. 2001 (https://doi.org/10.1111/j.1365-3040.2001.00668.x)
 
         # ten_layer_c3_canopy module
-        jmax                        = 195,         # Bernacchi et al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
-        jmax_mature                 = 195,         # Needed in the varying_Jmax25 module
-        sf_jmax                     = 0.2,         # Scaling factor for jmax. Needed in the varying_Jmax25 module
-        electrons_per_carboxylation = 4.5,         # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
-        electrons_per_oxygenation   = 5.25,        # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
-        tpu_rate_max                = 13,          # Fitted value based on the A-Ci data measured at UIUC in 2019-08 by Delgrado (unpublished data)
-        Rd                          = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
-        Catm                        = 372.59,      # micromol / mol, CO2 level in 2002
-        O2                          = 210,         # millimol / mol
         b0                          = 0.008,       # Leakey et al. 2006 (https://10.1111/j.1365-3040.2006.01556.x)
         b1                          = 10.6,        # Leakey et al. 2006 (https://10.1111/j.1365-3040.2006.01556.x)
-        Gs_min                      = 1e-3,
-        windspeed_height            = 5,
         beta_PSII                   = 0.5,         # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
+        Catm                        = 372.59,      # micromol / mol, CO2 level in 2002
+        electrons_per_carboxylation = 4.5,         # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
+        electrons_per_oxygenation   = 5.25,        # Bernacchi et al. 2003 (https://doi.org/10.1046/j.0016-8025.2003.01050.x)
+        Gs_min                      = 1e-3,
+        Jmax_at_25                  = 195,         # Bernacchi et al. 2005 (https://doi.org/10.1007/s00425-004-1320-8), 2002 Seasonal average
+        Jmax_at_25_mature           = 195,         # Needed in the varying_Jmax25 module
         leafwidth                   = 0.1,         # Large mature leaflets can reach 10 cm in width
+        O2                          = 210,         # millimol / mol
+        RL_at_25                    = 1.28,        # Davey et al. 2004 (https://doi.org/10.1104/pp.103.030569), Table 3, cv Pana, co2 368 ppm
+        sf_jmax                     = 0.2,         # Scaling factor for Jmax_at_25. Needed in the varying_Jmax25 module
+        Tp_at_25                    = 13,          # Fitted value based on the A-Ci data measured at UIUC in 2019-08 by Delgrado (unpublished data)
+        windspeed_height            = 5,
 
         # ten_layer_canopy_integrator module
         growth_respiration_fraction = 0,
 
         # no_leaf_resp_partitioning_growth_calculator_negative_assimilation_partitioned module
-        grc_stem                        = 0.02828,    # dimensionless, optimized. growth respiration coefficient
+        grc_rhizome                     = 0.00270,    # dimensionless, set to the value of grc_root
         grc_root                        = 0.00270,    # dimensionless, optimized
+        grc_stem                        = 0.02828,    # dimensionless, optimized. growth respiration coefficient
 
         # maintenance respiration module
-        mrc_leaf                        = 0.00048836,    # kg / kg / hr maintenance respiration coefficient. optimized
-        mrc_stem                        = 0.00048836,    # kg / kg / hr, assumed to be same as leaf
-        mrc_root                        = 0.00001,       # kg / kg / hr, optimized
         mrc_grain                       = 1e-5,          # kg / kg / hr, assigned a small value to ignore this
+        mrc_leaf                        = 0.00048836,    # kg / kg / hr maintenance respiration coefficient. optimized
+        mrc_rhizome                     = 0.00001,       # kg / kg / hr, assumed to be same as root
+        mrc_root                        = 0.00001,       # kg / kg / hr, optimized
+        mrc_shell                       = 1e-5,          # kg / kg / hr, assigned a small value to ignore this
+        mrc_stem                        = 0.00048836,    # kg / kg / hr, assumed to be same as leaf
 
         # partitioning_growth module
         retrans                     = 0.9,         # previously hard-coded in the partitioning_growth module
