@@ -203,10 +203,12 @@ soybean <- list(
         grc_stem                        = 0.02828,    # dimensionless, optimized. growth respiration coefficient
 
         # maintenance respiration module
-        mrc_leaf                        = 0.00048836,    # kg / kg / hr maintenance respiration coefficient. optimized
-        mrc_stem                        = 0.00048836,    # kg / kg / hr, assumed to be same as leaf
-        mrc_root                        = 0.00001,       # kg / kg / hr, optimized
         mrc_grain                       = 1e-5,          # kg / kg / hr, assigned a small value to ignore this
+        mrc_leaf                        = 0.00048836,    # kg / kg / hr maintenance respiration coefficient. optimized
+        mrc_rhizome                     = 0.00001,       # kg / kg / hr, assumed to be same as root
+        mrc_root                        = 0.00001,       # kg / kg / hr, optimized
+        mrc_shell                       = 1e-5,          # kg / kg / hr, assigned a small value to ignore this
+        mrc_stem                        = 0.00048836,    # kg / kg / hr, assumed to be same as leaf
 
         # partitioning_growth module
         retrans                     = 0.9,         # previously hard-coded in the partitioning_growth module

@@ -30,7 +30,9 @@ class maintenance_respiration : public differential_module
           Leaf{get_input(input_quantities, "Leaf")},
           mrc_grain{get_input(input_quantities, "mrc_grain")},
           mrc_leaf{get_input(input_quantities, "mrc_leaf")},
+          mrc_rhizome{get_input(input_quantities, "mrc_rhizome")},
           mrc_root{get_input(input_quantities, "mrc_root")},
+          mrc_shell{get_input(input_quantities, "mrc_shell")},
           mrc_stem{get_input(input_quantities, "mrc_stem")},
           Rhizome{get_input(input_quantities, "Rhizome")},
           Root{get_input(input_quantities, "Root")},
@@ -57,7 +59,9 @@ class maintenance_respiration : public differential_module
     const double& Leaf;
     const double& mrc_grain;
     const double& mrc_leaf;
+    const double& mrc_rhizome;
     const double& mrc_root;
+    const double& mrc_shell;
     const double& mrc_stem;
     const double& Rhizome;
     const double& Root;
@@ -80,17 +84,19 @@ class maintenance_respiration : public differential_module
 string_vector maintenance_respiration::get_inputs()
 {
     return {
-        "Grain",      // Mg / ha
-        "Leaf",       // Mg / ha
-        "mrc_grain",  // kg / kg / hr
-        "mrc_leaf",   // kg / kg / hr
-        "mrc_root",   // kg / kg / hr
-        "mrc_stem",   // kg / kg / hr
-        "Rhizome",    // Mg / ha
-        "Root",       // Mg / ha
-        "Shell",      // Mg / ha
-        "Stem",       // Mg / ha
-        "temp"        // degree C
+        "Grain",        // Mg / ha
+        "Leaf",         // Mg / ha
+        "mrc_grain",    // kg / kg / hr
+        "mrc_leaf",     // kg / kg / hr
+        "mrc_rhizome",  // kg / kg / hr
+        "mrc_root",     // kg / kg / hr
+        "mrc_shell",    // kg / kg / hr
+        "mrc_stem",     // kg / kg / hr
+        "Rhizome",      // Mg / ha
+        "Root",         // Mg / ha
+        "Shell",        // Mg / ha
+        "Stem",         // Mg / ha
+        "temp"          // degree C
     };
 }
 
@@ -108,19 +114,19 @@ string_vector maintenance_respiration::get_outputs()
 
 void maintenance_respiration::do_operation() const
 {
-    double Tref = 25.0;  // reference temperature for the Q10 function
+    double constexpr Tref = 25.0;  // reference temperature for the Q10 function
 
-    double dLeaf = -Leaf * mrc_leaf * Q10_temperature_response(temp, Tref);  // Mg / ha
+    double const dLeaf = -Leaf * mrc_leaf * Q10_temperature_response(temp, Tref);  // Mg / ha
 
-    double dStem = -Stem * mrc_stem * Q10_temperature_response(temp, Tref);
+    double const dStem = -Stem * mrc_stem * Q10_temperature_response(temp, Tref);  // Mg / ha
 
-    double dRoot = -Root * mrc_root * Q10_temperature_response(temp, Tref);
-    //assume rhizome has the same maintenance_respiration_coef as root
-    double dRhizome = -Rhizome * mrc_root * Q10_temperature_response(temp, Tref);
+    double const dRoot = -Root * mrc_root * Q10_temperature_response(temp, Tref);  // Mg / ha
 
-    double dGrain = -Grain * mrc_grain * Q10_temperature_response(temp, Tref);
-    //assume shell has the same maintenance_respiration_coef as grain
-    double dShell = -Shell * mrc_grain * Q10_temperature_response(temp, Tref);  // Mg / ha
+    double const dRhizome = -Rhizome * mrc_rhizome * Q10_temperature_response(temp, Tref);  // Mg / ha
+
+    double const dGrain = -Grain * mrc_grain * Q10_temperature_response(temp, Tref);  // Mg / ha
+
+    double const dShell = -Shell * mrc_shell * Q10_temperature_response(temp, Tref);  // Mg / ha
 
     update(Grain_op, dGrain);      // Mg / ha
     update(Leaf_op, dLeaf);        // Mg / ha

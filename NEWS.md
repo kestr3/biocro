@@ -55,6 +55,12 @@ be directly added to this file to describe the related changes.
   - `mrc2` has been replaced by `grc_root` and `grc_rhizome` for similar
     reasons.
 
+  - `mrc_root` has been split into `mrc_root` and `mrc_rhizome` instead of using
+    one coefficient for both.
+
+  - `mrc_grain` has been split into `mrc_grain` and `mrc_shell` instead of using
+    one coefficient for both.
+
   - Molar fluxes (with units of micromol / m^2 / s) are now distinguished from
     mass fluxes (with units of Mg / ha / hr) when necessary by appending
     `_molar` to the quantity name. For example, `canopy_assimilation_rate_molar`
