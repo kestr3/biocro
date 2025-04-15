@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "BioCro.h"  // for resp
+#include "growth_resp.h"  // for growth_resp
 
 namespace standardBML
 {
@@ -31,12 +31,12 @@ namespace standardBML
  *  senescence and gains due to remobilized carbon from other organs are handled
  *  elsewhere and are not included here.
  *
- *  Respiration is included via the `resp()` function, which implements an
- *  empirical rule for determining the fraction of energy spent on respiration
- *  at a particular temperature. See the following paper for a general
- *  discussion of the importance of respiration in understanding plant growth:
- *  [Amthor, J. S. "The role of maintenance respiration in plant growth" Plant,
- *  Cell & Environment 7, 561–569 (1984)]
+ *  Respiration is included via the `growth_resp()` function, which implements
+ *  an empirical rule for determining the fraction of energy spent on
+ *  respiration at a particular temperature. See the following paper for a
+ *  general discussion of the importance of respiration in understanding plant
+ *  growth: [Amthor, J. S. "The role of maintenance respiration in plant growth"
+ *  Plant, Cell & Environment 7, 561–569 (1984)]
  *  (https://doi.org/10.1111/1365-3040.ep11591833).
  *
  *  ### Specifics of this module
@@ -156,17 +156,17 @@ void no_leaf_resp_partitioning_growth_calculator::do_operation() const
     // Calculate the rate of new stem production, accounting for respiratory
     // costs (Mg / ha / hr)
     double const net_assimilation_rate_stem{
-        kStem > 0 ? resp(nonleaf_carbon_flux * kStem, grc_leaf, temp) : 0};
+        kStem > 0 ? growth_resp(nonleaf_carbon_flux * kStem, grc_leaf, temp) : 0};
 
     // Calculate the rate of new root production, accounting for respiratory
     // costs (Mg / ha / hr)
     double const net_assimilation_rate_root{
-        kRoot > 0 ? resp(nonleaf_carbon_flux * kRoot, grc_root, temp) : 0};
+        kRoot > 0 ? growth_resp(nonleaf_carbon_flux * kRoot, grc_root, temp) : 0};
 
     // Calculate the rate of new rhizome production, accounting for respiratory
     // costs (Mg / ha / hr)
     double const net_assimilation_rate_rhizome{
-        kRhizome > 0 ? resp(nonleaf_carbon_flux * kRhizome, grc_rhizome, temp) : 0};
+        kRhizome > 0 ? growth_resp(nonleaf_carbon_flux * kRhizome, grc_rhizome, temp) : 0};
 
     // Calculate the rate of new grain production without any respiratory costs
     // (Mg / ha / hr)
