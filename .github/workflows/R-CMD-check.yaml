@@ -59,6 +59,7 @@ on:
           - R release version on macOS
           - R 3.6.0 on Windows
           - R release version on Windows
+          - R devel version on Windows
         default: R 3.6.0 on Ubuntu
 
 jobs:

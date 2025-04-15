@@ -46,6 +46,55 @@ be directly added to this file to describe the related changes.
   This change only affects the solution at low Ci, and does not modify the
   interface of any module.
 
+- Renamed several quantities to make their meanings more clear:
+
+  - `mrc1` has been replaced by `grc_leaf` and `grc_stem` to better indicate
+    that this is a growth respiration coefficient that was applied to two
+    different tissues.
+
+  - `mrc2` has been replaced by `grc_root` and `grc_rhizome` for similar
+    reasons.
+
+  - `mrc_root` has been split into `mrc_root` and `mrc_rhizome` instead of using
+    one coefficient for both.
+
+  - `mrc_grain` has been split into `mrc_grain` and `mrc_shell` instead of using
+    one coefficient for both.
+
+  - Molar fluxes (with units of micromol / m^2 / s) are now distinguished from
+    mass fluxes (with units of Mg / ha / hr) when necessary by replacing `_rate`
+    with `_molar_flux` in the quantity name. For example,
+    `canopy_assimilation_molar_flux` is a molar flux and
+    `canopy_assimilation_rate` is a mass flux. Previously the molar fluxes had a
+    suffix of `_CO2`, so this necessitated renaming two quantities:
+    `canopy_assimilation_rate_CO2` and `canopy_photorespiration_rate_CO2`.
+
+  - `GrossAssim_CO2` was renamed to `canopy_gross_assimilation_molar_flux` for
+    consistency with other canopy-level molar flux outputs such as
+    `canopy_assimilation_molar_flux`.
+
+  - `Rd` was renamed to `RL` and its definition was updated to "the rate of
+    non-photorespiratory CO2 release in the light" when necessary, following
+    https://doi.org/10.1093/plphys/kiab076 and https://doi.org/10.1111/pce.14153.
+    This avoid the ambiguity of using a subscript `d` (which can refer to "day"
+    or "dark" in different contexts) and it reflects and updated understanding
+    of the metabolic origin of this term (it is not exclusively, or even
+    primarily, due to mitochondrial respiration).
+
+  - Several quantities representing a value at 25 degrees C were renamed to
+    better reflect this: `jmax` -> `Jmax_at_25`, `Rd` -> `RL_at_25`,
+    `tpu_rate_max` -> `Tp_at_25`, `vmax1` -> `Vcmax_at_25`,
+    `vmax` -> `Vcmax_at_25`.
+
+- The `BioCro:parameter_calculator` module no longer recalculates `Vcmax_at_25`.
+
+- The rate of non-photorespiratory CO2 release in the light (`RL` or
+  `canopy_non_photorespiratory_CO2_release`) is now included in the outputs of
+  photosynthesis modules, including at the canopy level.
+
+- Two new modules were added for calculating cumulative flows of CO2 and water:
+  `BioCro:cumulative_carbon_dynamics` and `BioCro:cumulative_water_dynamics`.
+
 ## Bug fixes
 
 - Fixed a an issue where setting `adaptive_max_steps` to `NA` in R would cause
@@ -267,7 +316,7 @@ be directly added to this file to describe the related changes.
   from photon flux density (in micromoles per square meter per second) to energy
   flux density (in joules per square meter per second or watts per square meter)
   for photosynthetically active radiation (PAR). It equals 1/4.57, 4.57 being a
-  commonly used constant to convert PAR in W m^-2 to micromole m^-2 s^-1. Users
+  commonly used constant to convert PAR in W m^-2 to micromol m^-2 s^-1. Users
   should take care to ensure that if processing of radiation data is required to
   prepare it for use with BioCro, the same conversion factor is used. See more
   details in Plant Growth Chamber Handbook. CHAPTER 1 – RADIATION– John C. Sager

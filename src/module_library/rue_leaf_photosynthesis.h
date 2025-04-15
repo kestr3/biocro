@@ -145,7 +145,7 @@ class rue_leaf_photosynthesis : public direct_module
           height{get_input(input_quantities, "height")},
           incident_ppfd{get_input(input_quantities, "incident_ppfd")},
           leafwidth{get_input(input_quantities, "leafwidth")},
-          Rd{get_input(input_quantities, "Rd")},
+          RL_at_25{get_input(input_quantities, "RL_at_25")},
           rh{get_input(input_quantities, "rh")},
           temp{get_input(input_quantities, "temp")},
           windspeed{get_input(input_quantities, "windspeed")},
@@ -153,15 +153,16 @@ class rue_leaf_photosynthesis : public direct_module
 
           // Get pointers to output parameters
           Assim_op{get_op(output_quantities, "Assim")},
-          GrossAssim_op{get_op(output_quantities, "GrossAssim")},
-          Rp_op{get_op(output_quantities, "Rp")},
           Ci_op{get_op(output_quantities, "Ci")},
-          Gs_op{get_op(output_quantities, "Gs")},
-          TransR_op{get_op(output_quantities, "TransR")},
           EPenman_op{get_op(output_quantities, "EPenman")},
           EPriestly_op{get_op(output_quantities, "EPriestly")},
+          gbw_op{get_op(output_quantities, "gbw")},
+          GrossAssim_op{get_op(output_quantities, "GrossAssim")},
+          Gs_op{get_op(output_quantities, "Gs")},
           leaf_temperature_op{get_op(output_quantities, "leaf_temperature")},
-          gbw_op{get_op(output_quantities, "gbw")}
+          RL_op{get_op(output_quantities, "RL")},
+          Rp_op{get_op(output_quantities, "Rp")},
+          TransR_op{get_op(output_quantities, "TransR")}
     {
     }
     static string_vector get_inputs();
@@ -181,7 +182,7 @@ class rue_leaf_photosynthesis : public direct_module
     double const& height;
     double const& incident_ppfd;
     double const& leafwidth;
-    double const& Rd;
+    double const& RL_at_25;
     double const& rh;
     double const& temp;
     double const& windspeed;
@@ -189,15 +190,16 @@ class rue_leaf_photosynthesis : public direct_module
 
     // Pointers to output parameters
     double* Assim_op;
-    double* GrossAssim_op;
-    double* Rp_op;
     double* Ci_op;
-    double* Gs_op;
-    double* TransR_op;
     double* EPenman_op;
     double* EPriestly_op;
-    double* leaf_temperature_op;
     double* gbw_op;
+    double* GrossAssim_op;
+    double* Gs_op;
+    double* leaf_temperature_op;
+    double* RL_op;
+    double* Rp_op;
+    double* TransR_op;
 
     // Main operation
     void do_operation() const;

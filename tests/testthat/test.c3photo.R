@@ -15,7 +15,7 @@ test_that("c3photoC is sensitive to changes in vcmax", {
         Gs_min = 1e-3,
         Gstar_c = 19.02,
         Gstar_Ea = 37.83e3,
-        jmax = 180,
+        Jmax_at_25 = 180,
         Jmax_c = 17.57,
         Jmax_Ea = 43.54e3,
         Kc_c = 38.05,
@@ -27,9 +27,9 @@ test_that("c3photoC is sensitive to changes in vcmax", {
         phi_PSII_1 = 0.022,
         phi_PSII_2 = -3.4e-4,
         Qabs = 1500,
-        Rd = 1.1,
-        Rd_c = 18.72,
-        Rd_Ea = 46.39e3,
+        RL_at_25 = 1.1,
+        RL_c = 18.72,
+        RL_Ea = 46.39e3,
         rh = 0.7,
         StomataWS = 1,
         temp = 10,
@@ -42,17 +42,17 @@ test_that("c3photoC is sensitive to changes in vcmax", {
         Tp_Ha = 62.99e3,
         Tp_Hd = 182.14e3,
         Tp_S = 0.588e3,
-        tpu_rate_max = 23,
+        Tp_at_25 = 23,
         Vcmax_c = 26.35,
         Vcmax_Ea = 65.33e3
     )
 
-    # Get net assimilation for vmax = 100 micromol / m^2 / s
-    inputs$vmax1 = 100
+    # Get net assimilation for Vcmax_at_25 = 100 micromol / m^2 / s
+    inputs$Vcmax_at_25 = 100
     a_100 <- evaluate_module("BioCro:c3_assimilation", inputs)$Assim
 
-    # Get net assimilation for vmax = 10 micromol / m^2 / s
-    inputs$vmax1 = 10
+    # Get net assimilation for Vcmax_at_25 = 10 micromol / m^2 / s
+    inputs$Vcmax_at_25 = 10
     a_10 <- evaluate_module("BioCro:c3_assimilation", inputs)$Assim
 
     # The two values should be different
@@ -108,7 +108,7 @@ test_that('c3photoC produces self-consistent outputs', {
             c3photo_res$Qabs[i],
             c3_parameters_res$phi_PSII[i],
             soybean$parameters$beta_PSII,
-            c3_parameters_res$Jmax_norm[i] * soybean$parameters$jmax,
+            c3_parameters_res$Jmax_norm[i] * soybean$parameters$Jmax_at_25,
             c3_parameters_res$theta[i]
         )
     })
@@ -126,9 +126,9 @@ test_that('c3photoC produces self-consistent outputs', {
             Kc = c3_parameters_res$Kc,
             Ko = c3_parameters_res$Ko,
             Oi = Oi,
-            Rd = c3_parameters_res$Rd_norm * soybean$parameters$Rd,
-            TPU = c3_parameters_res$Tp_norm * soybean$parameters$tpu_rate_max,
-            Vcmax = c3_parameters_res$Vcmax_norm * soybean$parameters$vmax1,
+            RL = c3_parameters_res$RL_norm * soybean$parameters$RL_at_25,
+            TPU = c3_parameters_res$Tp_norm * soybean$parameters$Tp_at_25,
+            Vcmax = c3_parameters_res$Vcmax_norm * soybean$parameters$Vcmax_at_25,
             electrons_per_carboxylation = c3photo_res$electrons_per_carboxylation,
             electrons_per_oxygenation = c3photo_res$electrons_per_oxygenation
         )
@@ -147,7 +147,7 @@ test_that('c3photoC produces self-consistent outputs', {
     )
 
     expect_equal(
-        fvcb_res$Vc - fvcb_res$Rd - fvcb_res$An,
+        fvcb_res$Vc - fvcb_res$RL - fvcb_res$An,
         c3photo_res$Rp
     )
 
