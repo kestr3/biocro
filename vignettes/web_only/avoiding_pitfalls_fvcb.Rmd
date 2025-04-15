@@ -70,7 +70,10 @@ units of $\mu$mol m$^{-2}$ s$^{-1}$. The first two terms in the equation
 ($V_c - 0.5 \cdot V_o$) represent the contribution of photosynthesis (or
 Rubisco) to the net CO~2~ assimilation, while the remaining term ($-R_L$) is the
 result of non-photorespiratory CO2 release, a separate process that includes
-mitochondrial respiration as well as the pentose phosphate pathway.
+mitochondrial respiration as well as the pentose phosphate pathway. The rate of
+non-photorespiratory CO2 release is known to depend on the amount of incident
+light, and is usually specified either in the light (as we do here) or in the
+dark.
 
 In its current form, this equation is not very easy to interpret or use. There
 are a few modifications we can use to improve it. One change is to introduce

@@ -59,11 +59,13 @@ be directly added to this file to describe the related changes.
     consistency with other canopy-level outputs such as
     `canopy_assimilation_rate_CO2`.
 
-  - `Rd` was renamed to `RL` and its definition was updated when necessary. This
-    is following best practices for naming (to avoid the ambiguity of the
-    subscript `d`, which can refer to "day" or "dark") and an updated
-    understanding of the biochemical origin of this term (it is not exclusively,
-    or even primarily, due to mitochondrial respiration).
+  - `Rd` was renamed to `RL` and its definition was updated to "the rate of
+    non-photorespiratory CO2 release in the light" when necessary, following
+    https://doi.org/10.1093/plphys/kiab076 and https://doi.org/10.1111/pce.14153.
+    This avoid the ambiguity of using a subscript `d` (which can refer to "day"
+    or "dark" in different contexts) and it reflects and updated understanding
+    of the metabolic origin of this term (it is not exclusively, or even
+    primarily, due to mitochondrial respiration).
 
   - Several quantities representing a value at 25 degrees C were renamed to
     better reflect this: `jmax` -> `Jmax_at_25`, `Rd` -> `RL_at_25`,
@@ -72,7 +74,8 @@ be directly added to this file to describe the related changes.
 
 - The `BioCro:parameter_calculator` module no longer recalculates `Vcmax_at_25`.
 
-- The rate of non-photorespiratory CO2 release is now included in the outputs of
+- The rate of non-photorespiratory CO2 release in the light (`RL` or
+  `canopy_non_photorespiratory_CO2_release`) is now included in the outputs of
   photosynthesis modules, including at the canopy level.
 
 - Two new modules were added for calculating cumulative flows of CO2 and water:

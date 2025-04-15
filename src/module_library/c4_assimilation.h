@@ -43,7 +43,7 @@ namespace standardBML
  * - ``'lowerT'`` for the low temperature cutoff for rubisco activity
  * - ``'Qp'`` for the incident quantum flux density of photosynthetically active radiation
  * - ``'rh'`` for the atmospheric relative humidity
- * - ``'RL_at_25'`` for the rate of non-photorespiratory CO2 release at 25 degrees C
+ * - ``'RL_at_25'`` for the rate of non-photorespiratory CO2 release in the light at 25 degrees C
  * - ``'StomataWS'`` for the water stress factor
  * - ``'temp'`` for the ambient temperature
  * - ``'theta'`` for the first quadratic mixing parameter
@@ -60,7 +60,7 @@ namespace standardBML
  * - ``'GrossAssim'`` for the gross CO2 assimilation rate
  * - ``'Gs'`` for the stomatal conductance for H2O
  * - ``'RHs'`` for the relative humidity at the leaf surface
- * - ``'RL'`` for the rate of non-photorespiratory CO2 release
+ * - ``'RL'`` for the rate of non-photorespiratory CO2 release in the light
  * - ``'Rp'`` for the rate of photorespiration
  * - ``'iterations'`` for the number of iterations required for the convergence loop
  */
