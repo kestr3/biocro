@@ -46,6 +46,38 @@ be directly added to this file to describe the related changes.
   This change only affects the solution at low Ci, and does not modify the
   interface of any module.
 
+- Renamed several quantities to make their meanings more clear:
+
+  - `mrc1` has been replaced by `grc_leaf` and `grc_stem` to better indicate
+    that this is a growth respiration coefficient that was applied to two
+    different tissues.
+
+  - `mrc2` has been replaced by `grc_root` and `grc_rhizome` for similar
+    reasons.
+
+  - `GrossAssim_CO2` was renamed to `canopy_gross_assimilation_rate_CO2` for
+    consistency with other canopy-level outputs such as
+    `canopy_assimilation_rate_CO2`.
+
+  - `Rd` was renamed to `RL` and its definition was updated when necessary. This
+    is following best practices for naming (to avoid the ambiguity of the
+    subscript `d`, which can refer to "day" or "dark") and an updated
+    understanding of the biochemical origin of this term (it is not exclusively,
+    or even primarily, due to mitochondrial respiration).
+
+  - Several quantities representing a value at 25 degrees C were renamed to
+    better reflect this: `jmax` -> `Jmax_at_25`, `Rd` -> `RL_at_25`,
+    `tpu_rate_max` -> `Tp_at_25`, `vmax1` -> `Vcmax_at_25`,
+    `vmax` -> `Vcmax_at_25`.
+
+- The `BioCro:parameter_calculator` module no longer recalculates `Vcmax_at_25`.
+
+- The rate of non-photorespiratory CO2 release is now included in the outputs of
+  photosynthesis modules, including at the canopy level.
+
+- Two new modules were added for calculating cumulative flows of CO2 and water:
+  `BioCro:cumulative_carbon_dynamics` and `BioCro:cumulative_water_dynamics`.
+
 ## Bug fixes
 
 - Fixed a an issue where setting `adaptive_max_steps` to `NA` in R would cause
