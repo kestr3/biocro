@@ -20,3 +20,20 @@ test_that('cumulative carbon and water dynamics can be added to crop models', {
         )})
     )
 })
+
+test_that('all partitioning calculators produce the same outputs', {
+    expect_equal(
+        module_info('BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator', verbose = FALSE)$outputs,
+        module_info('BioCro:no_leaf_resp_partitioning_growth_calculator', verbose = FALSE)$outputs
+    )
+
+    expect_equal(
+        module_info('BioCro:no_leaf_resp_partitioning_growth_calculator', verbose = FALSE)$outputs,
+        module_info('BioCro:partitioning_growth_calculator', verbose = FALSE)$outputs
+    )
+
+    expect_equal(
+        module_info('BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator', verbose = FALSE)$outputs,
+        module_info('BioCro:partitioning_growth_calculator', verbose = FALSE)$outputs
+    )
+})

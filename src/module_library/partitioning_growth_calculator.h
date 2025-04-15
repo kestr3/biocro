@@ -55,6 +55,9 @@ namespace standardBML
  *  - `Grain`: The grain growth rate is *not* modified by respiration and is not
  *     allowed to become negative, even when the canopy assimilation rate is
  *     negative.
+ *  - `Shell`: The shell growth rate is *not* modified by respiration and is not
+ *     allowed to become negative, even when the canopy assimilation rate is
+ *     negative.
  *
  *  Here it is assumed that the major effect of water stress on mass
  *  accumulation is a reduction in the leaf growth rate, following
@@ -70,7 +73,7 @@ class partitioning_growth_calculator : public direct_module
         state_map* output_quantities)
         : direct_module{},
 
-          // Get pointers to input quantities
+          // Get references to input quantities
           canopy_assim{get_input(input_quantities, "canopy_assimilation_rate")},
           grc_leaf{get_input(input_quantities, "grc_leaf")},
           grc_rhizome{get_input(input_quantities, "grc_rhizome")},
@@ -80,16 +83,22 @@ class partitioning_growth_calculator : public direct_module
           kLeaf{get_input(input_quantities, "kLeaf")},
           kRhizome{get_input(input_quantities, "kRhizome")},
           kRoot{get_input(input_quantities, "kRoot")},
+          kShell{get_input(input_quantities, "kShell")},
           kStem{get_input(input_quantities, "kStem")},
           LeafWS{get_input(input_quantities, "LeafWS")},
           temp{get_input(input_quantities, "temp")},
 
           // Get pointers to output quantities
+          Leaf_grr_op{get_op(output_quantities, "Leaf_grr")},
           net_assimilation_rate_grain_op{get_op(output_quantities, "net_assimilation_rate_grain")},
           net_assimilation_rate_leaf_op{get_op(output_quantities, "net_assimilation_rate_leaf")},
           net_assimilation_rate_rhizome_op{get_op(output_quantities, "net_assimilation_rate_rhizome")},
           net_assimilation_rate_root_op{get_op(output_quantities, "net_assimilation_rate_root")},
-          net_assimilation_rate_stem_op{get_op(output_quantities, "net_assimilation_rate_stem")}
+          net_assimilation_rate_shell_op{get_op(output_quantities, "net_assimilation_rate_shell")},
+          net_assimilation_rate_stem_op{get_op(output_quantities, "net_assimilation_rate_stem")},
+          Rhizome_grr_op{get_op(output_quantities, "Rhizome_grr")},
+          Root_grr_op{get_op(output_quantities, "Root_grr")},
+          Stem_grr_op{get_op(output_quantities, "Stem_grr")}
     {
     }
     static string_vector get_inputs();
@@ -97,7 +106,7 @@ class partitioning_growth_calculator : public direct_module
     static std::string get_name() { return "partitioning_growth_calculator"; }
 
    private:
-    // Pointers to input quantities
+    // References to input quantities
     const double& canopy_assim;
     const double& grc_leaf;
     const double& grc_rhizome;
@@ -107,16 +116,22 @@ class partitioning_growth_calculator : public direct_module
     const double& kLeaf;
     const double& kRhizome;
     const double& kRoot;
+    const double& kShell;
     const double& kStem;
     const double& LeafWS;
     const double& temp;
 
     // Pointers to output quantities
+    double* Leaf_grr_op;
     double* net_assimilation_rate_grain_op;
     double* net_assimilation_rate_leaf_op;
     double* net_assimilation_rate_rhizome_op;
     double* net_assimilation_rate_root_op;
+    double* net_assimilation_rate_shell_op;
     double* net_assimilation_rate_stem_op;
+    double* Rhizome_grr_op;
+    double* Root_grr_op;
+    double* Stem_grr_op;
 
     // Main operation
     void do_operation() const;
@@ -134,6 +149,7 @@ string_vector partitioning_growth_calculator::get_inputs()
         "kLeaf",                     // dimensionless
         "kRhizome",                  // dimensionless
         "kRoot",                     // dimensionless
+        "kShell",                    // dimensionless
         "kStem",                     // dimensionless
         "LeafWS",                    // dimensionless
         "temp"                       // degrees C
@@ -143,47 +159,58 @@ string_vector partitioning_growth_calculator::get_inputs()
 string_vector partitioning_growth_calculator::get_outputs()
 {
     return {
+        "Leaf_grr",                       // Mg / ha / hour
         "net_assimilation_rate_grain",    // Mg / ha / hour
         "net_assimilation_rate_leaf",     // Mg / ha / hour
         "net_assimilation_rate_rhizome",  // Mg / ha / hour
         "net_assimilation_rate_root",     // Mg / ha / hour
-        "net_assimilation_rate_stem"      // Mg / ha / hour
+        "net_assimilation_rate_shell",    // Mg / ha / hour
+        "net_assimilation_rate_stem",     // Mg / ha / hour
+        "Rhizome_grr",                    // Mg / ha / hour
+        "Root_grr",                       // Mg / ha / hour
+        "Stem_grr"                        // Mg / ha / hour
     };
 }
 
 void partitioning_growth_calculator::do_operation() const
 {
-    // Calculate the rate of new leaf production, accounting for water stress
-    // and additional respiratory costs due to growth (Mg / ha / hr)
-    double const net_assimilation_rate_leaf{
-        kLeaf > 0 ? growth_resp(canopy_assim * kLeaf * LeafWS, grc_leaf, temp) : 0};
+    // Calculate the base rate of new leaf production, accounting for water
+    // stress and the associated respiratory costs (Mg / ha / hr)
+    double const base_rate_leaf{kLeaf > 0 ? canopy_assim * kLeaf * LeafWS : 0};
+    double const Leaf_grr{growth_resp(base_rate_leaf, grc_leaf, temp)};
 
-    // Calculate the rate of new stem production, accounting for respiratory
-    // costs (Mg / ha / hr)
-    double const net_assimilation_rate_stem{
-        kStem > 0 ? growth_resp(canopy_assim * kStem, grc_stem, temp) : 0};
+    // Calculate the base rate of new stem production and the associated
+    // respiratory costs (Mg / ha / hr)
+    double const base_rate_stem{kStem > 0 ? canopy_assim * kStem : 0};
+    double const Stem_grr{growth_resp(base_rate_stem, grc_stem, temp)};
 
-    // Calculate the rate of new root production, accounting for respiratory
-    // costs (Mg / ha / hr)
-    double const net_assimilation_rate_root{
-        kRoot > 0 ? growth_resp(canopy_assim * kRoot, grc_root, temp) : 0};
+    // Calculate the base rate of new root production and the associated
+    // respiratory costs (Mg / ha / hr)
+    double const base_rate_root{kRoot > 0 ? canopy_assim * kRoot : 0};
+    double const Root_grr{growth_resp(base_rate_root, grc_root, temp)};
 
-    // Calculate the rate of new rhizome production, accounting for respiratory
-    // costs (Mg / ha / hr)
-    double const net_assimilation_rate_rhizome{
-        kRhizome > 0 ? growth_resp(canopy_assim * kRhizome, grc_rhizome, temp) : 0};
+    // Calculate the base rate of new rhizome production and the associated
+    // respiratory costs (Mg / ha / hr)
+    double const base_rate_rhizome{kRhizome > 0 ? canopy_assim * kRhizome : 0};
+    double const Rhizome_grr = growth_resp(base_rate_rhizome, grc_rhizome, temp);
 
-    // Calculate the rate of new grain production without any respiratory costs
-    // (Mg / ha / hr)
-    double const net_assimilation_rate_grain{
-        kGrain > 0 ? canopy_assim * kGrain : 0};
+    // Calculate the base rate of new grain production (Mg / ha / hr)
+    double const base_rate_grain{kGrain > 0 && canopy_assim > 0 ? canopy_assim * kGrain : 0};
+
+    // Calculate the base rate of new shell production (Mg / ha / hr)
+    double const base_rate_shell{kShell > 0 && canopy_assim > 0 ? canopy_assim * kShell : 0};
 
     // Update the output quantity list
-    update(net_assimilation_rate_grain_op, net_assimilation_rate_grain);
-    update(net_assimilation_rate_leaf_op, net_assimilation_rate_leaf);
-    update(net_assimilation_rate_rhizome_op, net_assimilation_rate_rhizome);
-    update(net_assimilation_rate_root_op, net_assimilation_rate_root);
-    update(net_assimilation_rate_stem_op, net_assimilation_rate_stem);
+    update(Leaf_grr_op, Leaf_grr);
+    update(net_assimilation_rate_grain_op, base_rate_grain);
+    update(net_assimilation_rate_leaf_op, base_rate_leaf - Leaf_grr);
+    update(net_assimilation_rate_rhizome_op, base_rate_rhizome - Rhizome_grr);
+    update(net_assimilation_rate_root_op, base_rate_root - Root_grr);
+    update(net_assimilation_rate_shell_op, base_rate_shell);
+    update(net_assimilation_rate_stem_op, base_rate_stem - Stem_grr);
+    update(Rhizome_grr_op, Rhizome_grr);
+    update(Root_grr_op, Root_grr);
+    update(Stem_grr_op, Stem_grr);
 }
 
 }  // namespace standardBML

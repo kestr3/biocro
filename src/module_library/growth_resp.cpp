@@ -2,53 +2,47 @@
 #include "temperature_response_functions.h"  // for Q10_temperature_response
 
 /**
- *  @brief Subtracts respiratory losses from a carbon production rate
+ *  @brief Calculates respiratory losses associated with a particular base rate
+ *         of biomass available for growth.
  *
  *  @param [in] base_rate The base rate of carbon production that does not
- *                        include respiratory losses. Any units are acceptable,
- *                        e.g. mol / m^2 / s or Mg / ha / hour.
+ *         include respiratory losses. Any units are acceptable, such as
+ *         mol / m^2 / s or Mg / ha / hour.
  *
  *  @param [in] grc Growth respiration coefficient (dimensionless)
  *
  *  @param [in] temp Temperature (degrees C)
  *
- *  @return A modified rate having the same units as `base_rate` where
- *          respiratory losses have been subtracted
+ *  @return A rate of respiratory losses having the same units as `base_rate`
  *
  *  ### Model overview
  *
- *  The idea here is that the net carbon assimilation rate (`A_n`) is given by
+ *  The idea here is that when `A_base` is the rate of carbon being allocated to
+ *  a tissue for growth, a fraction `f_g` of this carbon is lost to respiration
+ *  rather than being converted into new biomass. In other words, the rate of
+ *  respiratory losses `R_g` is given by
  *
- *  > `A_n = A_g - R` (1)
+ *  > `R_g = f_g * A_base (1)
  *
- *  where `A_g` is the gross assimilation rate or the production rate and `R` is
- *  the respiration rate. A further assumption is that respiration is
- *  proportional to production, i.e.
+ *  The remaining carbon available for growth (`A_growth`) is given by
  *
- *  > `R = R_c * A_g` (2)
- *
- *  where `R_c` is a dimensionless coefficient that lies on the interval [0,1].
- *  Combining equations (1) and (2), we can express the net assimilation rate
- *  as a function of the gross assimilation rate and the respiration
- *  coefficient:
- *
- *  > `A_n = A_g - R_c * A_g =  A_g * (1 - R_c)` (3)
+ *  > `A_growth = A_base * (1 - f_g) (2)
  *
  *  In this function, the temperature dependence of the respiration coefficient
  *  is modeled using a simple "Q10" method where `Q10 = 2` and the base
  *  temperature is 0 degrees C, i.e.,
  *
- *  > `R_c = R_c_0 * 2^(T / 10)` (4)
+ *  > `f_g = f_g_0 * 2^(T / 10)` (3)
  *
- *  where `T` is the temperature in Celsius. Combining equations (3) and (4), we
- *  finally arrive at a relationship between net assimilation, gross
- *  assimilation, and temperature:
+ *  Ever since the days of WIMOVAC, there has been an additional constraint that
+ *  `A_growth` is clamped to be greater than or equal to zero. From
+ *  Equation (2), we can see that `A_growth` would be negative whenever `A_base`
+ *  is negative, since the fraction `f_g` must lie on [0, 1] by definition. So,
+ *  this clamping operation is equivalent to setting `f_g` = 1 when `A_base` is
+ *  negative.
  *
- *  > `A_n = A_g * (1 - R_c_0 * 2^(T / 10))` (5)
- *
- *  In the code below, `base_rate` represents the gross assimilation rate `A_g`,
- *  `mrc` represents the maintenance respiration coefficient `R_c_0`, and `temp`
- *  represents the temperature `T`.
+ *  In the code below, `base_rate` represents `A_base`, `grc0` and `grc`
+ *  represent `f_g_0` and `f_g`, and `temp` represents the temperature `T`.
  *
  *  ### Sources
  *
@@ -99,17 +93,23 @@
  *  experiments with WIMOVAC: (Windows Intuitive Model of Vegetation response
  *  to Atmosphere & Climate Change)" (University of Essex, 2002)
  *
- *  [YH] This function scales the assimilation rate. It should be called the growth
- *  respiration instead of maintenance respiration, as defined in these papers:
+ *  Originally, this function was described as applying costs due to maintenance
+ *  respiration. Yufeng [YH] has pointed out that since the cost is proportional
+ *  to the growth rate, this is actually growth respiration. See these papers:
  *  - Apsim: (https://apsimdev.apsim.info/ApsimX/Documents/AgPastureScience.pdf)
  *  - Thornley, J. H. M. "Growth, maintenance and respiration: a re-interpretation."
  *    Annals of Botany 41.6 (1977): 1191-1203.
  */
-double growth_resp(double base_rate, double grc, double temp)
+double growth_resp(double const base_rate, double const grc0, double const temp)
 {
-    double ans = base_rate * (1 - (grc * Q10_temperature_response(temp, 0.0)));
+    // Get the growth respiration coefficient at the current temperature
+    double const grc{base_rate < 0 ? 1.0
+                                   : grc0 * Q10_temperature_response(temp, 0.0)};  // dimensionless
 
-    if (ans < 0) ans = 0;
+    // Check for error conditions
+    if (grc < 0.0 || grc > 1.0) {
+        throw std::range_error("Thrown in growth_resp: grc is outside [0, 1].");
+    }
 
-    return ans;
+    return base_rate < 0 ? base_rate : base_rate * grc;
 }

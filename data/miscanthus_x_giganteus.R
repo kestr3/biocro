@@ -117,7 +117,6 @@ miscanthus_x_giganteus <- list(
         min_gbw_canopy              = 0.005,
         nalphab0                    = 0.02367,
         nalphab1                    = 0.000488,
-        net_assimilation_rate_shell = 0.0,
         nileafn                     = 85,
         nkln                        = 0.5,
         nkpLN                       = 0.17,
