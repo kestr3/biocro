@@ -53,11 +53,11 @@ class multilayer_canopy_integrator : public direct_module
           lai{get_input(input_quantities, "lai")},
 
           // Get pointers to output quantities
-          canopy_assimilation_rate_molar_op{get_op(output_quantities, "canopy_assimilation_rate_molar")},
+          canopy_assimilation_molar_flux_op{get_op(output_quantities, "canopy_assimilation_molar_flux")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
-          canopy_gross_assimilation_rate_molar_op{get_op(output_quantities, "canopy_gross_assimilation_rate_molar")},
-          canopy_photorespiration_rate_molar_op{get_op(output_quantities, "canopy_photorespiration_rate_molar")},
-          canopy_RL_molar_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate_molar")},
+          canopy_gross_assimilation_molar_flux_op{get_op(output_quantities, "canopy_gross_assimilation_molar_flux")},
+          canopy_photorespiration_molar_flux_op{get_op(output_quantities, "canopy_photorespiration_molar_flux")},
+          canopy_RL_molar_flux_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_molar_flux")},
           canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {
     }
@@ -87,11 +87,11 @@ class multilayer_canopy_integrator : public direct_module
     double const& lai;
 
     // Pointers to output quantities
-    double* canopy_assimilation_rate_molar_op;
+    double* canopy_assimilation_molar_flux_op;
     double* canopy_conductance_op;
-    double* canopy_gross_assimilation_rate_molar_op;
-    double* canopy_photorespiration_rate_molar_op;
-    double* canopy_RL_molar_op;
+    double* canopy_gross_assimilation_molar_flux_op;
+    double* canopy_photorespiration_molar_flux_op;
+    double* canopy_RL_molar_flux_op;
     double* canopy_transpiration_rate_op;
 
     // Main operation
@@ -145,11 +145,11 @@ string_vector multilayer_canopy_integrator::get_inputs(int nlayers)
 string_vector multilayer_canopy_integrator::get_outputs(int /*nlayers*/)
 {
     return {
-        "canopy_assimilation_rate_molar",                      // micromol CO2 / m^2 / s
+        "canopy_assimilation_molar_flux",                      // micromol CO2 / m^2 / s
         "canopy_conductance",                                  // mmol / m^2 / s
-        "canopy_gross_assimilation_rate_molar",                // micromol CO2 / m^2 / s
-        "canopy_non_photorespiratory_CO2_release_rate_molar",  // micromol CO2 / m^2 / s
-        "canopy_photorespiration_rate_molar",                  // micromol CO2 / m^2 / s
+        "canopy_gross_assimilation_molar_flux",                // micromol CO2 / m^2 / s
+        "canopy_non_photorespiratory_CO2_release_molar_flux",  // micromol CO2 / m^2 / s
+        "canopy_photorespiration_molar_flux",                  // micromol CO2 / m^2 / s
         "canopy_transpiration_rate"                            // Mg / ha / hr
     };
 }
@@ -212,11 +212,11 @@ void multilayer_canopy_integrator::run() const
     // = 36 s * mol * Mg * m^2 / (hr * mmol * kg * ha)
     const double cf2 = physical_constants::molar_mass_of_water * 36;  // (Mg / ha / hr) / (mmol / m^2 / s)
 
-    update(canopy_assimilation_rate_molar_op, canopy_assimilation_rate);
+    update(canopy_assimilation_molar_flux_op, canopy_assimilation_rate);
     update(canopy_conductance_op, canopy_conductance);
-    update(canopy_gross_assimilation_rate_molar_op, canopy_gross_assimilation_rate);
-    update(canopy_photorespiration_rate_molar_op, canopy_photorespiration_rate);
-    update(canopy_RL_molar_op, canopy_RL);
+    update(canopy_gross_assimilation_molar_flux_op, canopy_gross_assimilation_rate);
+    update(canopy_photorespiration_molar_flux_op, canopy_photorespiration_rate);
+    update(canopy_RL_molar_flux_op, canopy_RL);
     update(canopy_transpiration_rate_op, canopy_transpiration_rate * cf2);
 }
 

@@ -62,15 +62,16 @@ be directly added to this file to describe the related changes.
     one coefficient for both.
 
   - Molar fluxes (with units of micromol / m^2 / s) are now distinguished from
-    mass fluxes (with units of Mg / ha / hr) when necessary by appending
-    `_molar` to the quantity name. For example, `canopy_assimilation_rate_molar`
-    vs. `canopy_assimilation_rate`. Previously the molar fluxes had a suffix of
-    `_CO2`, so this necessitated renaming two quantities:
+    mass fluxes (with units of Mg / ha / hr) when necessary by replacing `_rate`
+    with `_molar_flux` in the quantity name. For example,
+    `canopy_assimilation_molar_flux` is a molar flux and
+    `canopy_assimilation_rate` is a mass flux. Previously the molar fluxes had a
+    suffix of `_CO2`, so this necessitated renaming two quantities:
     `canopy_assimilation_rate_CO2` and `canopy_photorespiration_rate_CO2`.
 
-  - `GrossAssim_CO2` was renamed to `canopy_gross_assimilation_rate_molar` for
+  - `GrossAssim_CO2` was renamed to `canopy_gross_assimilation_molar_flux` for
     consistency with other canopy-level molar flux outputs such as
-    `canopy_assimilation_rate_molar`.
+    `canopy_assimilation_molar_flux`.
 
   - `Rd` was renamed to `RL` and its definition was updated to "the rate of
     non-photorespiratory CO2 release in the light" when necessary, following
