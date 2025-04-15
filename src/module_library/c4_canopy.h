@@ -66,11 +66,11 @@ class c4_canopy : public direct_module
           windspeed{get_input(input_quantities, "windspeed")},
 
           // Get pointers to output quantities
-          canopy_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_assimilation_rate_CO2")},
+          canopy_assimilation_rate_molar_op{get_op(output_quantities, "canopy_assimilation_rate_molar")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
-          canopy_gross_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_gross_assimilation_rate_CO2")},
-          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate_CO2")},
-          canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")},
+          canopy_gross_assimilation_rate_molar_op{get_op(output_quantities, "canopy_gross_assimilation_rate_molar")},
+          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate_molar")},
+          canopy_photorespiration_rate_molar_op{get_op(output_quantities, "canopy_photorespiration_rate_molar")},
           canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {
     }
@@ -130,11 +130,11 @@ class c4_canopy : public direct_module
     double const& windspeed;
 
     // Pointers to output quantities
-    double* canopy_assimilation_rate_CO2_op;
+    double* canopy_assimilation_rate_molar_op;
     double* canopy_conductance_op;
-    double* canopy_gross_assimilation_rate_CO2_op;
+    double* canopy_gross_assimilation_rate_molar_op;
     double* canopy_non_photorespiratory_CO2_release_rate_op;
-    double* canopy_photorespiration_rate_CO2_op;
+    double* canopy_photorespiration_rate_molar_op;
     double* canopy_transpiration_rate_op;
 
     // Main operation
@@ -198,12 +198,12 @@ string_vector c4_canopy::get_inputs()
 string_vector c4_canopy::get_outputs()
 {
     return {
-        "canopy_assimilation_rate_CO2",                      // micromol / m^2 / s
-        "canopy_conductance",                                // mol / m^2 / s
-        "canopy_gross_assimilation_rate_CO2",                // micromol / m^2 / s
-        "canopy_non_photorespiratory_CO2_release_rate_CO2",  // micromol / m^2 / s
-        "canopy_photorespiration_rate_CO2",                  // micromol / m^2 / s
-        "canopy_transpiration_rate"                          // Mg / ha / hr
+        "canopy_assimilation_rate_molar",                      // micromol / m^2 / s
+        "canopy_conductance",                                  // mol / m^2 / s
+        "canopy_gross_assimilation_rate_molar",                // micromol / m^2 / s
+        "canopy_non_photorespiratory_CO2_release_rate_molar",  // micromol / m^2 / s
+        "canopy_photorespiration_rate_molar",                  // micromol / m^2 / s
+        "canopy_transpiration_rate"                            // Mg / ha / hr
     };
 }
 
@@ -264,11 +264,11 @@ void c4_canopy::do_operation() const
         nlayers);
 
     // Update the parameter list
-    update(canopy_assimilation_rate_CO2_op, can_result.Assim);               // micromol / m^2 /s
+    update(canopy_assimilation_rate_molar_op, can_result.Assim);             // micromol / m^2 /s
     update(canopy_conductance_op, can_result.canopy_conductance);            // mol / m^2 / s
-    update(canopy_gross_assimilation_rate_CO2_op, can_result.GrossAssim);    // micromol / m^2 /s
+    update(canopy_gross_assimilation_rate_molar_op, can_result.GrossAssim);  // micromol / m^2 /s
     update(canopy_non_photorespiratory_CO2_release_rate_op, can_result.RL);  // micromol / m^2 / s
-    update(canopy_photorespiration_rate_CO2_op, can_result.Rp);              // micromol / m^2 /s
+    update(canopy_photorespiration_rate_molar_op, can_result.Rp);            // micromol / m^2 /s
     update(canopy_transpiration_rate_op, can_result.Trans);                  // Mg / ha / hr
 }
 }  // namespace standardBML

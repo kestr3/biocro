@@ -55,9 +55,16 @@ be directly added to this file to describe the related changes.
   - `mrc2` has been replaced by `grc_root` and `grc_rhizome` for similar
     reasons.
 
-  - `GrossAssim_CO2` was renamed to `canopy_gross_assimilation_rate_CO2` for
-    consistency with other canopy-level outputs such as
-    `canopy_assimilation_rate_CO2`.
+  - Molar fluxes (with units of micromol / m^2 / s) are now distinguished from
+    mass fluxes (with units of Mg / ha / hr) when necessary by appending
+    `_molar` to the quantity name. For example, `canopy_assimilation_rate_molar`
+    vs. `canopy_assimilation_rate`. Previously the molar fluxes had a suffix of
+    `_CO2`, so this necessitated renaming two quantities:
+    `canopy_assimilation_rate_CO2` and `canopy_photorespiration_rate_CO2`.
+
+  - `GrossAssim_CO2` was renamed to `canopy_gross_assimilation_rate_molar` for
+    consistency with other canopy-level molar flux outputs such as
+    `canopy_assimilation_rate_molar`.
 
   - `Rd` was renamed to `RL` and its definition was updated to "the rate of
     non-photorespiratory CO2 release in the light" when necessary, following

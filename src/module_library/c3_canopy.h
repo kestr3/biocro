@@ -81,11 +81,11 @@ class c3_canopy : public direct_module
           windspeed_height{get_input(input_quantities, "windspeed_height")},
 
           // Get pointers to output quantities
-          canopy_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_assimilation_rate_CO2")},
+          canopy_assimilation_rate_molar_op{get_op(output_quantities, "canopy_assimilation_rate_molar")},
           canopy_conductance_op{get_op(output_quantities, "canopy_conductance")},
-          canopy_gross_assimilation_rate_CO2_op{get_op(output_quantities, "canopy_gross_assimilation_rate_CO2")},
-          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate_CO2")},
-          canopy_photorespiration_rate_CO2_op{get_op(output_quantities, "canopy_photorespiration_rate_CO2")},
+          canopy_gross_assimilation_rate_molar_op{get_op(output_quantities, "canopy_gross_assimilation_rate_molar")},
+          canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate_molar")},
+          canopy_photorespiration_rate_molar_op{get_op(output_quantities, "canopy_photorespiration_rate_molar")},
           canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
     {
     }
@@ -161,11 +161,11 @@ class c3_canopy : public direct_module
     double const& windspeed_height;
 
     // Pointers to output quantities
-    double* canopy_assimilation_rate_CO2_op;
+    double* canopy_assimilation_rate_molar_op;
     double* canopy_conductance_op;
-    double* canopy_gross_assimilation_rate_CO2_op;
+    double* canopy_gross_assimilation_rate_molar_op;
     double* canopy_non_photorespiratory_CO2_release_rate_op;
-    double* canopy_photorespiration_rate_CO2_op;
+    double* canopy_photorespiration_rate_molar_op;
     double* canopy_transpiration_rate_op;
 
     // Main operation
