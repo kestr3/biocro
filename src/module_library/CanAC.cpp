@@ -12,19 +12,20 @@ canopy_photosynthesis_outputs CanAC(
     const nitroParms& nitroP,
     double absorbed_longwave,  // J / m^2 / s
     double Alpha,
-    double ambient_temperature,        // degrees C
-    double atmospheric_pressure,       // Pa
-    double atmospheric_scattering,     // dimensionless
-    double atmospheric_transmittance,  // dimensionless
-    double b0,                         // mol / m^2 / s
-    double b1,                         // dimensionless
-    double beta,                       // dimensionless
-    double Catm,                       // ppm
-    double chil,                       // dimensionless
-    double cosine_zenith_angle,        // dimensionless
-    double gbw_canopy,                 // m / s
-    double Gs_min,                     // mol / m^2 / s
-    double k_diffuse,                  // dimensionless
+    double ambient_temperature,          // degrees C
+    double atmospheric_pressure,         // Pa
+    double atmospheric_scattering,       // dimensionless
+    double atmospheric_transmittance,    // dimensionless
+    double b0,                           // mol / m^2 / s
+    double b1,                           // dimensionless
+    double beta,                         // dimensionless
+    double Catm,                         // ppm
+    double chil,                         // dimensionless
+    double cosine_zenith_angle,          // dimensionless
+    double gbw_canopy,                   // m / s
+    double growth_respiration_fraction,  // dimensionless
+    double Gs_min,                       // mol / m^2 / s
+    double k_diffuse,                    // dimensionless
     double Kparm,
     double kpLN,
     double LAI,                     // dimensionless from m^2 / m^2
@@ -211,15 +212,15 @@ canopy_photosynthesis_outputs CanAC(
     // = 36 s * mol * Mg * m^2 / (hr * mmol * kg * ha)
     const double cf2 = physical_constants::molar_mass_of_water * 36;  // (Mg / ha / hr) / (mmol / m^2 / s)
 
-    canopy_photosynthesis_outputs ans;
-    ans.Assim = CanopyA;                           // micromol / m^2 / s
-    ans.GrossAssim = GCanopyA;                     // micromol / m^2 / s
-    ans.Rp = canopy_rp;                            // micromol / m^2 / s
-    ans.RL = canopy_RL;                            // micromol / m^2 / s
-    ans.Trans = CanopyT * cf2;                     // Mg / ha / hr
-    ans.canopy_transpiration_penman = CanopyPe;    // mmol / m^2 / s
-    ans.canopy_transpiration_priestly = CanopyPr;  // mmol / m^2 / s
-    ans.canopy_conductance = canopy_conductance;   // mol / m^2 / s
-
-    return ans;
+    return canopy_photosynthesis_outputs{
+        /* .Assim = */ CanopyA * (1.0 - growth_respiration_fraction),  // micromol / m^2 / s
+        /* .canopy_conductance = */ canopy_conductance,                // mol / m^2 / s
+        /* .canopy_transpiration_penman = */ CanopyPe,                 // mmol / m^2 / s
+        /* .canopy_transpiration_priestly = */ CanopyPr,               // mmol / m^2 / s
+        /* .GrossAssim = */ GCanopyA,                                  // micromol / m^2 / s
+        /* .RL = */ canopy_RL,                                         // micromol / m^2 / s
+        /* .Rp = */ canopy_rp,                                         // micromol / m^2 / s
+        /* .Trans = */ CanopyT * cf2,                                  // Mg / ha / hr
+        /* .whole_plant_gr = */ CanopyA * growth_respiration_fraction  // micromol / m^2 / s
+    };
 }

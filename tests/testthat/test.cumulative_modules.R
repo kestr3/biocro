@@ -7,20 +7,26 @@ test_that('cumulative carbon and water dynamics can be added to the soybean mode
                 canopy_non_photorespiratory_CO2_release = 0,
                 canopy_photorespiration = 0,
                 canopy_transpiration = 0,
+                Grain_gr = 0,
                 Grain_mr = 0,
                 Leaf_gr = 0,
                 Leaf_mr = 0,
+                Leaf_WS_loss = 0,
                 Rhizome_gr = 0,
                 Rhizome_mr = 0,
                 Root_gr = 0,
                 Root_mr = 0,
+                Shell_gr = 0,
                 Shell_mr = 0,
                 soil_evaporation = 0,
                 Stem_gr = 0,
                 Stem_mr = 0,
-                total_precip = 0
+                total_precip = 0,
+                whole_plant_growth_respiration = 0
             )),
-            parameters,
+            within(parameters, {
+                growth_respiration_fraction = 0.01
+            }),
             soybean_weather[['2002']],
             direct_modules,
             c(differential_modules, list(
@@ -35,31 +41,33 @@ test_that('cumulative carbon and water dynamics can be added to the soybean mode
     # leaf, growth respiration, maintenance respiration, tissue growth, and
     # litter formation.
     soybean_res$total_carbon_use <- with(soybean_res, {
-        canopy_non_photorespiratory_CO2_release +
-        canopy_photorespiration +
         (Grain - soybean$initial_values$Grain) +
-        Grain_mr +
         (Leaf - soybean$initial_values$Leaf) +
-        Leaf_gr +
-        Leaf_mr +
         (LeafLitter - soybean$initial_values$LeafLitter) +
         (Rhizome - soybean$initial_values$Rhizome) +
-        Rhizome_gr +
-        Rhizome_mr +
         (RhizomeLitter - soybean$initial_values$RhizomeLitter) +
         (Root - soybean$initial_values$Root) +
-        Root_gr +
-        Root_mr +
         (RootLitter - soybean$initial_values$RootLitter) +
         (Shell - soybean$initial_values$Shell) +
-        Shell_mr +
         (Stem - soybean$initial_values$Stem) +
+        (StemLitter - soybean$initial_values$StemLitter) +
+        canopy_non_photorespiratory_CO2_release +
+        canopy_photorespiration +
+        Grain_gr +
+        Grain_mr +
+        Leaf_gr +
+        Leaf_mr +
+        Leaf_WS_loss +
+        Rhizome_gr +
+        Rhizome_mr +
+        Root_gr +
+        Root_mr +
+        Shell_gr +
+        Shell_mr +
         Stem_gr +
         Stem_mr +
-        (StemLitter - soybean$initial_values$StemLitter)
+        whole_plant_growth_respiration
     })
-
-    skip('Some carbon usage is not counted; skipping for now')
 
     expect_equal(
         soybean_res$canopy_gross_assimilation,
@@ -76,18 +84,22 @@ test_that('cumulative carbon and water dynamics can be added to the willow model
                 canopy_non_photorespiratory_CO2_release = 0,
                 canopy_photorespiration = 0,
                 canopy_transpiration = 0,
+                Grain_gr = 0,
                 Grain_mr = 0,
                 Leaf_gr = 0,
                 Leaf_mr = 0,
+                Leaf_WS_loss = 0,
                 Rhizome_gr = 0,
                 Rhizome_mr = 0,
                 Root_gr = 0,
                 Root_mr = 0,
+                Shell_gr = 0,
                 Shell_mr = 0,
                 soil_evaporation = 0,
                 Stem_gr = 0,
                 Stem_mr = 0,
-                total_precip = 0
+                total_precip = 0,
+                whole_plant_growth_respiration = 0
             )),
             c(parameters, list(
                 Grain_mr_rate = 0,
@@ -116,18 +128,22 @@ test_that('cumulative carbon and water dynamics can be added to the miscanthus m
                 canopy_non_photorespiratory_CO2_release = 0,
                 canopy_photorespiration = 0,
                 canopy_transpiration = 0,
+                Grain_gr = 0,
                 Grain_mr = 0,
                 Leaf_gr = 0,
                 Leaf_mr = 0,
+                Leaf_WS_loss = 0,
                 Rhizome_gr = 0,
                 Rhizome_mr = 0,
                 Root_gr = 0,
                 Root_mr = 0,
+                Shell_gr = 0,
                 Shell_mr = 0,
                 soil_evaporation = 0,
                 Stem_gr = 0,
                 Stem_mr = 0,
-                total_precip = 0
+                total_precip = 0,
+                whole_plant_growth_respiration = 0
             )),
             c(parameters, list(
                 Grain_mr_rate = 0,
