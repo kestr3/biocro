@@ -111,5 +111,5 @@ double growth_resp(double const base_rate, double const grc0, double const temp)
         throw std::range_error("Thrown in growth_resp: grc is outside [0, 1].");
     }
 
-    return base_rate < 0 ? base_rate : base_rate * grc;
+    return base_rate * grc;
 }

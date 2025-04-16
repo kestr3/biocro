@@ -210,6 +210,7 @@ void no_leaf_resp_partitioning_growth_calculator::do_operation() const
     double const Shell_gr_rate{0.0};
 
     // Update the output quantity list
+    update(Grain_gr_rate_op, Grain_gr_rate);
     update(Leaf_gr_rate_op, Leaf_gr_rate);
     update(Leaf_WS_loss_rate_op, Leaf_WS_loss_rate);
     update(net_assimilation_rate_grain_op, base_rate_grain - Grain_gr_rate);
@@ -220,6 +221,7 @@ void no_leaf_resp_partitioning_growth_calculator::do_operation() const
     update(net_assimilation_rate_stem_op, base_rate_stem - Stem_gr_rate);
     update(Rhizome_gr_rate_op, Rhizome_gr_rate);
     update(Root_gr_rate_op, Root_gr_rate);
+    update(Shell_gr_rate_op, Shell_gr_rate);
     update(Stem_gr_rate_op, Stem_gr_rate);
 }
 
