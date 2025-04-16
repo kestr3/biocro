@@ -25,12 +25,12 @@ class maintenance_respiration : public differential_module
         : differential_module{},
 
           // Get references to input quantities
-          Grain_mrr{get_input(input_quantities, "Grain_mrr")},
-          Leaf_mrr{get_input(input_quantities, "Leaf_mrr")},
-          Rhizome_mrr{get_input(input_quantities, "Rhizome_mrr")},
-          Root_mrr{get_input(input_quantities, "Root_mrr")},
-          Shell_mrr{get_input(input_quantities, "Shell_mrr")},
-          Stem_mrr{get_input(input_quantities, "Stem_mrr")},
+          Grain_mr_rate{get_input(input_quantities, "Grain_mr_rate")},
+          Leaf_mr_rate{get_input(input_quantities, "Leaf_mr_rate")},
+          Rhizome_mr_rate{get_input(input_quantities, "Rhizome_mr_rate")},
+          Root_mr_rate{get_input(input_quantities, "Root_mr_rate")},
+          Shell_mr_rate{get_input(input_quantities, "Shell_mr_rate")},
+          Stem_mr_rate{get_input(input_quantities, "Stem_mr_rate")},
 
           // Get pointers to output quantities
           Grain_op{get_op(output_quantities, "Grain")},
@@ -47,12 +47,12 @@ class maintenance_respiration : public differential_module
 
    private:
     // References to input quantities
-    const double& Grain_mrr;
-    const double& Leaf_mrr;
-    const double& Rhizome_mrr;
-    const double& Root_mrr;
-    const double& Shell_mrr;
-    const double& Stem_mrr;
+    const double& Grain_mr_rate;
+    const double& Leaf_mr_rate;
+    const double& Rhizome_mr_rate;
+    const double& Root_mr_rate;
+    const double& Shell_mr_rate;
+    const double& Stem_mr_rate;
 
     // Pointers to output quantities
     double* Grain_op;
@@ -69,12 +69,12 @@ class maintenance_respiration : public differential_module
 string_vector maintenance_respiration::get_inputs()
 {
     return {
-        "Grain_mrr",    // Mg / ha / hr
-        "Leaf_mrr",     // Mg / ha / hr
-        "Rhizome_mrr",  // Mg / ha / hr
-        "Root_mrr",     // Mg / ha / hr
-        "Shell_mrr",    // Mg / ha / hr
-        "Stem_mrr"      // Mg / ha / hr
+        "Grain_mr_rate",    // Mg / ha / hr
+        "Leaf_mr_rate",     // Mg / ha / hr
+        "Rhizome_mr_rate",  // Mg / ha / hr
+        "Root_mr_rate",     // Mg / ha / hr
+        "Shell_mr_rate",    // Mg / ha / hr
+        "Stem_mr_rate"      // Mg / ha / hr
     };
 }
 
@@ -92,12 +92,12 @@ string_vector maintenance_respiration::get_outputs()
 
 void maintenance_respiration::do_operation() const
 {
-    update(Grain_op, -Grain_mrr);      // Mg / ha / hr
-    update(Leaf_op, -Leaf_mrr);        // Mg / ha / hr
-    update(Rhizome_op, -Rhizome_mrr);  // Mg / ha / hr
-    update(Root_op, -Root_mrr);        // Mg / ha / hr
-    update(Shell_op, -Shell_mrr);      // Mg / ha / hr
-    update(Stem_op, -Stem_mrr);        // Mg / ha / hr
+    update(Grain_op, -Grain_mr_rate);      // Mg / ha / hr
+    update(Leaf_op, -Leaf_mr_rate);        // Mg / ha / hr
+    update(Rhizome_op, -Rhizome_mr_rate);  // Mg / ha / hr
+    update(Root_op, -Root_mr_rate);        // Mg / ha / hr
+    update(Shell_op, -Shell_mr_rate);      // Mg / ha / hr
+    update(Stem_op, -Stem_mr_rate);        // Mg / ha / hr
 }
 
 }  // namespace standardBML

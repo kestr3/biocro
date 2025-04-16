@@ -40,16 +40,16 @@ class cumulative_carbon_dynamics : public differential_module
           canopy_gross_assimilation_rate{get_input(input_quantities, "canopy_gross_assimilation_rate")},
           canopy_photorespiration_rate{get_input(input_quantities, "canopy_photorespiration_rate")},
           canopy_RL_rate{get_input(input_quantities, "canopy_non_photorespiratory_CO2_release_rate")},
-          Grain_mrr{get_input(input_quantities, "Grain_mrr")},
-          Leaf_grr{get_input(input_quantities, "Leaf_grr")},
-          Leaf_mrr{get_input(input_quantities, "Leaf_mrr")},
-          Rhizome_grr{get_input(input_quantities, "Rhizome_grr")},
-          Rhizome_mrr{get_input(input_quantities, "Rhizome_mrr")},
-          Root_grr{get_input(input_quantities, "Root_grr")},
-          Root_mrr{get_input(input_quantities, "Root_mrr")},
-          Shell_mrr{get_input(input_quantities, "Shell_mrr")},
-          Stem_grr{get_input(input_quantities, "Stem_grr")},
-          Stem_mrr{get_input(input_quantities, "Stem_mrr")},
+          Grain_mr_rate{get_input(input_quantities, "Grain_mr_rate")},
+          Leaf_gr_rate{get_input(input_quantities, "Leaf_gr_rate")},
+          Leaf_mr_rate{get_input(input_quantities, "Leaf_mr_rate")},
+          Rhizome_gr_rate{get_input(input_quantities, "Rhizome_gr_rate")},
+          Rhizome_mr_rate{get_input(input_quantities, "Rhizome_mr_rate")},
+          Root_gr_rate{get_input(input_quantities, "Root_gr_rate")},
+          Root_mr_rate{get_input(input_quantities, "Root_mr_rate")},
+          Shell_mr_rate{get_input(input_quantities, "Shell_mr_rate")},
+          Stem_gr_rate{get_input(input_quantities, "Stem_gr_rate")},
+          Stem_mr_rate{get_input(input_quantities, "Stem_mr_rate")},
 
           // Get pointers to output quantities
           canopy_assimilation_op{get_op(output_quantities, "canopy_assimilation")},
@@ -78,16 +78,16 @@ class cumulative_carbon_dynamics : public differential_module
     double const& canopy_gross_assimilation_rate;
     double const& canopy_photorespiration_rate;
     double const& canopy_RL_rate;
-    double const& Grain_mrr;
-    double const& Leaf_grr;
-    double const& Leaf_mrr;
-    double const& Rhizome_grr;
-    double const& Rhizome_mrr;
-    double const& Root_grr;
-    double const& Root_mrr;
-    double const& Shell_mrr;
-    double const& Stem_grr;
-    double const& Stem_mrr;
+    double const& Grain_mr_rate;
+    double const& Leaf_gr_rate;
+    double const& Leaf_mr_rate;
+    double const& Rhizome_gr_rate;
+    double const& Rhizome_mr_rate;
+    double const& Root_gr_rate;
+    double const& Root_mr_rate;
+    double const& Shell_mr_rate;
+    double const& Stem_gr_rate;
+    double const& Stem_mr_rate;
 
     // Pointers to output quantities
     double* canopy_assimilation_op;
@@ -116,16 +116,16 @@ string_vector cumulative_carbon_dynamics::get_inputs()
         "canopy_gross_assimilation_rate",                // Mg / ha / hr
         "canopy_non_photorespiratory_CO2_release_rate",  // Mg / ha / hr
         "canopy_photorespiration_rate",                  // Mg / ha / hr
-        "Grain_mrr",                                     // Mg / ha / hr
-        "Leaf_grr",                                      // Mg / ha / hr
-        "Leaf_mrr",                                      // Mg / ha / hr
-        "Rhizome_grr",                                   // Mg / ha / hr
-        "Rhizome_mrr",                                   // Mg / ha / hr
-        "Root_grr",                                      // Mg / ha / hr
-        "Root_mrr",                                      // Mg / ha / hr
-        "Shell_mrr",                                     // Mg / ha / hr
-        "Stem_grr",                                      // Mg / ha / hr
-        "Stem_mrr"                                       // Mg / ha / hr
+        "Grain_mr_rate",                                 // Mg / ha / hr
+        "Leaf_gr_rate",                                  // Mg / ha / hr
+        "Leaf_mr_rate",                                  // Mg / ha / hr
+        "Rhizome_gr_rate",                               // Mg / ha / hr
+        "Rhizome_mr_rate",                               // Mg / ha / hr
+        "Root_gr_rate",                                  // Mg / ha / hr
+        "Root_mr_rate",                                  // Mg / ha / hr
+        "Shell_mr_rate",                                 // Mg / ha / hr
+        "Stem_gr_rate",                                  // Mg / ha / hr
+        "Stem_mr_rate"                                   // Mg / ha / hr
     };
 }
 
@@ -155,16 +155,16 @@ void cumulative_carbon_dynamics::do_operation() const
     update(canopy_gross_assimilation_op, canopy_gross_assimilation_rate);
     update(canopy_photorespiration_op, canopy_photorespiration_rate);
     update(canopy_RL_op, canopy_RL_rate);
-    update(Grain_mr_op, Grain_mrr);
-    update(Leaf_gr_op, Leaf_grr);
-    update(Leaf_mr_op, Leaf_mrr);
-    update(Rhizome_gr_op, Rhizome_grr);
-    update(Rhizome_mr_op, Rhizome_mrr);
-    update(Root_gr_op, Root_grr);
-    update(Root_mr_op, Root_mrr);
-    update(Shell_mr_op, Shell_mrr);
-    update(Stem_gr_op, Stem_grr);
-    update(Stem_mr_op, Stem_mrr);
+    update(Grain_mr_op, Grain_mr_rate);
+    update(Leaf_gr_op, Leaf_gr_rate);
+    update(Leaf_mr_op, Leaf_mr_rate);
+    update(Rhizome_gr_op, Rhizome_gr_rate);
+    update(Rhizome_mr_op, Rhizome_mr_rate);
+    update(Root_gr_op, Root_gr_rate);
+    update(Root_mr_op, Root_mr_rate);
+    update(Shell_mr_op, Shell_mr_rate);
+    update(Stem_gr_op, Stem_gr_rate);
+    update(Stem_mr_op, Stem_mr_rate);
 }
 
 }  // namespace standardBML

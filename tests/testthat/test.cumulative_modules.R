@@ -90,12 +90,12 @@ test_that('cumulative carbon and water dynamics can be added to the willow model
                 total_precip = 0
             )),
             c(parameters, list(
-                Grain_mrr = 0,
-                Leaf_mrr = 0,
-                Rhizome_mrr = 0,
-                Root_mrr = 0,
-                Shell_mrr = 0,
-                Stem_mrr = 0
+                Grain_mr_rate = 0,
+                Leaf_mr_rate = 0,
+                Rhizome_mr_rate = 0,
+                Root_mr_rate = 0,
+                Shell_mr_rate = 0,
+                Stem_mr_rate = 0
             )),
             weather[['2002']],
             direct_modules,
@@ -130,12 +130,12 @@ test_that('cumulative carbon and water dynamics can be added to the miscanthus m
                 total_precip = 0
             )),
             c(parameters, list(
-                Grain_mrr = 0,
-                Leaf_mrr = 0,
-                Rhizome_mrr = 0,
-                Root_mrr = 0,
-                Shell_mrr = 0,
-                Stem_mrr = 0
+                Grain_mr_rate = 0,
+                Leaf_mr_rate = 0,
+                Rhizome_mr_rate = 0,
+                Root_mr_rate = 0,
+                Shell_mr_rate = 0,
+                Stem_mr_rate = 0
             )),
             weather[['2002']],
             direct_modules,

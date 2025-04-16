@@ -12,7 +12,7 @@ namespace standardBML
  *
  * @brief Calculates the rate of change in plant organ biomasses due to
  * maintenance respiration; these are referred to as "maintenance respiration
- * rates" (mrr).
+ * rates," and the associated quantity names end with `_mr_rate`.
  *
  * This module is intended to be used along with the `maintenance_respiration`
  * module.
@@ -45,12 +45,12 @@ class maintenance_respiration_calculator : public direct_module
           temp{get_input(input_quantities, "temp")},
 
           // Get pointers to output quantities
-          Grain_mrr_op{get_op(output_quantities, "Grain_mrr")},
-          Leaf_mrr_op{get_op(output_quantities, "Leaf_mrr")},
-          Rhizome_mrr_op{get_op(output_quantities, "Rhizome_mrr")},
-          Root_mrr_op{get_op(output_quantities, "Root_mrr")},
-          Shell_mrr_op{get_op(output_quantities, "Shell_mrr")},
-          Stem_mrr_op{get_op(output_quantities, "Stem_mrr")}
+          Grain_mr_rate_op{get_op(output_quantities, "Grain_mr_rate")},
+          Leaf_mr_rate_op{get_op(output_quantities, "Leaf_mr_rate")},
+          Rhizome_mr_rate_op{get_op(output_quantities, "Rhizome_mr_rate")},
+          Root_mr_rate_op{get_op(output_quantities, "Root_mr_rate")},
+          Shell_mr_rate_op{get_op(output_quantities, "Shell_mr_rate")},
+          Stem_mr_rate_op{get_op(output_quantities, "Stem_mr_rate")}
     {
     }
     static string_vector get_inputs();
@@ -74,12 +74,12 @@ class maintenance_respiration_calculator : public direct_module
     const double& temp;
 
     // Pointers to output quantities
-    double* Grain_mrr_op;
-    double* Leaf_mrr_op;
-    double* Rhizome_mrr_op;
-    double* Root_mrr_op;
-    double* Shell_mrr_op;
-    double* Stem_mrr_op;
+    double* Grain_mr_rate_op;
+    double* Leaf_mr_rate_op;
+    double* Rhizome_mr_rate_op;
+    double* Root_mr_rate_op;
+    double* Shell_mr_rate_op;
+    double* Stem_mr_rate_op;
 
     // Implement the pure virtual function do_operation():
     void do_operation() const override final;
@@ -107,12 +107,12 @@ string_vector maintenance_respiration_calculator::get_inputs()
 string_vector maintenance_respiration_calculator::get_outputs()
 {
     return {
-        "Grain_mrr",    // Mg / ha / hr
-        "Leaf_mrr",     // Mg / ha / hr
-        "Rhizome_mrr",  // Mg / ha / hr
-        "Root_mrr",     // Mg / ha / hr
-        "Shell_mrr",    // Mg / ha / hr
-        "Stem_mrr"      // Mg / ha / hr
+        "Grain_mr_rate",    // Mg / ha / hr
+        "Leaf_mr_rate",     // Mg / ha / hr
+        "Rhizome_mr_rate",  // Mg / ha / hr
+        "Root_mr_rate",     // Mg / ha / hr
+        "Shell_mr_rate",    // Mg / ha / hr
+        "Stem_mr_rate"      // Mg / ha / hr
     };
 }
 
@@ -125,19 +125,19 @@ void maintenance_respiration_calculator::do_operation() const
     double Q10 = Q10_temperature_response(temp, Tref);  // dimensionless
 
     // Calculate each maintenance respiration rate (mrr)
-    double const Grain_mrr = Grain * mrc_grain * Q10;        // Mg / ha / hr
-    double const Leaf_mrr = Leaf * mrc_leaf * Q10;           // Mg / ha / hr
-    double const Rhizome_mrr = Rhizome * mrc_rhizome * Q10;  // Mg / ha / hr
-    double const Root_mrr = Root * mrc_root * Q10;           // Mg / ha / hr
-    double const Shell_mrr = Shell * mrc_shell * Q10;        // Mg / ha / hr
-    double const Stem_mrr = Stem * mrc_stem * Q10;           // Mg / ha / hr
+    double const Grain_mr_rate = Grain * mrc_grain * Q10;        // Mg / ha / hr
+    double const Leaf_mr_rate = Leaf * mrc_leaf * Q10;           // Mg / ha / hr
+    double const Rhizome_mr_rate = Rhizome * mrc_rhizome * Q10;  // Mg / ha / hr
+    double const Root_mr_rate = Root * mrc_root * Q10;           // Mg / ha / hr
+    double const Shell_mr_rate = Shell * mrc_shell * Q10;        // Mg / ha / hr
+    double const Stem_mr_rate = Stem * mrc_stem * Q10;           // Mg / ha / hr
 
-    update(Grain_mrr_op, Grain_mrr);      // Mg / ha / hr
-    update(Leaf_mrr_op, Leaf_mrr);        // Mg / ha / hr
-    update(Rhizome_mrr_op, Rhizome_mrr);  // Mg / ha / hr
-    update(Root_mrr_op, Root_mrr);        // Mg / ha / hr
-    update(Shell_mrr_op, Shell_mrr);      // Mg / ha / hr
-    update(Stem_mrr_op, Stem_mrr);        // Mg / ha / hr
+    update(Grain_mr_rate_op, Grain_mr_rate);      // Mg / ha / hr
+    update(Leaf_mr_rate_op, Leaf_mr_rate);        // Mg / ha / hr
+    update(Rhizome_mr_rate_op, Rhizome_mr_rate);  // Mg / ha / hr
+    update(Root_mr_rate_op, Root_mr_rate);        // Mg / ha / hr
+    update(Shell_mr_rate_op, Shell_mr_rate);      // Mg / ha / hr
+    update(Stem_mr_rate_op, Stem_mr_rate);        // Mg / ha / hr
 }
 
 }  // namespace standardBML
