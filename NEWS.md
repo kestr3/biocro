@@ -92,8 +92,28 @@ be directly added to this file to describe the related changes.
   `canopy_non_photorespiratory_CO2_release`) is now included in the outputs of
   photosynthesis modules, including at the canopy level.
 
+- The rate of whole-plant growth respiration is now included in the outputs of
+  the canopy photosynthesis modules, including the C4 canopy, where whole-plant
+  growth respiration had not been previously calculated.
+
+- The `BioCro:maintenance_respiration` module was split into two modules
+  (a differential module called `BioCro:maintenance_respiration` and a direct
+  module called `BioCro:maintenance_respiration_calculator`) to make maintenance
+  respiration rates available as outputs.
+
+- The partitioning growth calculator modules now include growth respiration
+  rates in their outputs.
+
 - Two new modules were added for calculating cumulative flows of CO2 and water:
   `BioCro:cumulative_carbon_dynamics` and `BioCro:cumulative_water_dynamics`.
+
+- Altered `test_module` (and hence `test_module_library`) so that new module
+  outputs produce a warning but don't cause an error on their own.
+
+## Internal changes
+
+- Renamed the `resp()` function to `growth_resp()` to better indicate its
+  purpose, and moved it to a dedicated header.
 
 ## Bug fixes
 
