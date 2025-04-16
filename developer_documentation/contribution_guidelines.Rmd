@@ -426,24 +426,43 @@ be achieved through the following steps:
 The package maintainer is responsible for submitting to CRAN, and the process
 consists of the following steps:
 
-1. Build the package with `R CMD build`[^compressing_vignettes] using the
-   current release version.
+1. Make sure `R CMD check` does not produce warnings on any operating system or
+   version of R, especially the current release version and the current
+   development version on Linux and Windows. Our GitHub actions automatically
+   run this for all pull requests.
 
-2. Test the resulting `.tar.gz` file using `R CMD check --as-cran` using the
-   current release version and the current development version on Linux and
-   Windows. GitHub actions run this for R current Windows and Linux, and R
-   devel Linux, so only R devel Windows needs to be checked locally.
+   To be extra safe, it is also recommended to use the
+   [win-builder service](https://win-builder.r-project.org/) to check the
+   package again on the development version of R for Windows. The easiest way to
+   do this is to call `devtools::check_win_devel()` from an R session running in
+   the BioCro root directory. Note that all email correspondance will be sent to
+   the package maintainer regardless of who performs this action.
 
-3. Attach the resulting `.tar.gz` file to the form here:
-   https://cran.r-project.org/submit.html.
+2. Submit the package, cross fingers, and wait. There are two ways to submit:
 
-4. Paste the contents of `cran-comments.md` in the form's comments box.
+   1. Call `devtools::submit_cran()` from an R session running in the BioCro
+      root directory. This method will build the package and submit it to CRAN,
+      automatically including the contents of `cran-comments.md` along with the
+      built package.
 
-5. Submit, cross fingers, and wait. If any issues are found by CRAN, address
-   them and try again. If the checks fail only from permissible NOTES, such as
-   using C++11, reply to the email indicating the justification, for example,
-   we use a library that uses C++11. You can restate what is in
-   `cran-comments.md`.
+   2. Submit manually. First, build the package with
+      `R CMD build`[^compressing_vignettes]. Second, attach the resulting
+      `.tar.gz` file to the [CRAN form](https://cran.r-project.org/submit.html).
+      Finally, paste the contents of `cran-comments.md` in the form's comments
+      box and submit.
+
+   With either method, the package maintainer will receive an email message
+   with a link that must be followed to confirm the submission.
+
+3. If any issues are found by CRAN, address them and try again.
+
+   - If the checks fail only from permissible NOTES, such as using C++11, reply
+     to the email indicating the justification, for example, "We use a library
+     that uses C++11." You can restate what is in `cran-comments.md`.
+
+   - If the package fails a manual review and must be resubmitted, make sure to
+     increment the BioCro package version, or there will be a warning about an
+     insufficient package version.
 
 BioCro's online testing system should catch most issues before reaching this
 point, but sometimes CRAN starts enforcing rules that are not clearly explained
@@ -455,6 +474,8 @@ submission:
  - https://cran.r-project.org/web/packages/policies.html
 
  - https://r-pkgs.org/release.html#release
+
+ - https://contributor.r-project.org/cran-cookbook/code_issues.html
 
  - https://github.com/DavisVaughan/extrachecks
 

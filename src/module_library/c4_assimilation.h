@@ -42,14 +42,14 @@ namespace standardBML
  * - ``'kparm'`` for the initial slope of the photosynthetic CO2 response
  * - ``'lowerT'`` for the low temperature cutoff for rubisco activity
  * - ``'Qp'`` for the incident quantum flux density of photosynthetically active radiation
- * - ``'Rd'`` for the respiration rate at 25 degrees C
  * - ``'rh'`` for the atmospheric relative humidity
+ * - ``'RL_at_25'`` for the rate of non-photorespiratory CO2 release in the light at 25 degrees C
  * - ``'StomataWS'`` for the water stress factor
  * - ``'temp'`` for the ambient temperature
  * - ``'theta'`` for the first quadratic mixing parameter
  * - ``'Tleaf'`` for the leaf temperature
  * - ``'upperT'`` for the high temperature cutoff for rubisco activity
- * - ``'vmax'`` for the rubisco carboxylation rate at 25 degrees C
+ * - ``'Vcmax_at_25'`` for the rubisco carboxylation rate at 25 degrees C
  *
  * We use the following names for the model's output quantities:
  * - ``'Assim'`` for the net CO2 assimilation rate
@@ -60,6 +60,7 @@ namespace standardBML
  * - ``'GrossAssim'`` for the gross CO2 assimilation rate
  * - ``'Gs'`` for the stomatal conductance for H2O
  * - ``'RHs'`` for the relative humidity at the leaf surface
+ * - ``'RL'`` for the rate of non-photorespiratory CO2 release in the light
  * - ``'Rp'`` for the rate of photorespiration
  * - ``'iterations'`` for the number of iterations required for the convergence loop
  */
@@ -83,14 +84,14 @@ class c4_assimilation : public direct_module
           kparm{get_input(input_quantities, "kparm")},
           lowerT{get_input(input_quantities, "lowerT")},
           Qp{get_input(input_quantities, "Qp")},
-          Rd{get_input(input_quantities, "Rd")},
           rh{get_input(input_quantities, "rh")},
+          RL_at_25{get_input(input_quantities, "RL_at_25")},
           StomataWS{get_input(input_quantities, "StomataWS")},
           Tambient{get_input(input_quantities, "temp")},
           theta{get_input(input_quantities, "theta")},
           Tleaf{get_input(input_quantities, "Tleaf")},
           upperT{get_input(input_quantities, "upperT")},
-          vmax{get_input(input_quantities, "vmax")},
+          Vcmax_at_25{get_input(input_quantities, "Vcmax_at_25")},
 
           // Get pointers to output quantities
           Assim_op{get_op(output_quantities, "Assim")},
@@ -101,6 +102,7 @@ class c4_assimilation : public direct_module
           GrossAssim_op{get_op(output_quantities, "GrossAssim")},
           Gs_op{get_op(output_quantities, "Gs")},
           RHs_op{get_op(output_quantities, "RHs")},
+          RL_op{get_op(output_quantities, "RL")},
           Rp_op{get_op(output_quantities, "Rp")},
           iterations_op{get_op(output_quantities, "iterations")}
     {
@@ -122,14 +124,14 @@ class c4_assimilation : public direct_module
     double const& kparm;
     double const& lowerT;
     double const& Qp;
-    double const& Rd;
     double const& rh;
+    double const& RL_at_25;
     double const& StomataWS;
     double const& Tambient;
     double const& theta;
     double const& Tleaf;
     double const& upperT;
-    double const& vmax;
+    double const& Vcmax_at_25;
 
     // Pointers to output quantities
     double* Assim_op;
@@ -140,6 +142,7 @@ class c4_assimilation : public direct_module
     double* GrossAssim_op;
     double* Gs_op;
     double* RHs_op;
+    double* RL_op;
     double* Rp_op;
     double* iterations_op;
 
@@ -161,14 +164,14 @@ string_vector c4_assimilation::get_inputs()
         "kparm",                 // mol / mol
         "lowerT",                // degrees C
         "Qp",                    // micromol / m^2 / s
-        "Rd",                    // micromol / m^2 / s
         "rh",                    // dimensionless
+        "RL_at_25",              // micromol / m^2 / s
         "StomataWS",             // dimensionless
         "temp",                  // degrees C
         "theta",                 // dimensionless
         "Tleaf",                 // degrees C
         "upperT",                // degrees C
-        "vmax"                   // micromol / m^2 / s
+        "Vcmax_at_25"            // micromol / m^2 / s
     };
 }
 
@@ -183,6 +186,7 @@ string_vector c4_assimilation::get_outputs()
         "GrossAssim",         // micromol / m^2 / s
         "Gs",                 // mol / m^2 / s
         "RHs",                // dimensionless from Pa / Pa
+        "RL",                 // micromol / m^2 / s
         "Rp",                 // micromol / m^2 / s
         "iterations"          // not a physical quantity
     };
@@ -195,12 +199,12 @@ void c4_assimilation::do_operation() const
         Tleaf,
         Tambient,
         rh,
-        vmax,
+        Vcmax_at_25,
         alpha,
         kparm,
         theta,
         beta,
-        Rd,
+        RL_at_25,
         b0,
         b1,
         Gs_min,
@@ -220,6 +224,7 @@ void c4_assimilation::do_operation() const
     update(GrossAssim_op, c4_results.GrossAssim);
     update(Gs_op, c4_results.Gs);
     update(RHs_op, c4_results.RHs);
+    update(RL_op, c4_results.RL);
     update(Rp_op, c4_results.Rp);
     update(iterations_op, c4_results.iterations);
 }

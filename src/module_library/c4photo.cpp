@@ -22,12 +22,12 @@ photosynthesis_outputs c4photoC(
     double const leaf_temperature,      // degrees C
     double const ambient_temperature,   // degrees C
     double const relative_humidity,     // dimensionless from Pa / Pa
-    double const vmax,                  // micromol / m^2 / s
+    double const Vcmax_at_25,           // micromol / m^2 / s
     double const alpha,                 // mol / mol
     double const kparm,                 // mol / m^2 / s
     double const theta,                 // dimensionless
     double const beta,                  // dimensionless
-    double const Rd,                    // micromol / m^2 / s
+    double const RL_at_25,              // micromol / m^2 / s
     double const bb0,                   // mol / m^2 / s
     double const bb1,                   // dimensionless from [mol / m^2 / s] / [mol / m^2 / s]
     double const Gs_min,                // mol / m^2 / s
@@ -46,14 +46,14 @@ photosynthesis_outputs c4photoC(
     double const kT = kparm * pow(k_Q10, (leaf_temperature - 25.0) / 10.0);  // dimensionless
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double const Vtn = vmax * pow(2, (leaf_temperature - 25.0) / 10.0);                                              // micromole / m^2 / s
+    double const Vtn = Vcmax_at_25 * pow(2, (leaf_temperature - 25.0) / 10.0);                                       // micromol / m^2 / s
     double const Vtd = (1 + exp(0.3 * (lowerT - leaf_temperature))) * (1 + exp(0.3 * (leaf_temperature - upperT)));  // dimensionless
-    double const VT = Vtn / Vtd;                                                                                     // micromole / m^2 / s
+    double const VT = Vtn / Vtd;                                                                                     // micromol / m^2 / s
 
     // Collatz 1992. Appendix B. Equation set 5B.
-    double const Rtn = Rd * pow(2, (leaf_temperature - 25) / 10);  // micromole / m^2 / s
-    double const Rtd = 1 + exp(1.3 * (leaf_temperature - 55));     // dimensionless
-    double const RT = Rtn / Rtd;                                   // micromole / m^2 / s
+    double const Rtn = RL_at_25 * pow(2, (leaf_temperature - 25) / 10);  // micromol / m^2 / s
+    double const Rtd = 1 + exp(1.3 * (leaf_temperature - 55));           // dimensionless
+    double const RT = Rtn / Rtd;                                         // micromol / m^2 / s
 
     // Collatz 1992. Appendix B. Quadratic coefficients from Equation 2B.
     double const b0 = VT * alpha * Qp;
@@ -71,7 +71,7 @@ photosynthesis_outputs c4photoC(
     // Function to compute the biochemical assimilation rate.
     auto collatz_assim = [=](double const InterCellularCO2) {
         // Collatz 1992. Appendix B. Quadratic coefficients from Equation 3B.
-        double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / m^2 / s
+        double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromol / m^2 / s
         double a = beta;
         double b = -(M + kT_IC_P);
         double c = M * kT_IC_P;
@@ -153,6 +153,7 @@ photosynthesis_outputs c4photoC(
         /* .GrossAssim = */ result.root + RT,       // micromol / m^2 / s
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
+        /* .RL = */ RT,                             // micromol / m^2 / s
         /* .Rp = */ 0,                              // micromol / m^2 / s
         /* .iterations = */ result.iteration        // not a physical quantity
     };

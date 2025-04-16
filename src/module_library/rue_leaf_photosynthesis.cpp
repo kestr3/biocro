@@ -23,7 +23,7 @@ photosynthesis_outputs rue_photo(
     double alpha_rue,  // dimensionless
     double Tleaf,      // degrees C
     double RH,         // dimensionless from Pa / Pa
-    double Rd0,        // mol / m^2 / s
+    double RL_at_25,        // mol / m^2 / s
     double bb0,        // mol / m^2 / s
     double bb1,        // dimensionless
     double Ca,         // dimensionless from mol / mol
@@ -40,14 +40,14 @@ photosynthesis_outputs rue_photo(
     // Determine respiration from the leaf temperature using Arrhenius exponents
     // from Bernacchi et al. (2001) Plant, Cell and Environment, 24(2), 253-259.
     // https://doi.org/10.1111/j.1365-3040.2001.00668.x
-    double const rd = Rd0 *
+    double const RL = RL_at_25 *
                       arrhenius_exponential(
                           18.72,
                           46.39e3,
                           tlk);  // mol / m^2 / s
 
     // Determine net assimilation
-    double an = ag - rd;  // mol / m^2 / s
+    double an = ag - RL;  // mol / m^2 / s
 
     // The net CO2 assimilation is the smaller of the RUE-limited and
     // conductance-limited rates. This will prevent the calculated Ci and Cs
@@ -79,6 +79,7 @@ photosynthesis_outputs rue_photo(
         /* .GrossAssim = */ ag * 1e6,                     // micromol / m^2 / s
         /* .Gs = */ gs,                                   // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                           // dimensionless from Pa / Pa
+        /* .RL = */ RL,                                   // micromol / m^2 / s
         /* .Rp = */ 0.0,                                  // micromol / m^2 / s
         /* .iterations = */ 0                             // not a physical quantity
     };
@@ -98,7 +99,7 @@ string_vector rue_leaf_photosynthesis::get_inputs()
         "height",                // m
         "incident_ppfd",         // micromol / (m^2 leaf) / s
         "leafwidth",             // m
-        "Rd",                    // micromol / m^2 / s
+        "RL_at_25",                   // micromol / m^2 / s
         "rh",                    // dimensionless
         "temp",                  // degrees C
         "windspeed",             // m / s
@@ -110,15 +111,16 @@ string_vector rue_leaf_photosynthesis::get_outputs()
 {
     return {
         "Assim",             // micromol / m^2 /s
-        "GrossAssim",        // micromol / m^2 /s
-        "Rp",                // micromol / m^2 / s
         "Ci",                // micromol / mol
-        "Gs",                // mol / m^2 / s
-        "TransR",            // mmol / m^2 / s
         "EPenman",           // mmol / m^2 / s
         "EPriestly",         // mmol / m^2 / s
+        "gbw",               // mol / m^2 / s
+        "GrossAssim",        // micromol / m^2 /s
+        "Gs",                // mol / m^2 / s
         "leaf_temperature",  // degrees C
-        "gbw"                // mol / m^2 / s
+        "RL",                // micromol / m^2 / s
+        "Rp",                // micromol / m^2 / s
+        "TransR"             // mmol / m^2 / s
     };
 }
 
@@ -135,7 +137,7 @@ void rue_leaf_photosynthesis::do_operation() const
             alpha_rue,             // dimensionless
             temp,                  // degrees C
             rh,                    // dimensionless from Pa / Pa
-            Rd * 1e-6,             // mol / m^2 / s
+            RL_at_25 * 1e-6,            // mol / m^2 / s
             b0,                    // mol / m^2 / s
             b1,                    // dimensionless
             Catm * 1e-6,           // dimensionless from mol / mol
@@ -165,7 +167,7 @@ void rue_leaf_photosynthesis::do_operation() const
             alpha_rue,             // dimensionless
             leaf_temperature,      // degrees C
             rh,                    // dimensionless from Pa / Pa
-            Rd * 1e-6,             // mol / m^2 / s
+            RL_at_25 * 1e-6,            // mol / m^2 / s
             b0,                    // mol / m^2 / s
             b1,                    // dimensionless
             Catm * 1e-6,           // dimensionless from mol / mol
@@ -174,13 +176,14 @@ void rue_leaf_photosynthesis::do_operation() const
 
     // Update the outputs
     update(Assim_op, photo.Assim);
-    update(GrossAssim_op, photo.GrossAssim);
-    update(Rp_op, photo.Rp);
     update(Ci_op, photo.Ci);
-    update(Gs_op, photo.Gs);
-    update(TransR_op, et.TransR);
     update(EPenman_op, et.EPenman);
     update(EPriestly_op, et.EPriestly);
-    update(leaf_temperature_op, leaf_temperature);
     update(gbw_op, et.gbw_molecular);
+    update(GrossAssim_op, photo.GrossAssim);
+    update(Gs_op, photo.Gs);
+    update(leaf_temperature_op, leaf_temperature);
+    update(RL_op, photo.RL);
+    update(Rp_op, photo.Rp);
+    update(TransR_op, et.TransR);
 }
