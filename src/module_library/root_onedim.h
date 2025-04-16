@@ -30,8 +30,8 @@ enum class Flag {
     division_by_zero,
     halley_no_cross
 };
-bool successful_termination(Flag flag);
-std::string flag_message(Flag flag);
+inline bool successful_termination(Flag flag);
+inline std::string flag_message(Flag flag);
 
 /*
 For error handling, this struct adds flags to a state used in the
