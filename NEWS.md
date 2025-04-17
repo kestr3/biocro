@@ -107,6 +107,10 @@ be directly added to this file to describe the related changes.
 - Two new modules were added for calculating cumulative flows of CO2 and water:
   `BioCro:cumulative_carbon_dynamics` and `BioCro:cumulative_water_dynamics`.
 
+- A new module was added for calculating the total amounts of carbon used for
+  growth and maintenance respiration:
+  `BioCro:total_growth_and_maintenance_respiration`.
+
 - Altered `test_module` (and hence `test_module_library`) so that new module
   outputs produce a warning but don't cause an error on their own.
 
