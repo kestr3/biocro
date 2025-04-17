@@ -38,9 +38,14 @@ test_soybean_carbon_accounting <- function(partitioning_calculator) {
                     growth_respiration_fraction = 0.01
                 }),
                 soybean_weather[['2002']],
-                within(direct_modules, {
-                    partitioning_growth_calculator = partitioning_calculator
-                }),
+                c(
+                    list(
+                        'BioCro:total_biomass'
+                    ),
+                    within(direct_modules, {
+                        partitioning_growth_calculator = partitioning_calculator
+                    })
+                ),
                 c(differential_modules, list(
                     'BioCro:cumulative_carbon_dynamics',
                     'BioCro:cumulative_water_dynamics'
@@ -53,16 +58,8 @@ test_soybean_carbon_accounting <- function(partitioning_calculator) {
         # by the leaf, growth respiration, maintenance respiration, tissue
         # growth, and litter formation.
         soybean_res$total_carbon_use <- with(soybean_res, {
-            (Grain - soybean$initial_values$Grain) +
-            (Leaf - soybean$initial_values$Leaf) +
-            (LeafLitter - soybean$initial_values$LeafLitter) +
-            (Rhizome - soybean$initial_values$Rhizome) +
-            (RhizomeLitter - soybean$initial_values$RhizomeLitter) +
-            (Root - soybean$initial_values$Root) +
-            (RootLitter - soybean$initial_values$RootLitter) +
-            (Shell - soybean$initial_values$Shell) +
-            (Stem - soybean$initial_values$Stem) +
-            (StemLitter - soybean$initial_values$StemLitter) +
+            (total_intact_biomass - total_intact_biomass[1]) +
+            (total_litter_biomass - total_litter_biomass[1]) +
             canopy_non_photorespiratory_CO2_release +
             canopy_photorespiration +
             Grain_gr +
