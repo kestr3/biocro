@@ -40,7 +40,8 @@ test_soybean_carbon_accounting <- function(partitioning_calculator) {
                 soybean_weather[['2002']],
                 c(
                     list(
-                        'BioCro:total_biomass'
+                        'BioCro:total_biomass',
+                        'BioCro:total_growth_and_maintenance_respiration'
                     ),
                     within(direct_modules, {
                         partitioning_growth_calculator = partitioning_calculator
@@ -62,20 +63,8 @@ test_soybean_carbon_accounting <- function(partitioning_calculator) {
             (total_litter_biomass - total_litter_biomass[1]) +
             canopy_non_photorespiratory_CO2_release +
             canopy_photorespiration +
-            Grain_gr +
-            Grain_mr +
-            Leaf_gr +
-            Leaf_mr +
-            Leaf_WS_loss +
-            Rhizome_gr +
-            Rhizome_mr +
-            Root_gr +
-            Root_mr +
-            Shell_gr +
-            Shell_mr +
-            Stem_gr +
-            Stem_mr +
-            whole_plant_growth_respiration
+            total_growth_respiration +
+            total_maintenance_respiration
         })
 
         expect_equal(

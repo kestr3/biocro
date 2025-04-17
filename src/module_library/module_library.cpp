@@ -96,6 +96,7 @@
 #include "thermal_time_senescence.h"
 #include "thermal_time_trilinear.h"
 #include "total_biomass.h"
+#include "total_growth_and_maintenance_respiration.h"
 #include "two_layer_soil_profile.h"
 #include "varying_Jmax25.h"
 #include "water_vapor_properties_from_air_temperature.h"
@@ -194,6 +195,7 @@ creator_map standardBML::module_library::library_entries =
      {"thermal_time_senescence",                               &create_mc<thermal_time_senescence>},
      {"thermal_time_trilinear",                                &create_mc<thermal_time_trilinear>},
      {"total_biomass",                                         &create_mc<total_biomass>},
+     {"total_growth_and_maintenance_respiration",              &create_mc<total_growth_and_maintenance_respiration>},
      {"two_layer_soil_profile",                                &create_mc<two_layer_soil_profile>},
      {"varying_Jmax25",                                        &create_mc<varying_Jmax25>},
      {"water_vapor_properties_from_air_temperature",           &create_mc<water_vapor_properties_from_air_temperature>}
