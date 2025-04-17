@@ -34,8 +34,8 @@ test_module <- function(module_name, case_to_test) {
             abs(x - y) > sqrt(.Machine$double.eps)
         }
         idx <- which_not_equal(
-            expected_outputs |> unlist(),
-            actual_outputs |> unlist()
+            unlist(expected_outputs),
+            unlist(actual_outputs)
         )
         es <- expected_outputs[idx]
         acs <- actual_outputs[idx]

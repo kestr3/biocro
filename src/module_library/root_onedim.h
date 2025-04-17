@@ -17,7 +17,6 @@ inline bool same_signs(double x, double y);
 inline bool opposite_signs(double x, double y);
 inline bool smaller(double x, double y);
 inline bool is_between(double x, double a, double b);
-inline bool all_distinct(double x, double y, double z);
 
 // For error handling.
 enum class Flag {
@@ -148,7 +147,13 @@ struct result_t {
  * // implemented here. If the iteration encounters an error, return the
  * // flag indicating the error.
  * // Some methods handle errors that other methods do not.
- * with_flag<state> iterate(F&& f, const state& s);
+ * with_flag<state>& iterate(F&& f, with_flag<state>& s);
+ * // iterate is implemented like a compound assignment operator,
+ * // updating in-place rather than using an immutable maping.
+ * // It should be equivalent to with_flag<state> iterate(f, const state& s)
+ * // Where it maps a state to state, and adds a new flag if an error is
+ * // encountered.
+ *
  * // checks the state to see if the algorithm has found a root to within
  * // tolerance; return the appropriate flag, else return `Flag::valid`
  * Flag check_convergence(const state& s, _abs_tol, _rel_tol);
@@ -205,7 +210,7 @@ struct root_finder : public Method {
                 return make_result(s, i);
             }
 
-            s = Method::iterate(std::forward<F>(func), s.state);
+            s = Method::iterate(std::forward<F>(func), s);
         }
 
         s.flag = Flag::max_iterations;
@@ -252,20 +257,25 @@ struct secant {
     }
 
     template <typename F>
-    with_flag<state> iterate(F&& fun, const state& s)
+    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
     {
-        double r = s.best.y / s.last.y;
-        double p = (s.best.x - s.last.x) * r;
+
+        auto& best = s.state.best;
+        auto& last = s.state.last;
+        double r = best.y / last.y;
+        double p = (best.x - last.x) * r;
         double q = 1 - r;
         if (is_zero(q)) {
-            return {s, Flag::division_by_zero};
+            s.flag = Flag::division_by_zero;
+            return s;
         }
-        double x2 = s.best.x + p / q;
-        graph_t new_guess = {x2, fun(x2)};
-        return state{s.best, new_guess};
+        last = best;
+        best.x += p / q;
+        best.y = fun(best.x);
+        return s;
     }
 
-    Flag check_convergence(const state& s, double abs_tol, double rel_tol)
+    inline Flag check_convergence(const state& s, double abs_tol, double rel_tol)
     {
         if (is_zero(s.best.y, abs_tol)) {
             return Flag::residual_zero;
@@ -301,7 +311,7 @@ struct one_step_method {
         return state{x0, fun(x0)};
     }
 
-    Flag check_convergence(const state& s, double abs_tol, double rel_tol)
+    inline Flag check_convergence(const state& s, double abs_tol, double rel_tol)
     {
         return is_zero(s.y, abs_tol) ? Flag::residual_zero : Flag::valid;
     }
@@ -325,14 +335,18 @@ struct one_step_method {
  */
 struct newton : public one_step_method {
     template <typename F>
-    with_flag<state> iterate(F&& fun, const state& s)
+    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
     {
-        double slope = fun.derivative(s.x);
+        double& x = s.state.x;
+        double& y = s.state.y;
+        double slope = fun.derivative(x);
         if (is_zero(slope)) {
-            return {s, Flag::division_by_zero};
+            s.flag = Flag::division_by_zero;
+            return s;
         }
-        double x_new = s.x - s.y / slope;
-        return graph_t{x_new, fun(x_new)};
+        x -= y / slope;
+        y = fun(x);
+        return s;
     }
 };
 
@@ -345,21 +359,26 @@ struct newton : public one_step_method {
  */
 struct halley : public one_step_method {
     template <typename F>
-    with_flag<state> iterate(F&& fun, const state& s)
+    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
     {
-        double df = fun.derivative(s.x);
+        double& x = s.state.x;
+        double& y = s.state.y;
+        double df = fun.derivative(x);
         if (is_zero(df)) {
-            return {s, Flag::division_by_zero};
+            s = Flag::division_by_zero;
+            return s;
         }
-        double df2 = fun.second_derivative(s.x);
-        double a = s.y / df;
+        double df2 = fun.second_derivative(x);
+        double a = y / df;
         double b = df2 / (2 * df);
-        double ab = a * b;
-        if (is_close(ab, 1)) {
-            return {s, Flag::halley_no_cross};
+        b *= a;
+        if (is_close(b, 1)) {
+            s = Flag::halley_no_cross;
+            return s;
         }
-        double x_new = s.x - a / (1. - a * b);  // is division by zero possible here? Only if no solution
-        return graph_t{x_new, fun(x_new)};
+        x -= a / (1. - b);  // division by zero Only if no solution
+        y = fun(x);
+        return s;
     }
 };
 
@@ -371,20 +390,24 @@ struct halley : public one_step_method {
  */
 struct steffensen : public one_step_method {
     template <typename F>
-    with_flag<state> iterate(F&& fun, const state& s)
+    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
     {
-        double g = fun(s.x + s.y) / s.y - 1;
+        double& x = s.state.x;
+        double& y = s.state.y;
+        double g = fun(x + y) / y - 1;
         if (is_zero(g)) {
-            return {s, Flag::division_by_zero};
+            s.flag = Flag::division_by_zero;
+            return s;
         }
-        double x_new = s.x - s.y / g;
-        return graph_t{x_new, fun(x_new)};
+        x -= y / g;
+        y = fun(x);
+        return s;
     }
 };
 
 // Bracketing methods
 struct bracket_method {
-    struct state {
+struct state {
         graph_t left;
         graph_t right;
     };
@@ -394,17 +417,20 @@ struct bracket_method {
     {
         graph_t left{a, fun(a)};
         graph_t right{b, fun(b)};
-        if (same_signs(left.y, right.y)) {
-            return {state{left, right}, Flag::invalid_bracket};
+        state s{left, right};
+        if (is_zero(s.left.y) || is_zero(right.y)) {
+            return {s, Flag::residual_zero};
         }
-        return state{left, right};
+
+        if (same_signs(left.y, right.y)) {
+            return {s, Flag::invalid_bracket};
+        }
+
+        return s;
     }
 
     Flag check_convergence(const state& s, double abs_tol, double rel_tol)
     {
-        bool a = is_zero(s.left.y, abs_tol);
-        bool b = is_zero(s.right.y, abs_tol);
-        if (a || b) return Flag::residual_zero;
 
         bool c = is_close(s.left.x, s.right.x, abs_tol, rel_tol);
         if (c) return Flag::bracket_width_zero;
@@ -423,9 +449,15 @@ struct bracket_method {
     }
 
     // update bracket so that sign difference is maintained
-    inline state update_bracket(const state& current, const graph_t& new_point)
+    inline void update_bracket(graph_t& left, graph_t& right, double c, double yc)
     {
-        return same_signs(current.left.y, new_point.y) ? state{new_point, current.right} : state{current.left, new_point};
+        if (same_signs(yc, left.y)){
+            left.x = c;
+            left.y = yc;
+        } else {
+            right.x = c;
+            right.y = yc;
+        }
     }
 };
 
@@ -438,23 +470,18 @@ struct bracket_method {
  */
 struct bisection : public bracket_method {
     template <typename F>
-    with_flag<state> iterate(F&& fun, const state& s)
+    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
     {
-        graph_t midpoint = {
-            (s.left.x + s.right.x) / 2,
-            fun(midpoint.x)};
-
-        return update_bracket(s, midpoint);
-    }
-
-    inline double root(const state& s)
-    {
-        return (s.left.x + s.right.x) / 2;
-    }
-
-    inline double residual(const state& s)
-    {
-        return (s.left.y + s.right.y) / 2;
+        graph_t& left = s.state.left;
+        graph_t& right = s.state.right;
+        double midpoint = 0.5 * (left.x + right.x);
+        double y_midpoint = fun(midpoint);
+        if(is_zero(y_midpoint)) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
+        update_bracket(left, right, midpoint, y_midpoint);
+        return s;
     }
 };
 
@@ -467,15 +494,21 @@ struct bisection : public bracket_method {
  */
 struct regula_falsi : public bracket_method {
     template <typename F>
-    with_flag<state> iterate(F&& fun, const state& s)
+    inline with_flag<state>& iterate(F&& fun,  with_flag<state>& s)
     {
-        double slope = (s.right.y - s.left.y) / (s.right.x - s.left.x);
-
-        graph_t new_point;
-        new_point.x = s.right.x - s.right.y / slope;
-        new_point.y = fun(new_point.x);
-
-        return update_bracket(s, new_point);
+        graph_t& left = s.state.left;
+        graph_t& right = s.state.right;
+        double r = right.y / left.y; // equivalent to a secant update.
+        double p = (right.x - left.x) * r;
+        double q = 1 - r;
+        if (is_zero(q)) {
+            s.flag = Flag::division_by_zero;
+            return s;
+        }
+        double c = right.x + p / q;
+        double fc = fun(c);
+        update_bracket(left, right, c, fc);
+        return s;
     }
 };
 
@@ -488,23 +521,26 @@ struct regula_falsi : public bracket_method {
  */
 struct ridder : public bracket_method {
     template <typename F>
-    with_flag<state> iterate(F&& fun, const state& s)
+    inline with_flag<state>& iterate(F&& fun,  with_flag<state>& s)
     {
-        graph_t midpoint = {
-            (s.left.x + s.right.x) / 2,
-            fun(midpoint.x)};
+        graph_t& left = s.state.left;
+        graph_t& right = s.state.right;
+        double c = (left.x + right.x) / 2;
+        double yc = fun(c);
 
-        double d = midpoint.x - s.left.x;
-        double a = midpoint.y / s.left.y;
-        double b = s.right.y / s.left.y;
-
-        graph_t new_point;
-        new_point.x = midpoint.x + d * a / std::sqrt(a * a - b);
-        if (!std::isfinite(new_point.x)) {
-            return {s, Flag::division_by_zero};  // is this state possible ?
+        double d = c - left.x;
+        double a = yc / left.y;
+        double b = right.y / left.y;
+        double denom = a * a - b;
+        if (is_zero(denom)) {
+            s.flag = Flag::division_by_zero;  // is this state possible ?
+            return s;
         }
-        new_point.y = fun(new_point.x);
-        return update_bracket(s, new_point);
+
+        c  += d * a / std::sqrt(denom);
+        yc = fun(c);
+        update_bracket(left, right, c, yc);
+        return s;
     }
 };
 
@@ -533,7 +569,7 @@ inline bool is_zero(double x)
 
 inline bool same_signs(double x, double y)
 {
-    return x * y > 0;
+    return x * y >= 0;
 }
 
 inline bool opposite_signs(double x, double y)
@@ -549,15 +585,6 @@ inline bool smaller(double x, double y)
 inline bool is_between(double x, double a, double b)
 {
     return ((x >= a) && (x <= b)) || ((x <= a) && (x >= b));
-}
-
-inline bool all_distinct(double x, double y, double z)
-{
-    constexpr double tol = std::numeric_limits<double>::epsilon();
-    bool a = is_close(x, y, tol, tol);
-    a |= is_close(y, z, tol, tol);
-    a |= is_close(x, y, tol, tol);
-    return !a;
 }
 
 bool successful_termination(Flag flag)
