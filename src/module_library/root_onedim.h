@@ -29,6 +29,12 @@ enum class Flag {
     division_by_zero,
     halley_no_cross
 };
+
+template <typename T>
+inline bool is_valid(T x)
+{
+    return x.flag == Flag::valid;
+}
 inline bool successful_termination(Flag flag);
 inline std::string flag_message(Flag flag);
 
@@ -40,22 +46,17 @@ should be respected: For any function/function object with the signature:
 if (is_valid(x)) return with_flag<T>{f(x.state)}; else return x;
 
 */
-template <typename T>
-struct with_flag {
-    T state;
-    Flag flag;
+// template <typename T>
+// struct with_flag {
+//     T state;
+//     Flag flag;
 
-    with_flag() = default;
-    with_flag(T x) : state(x), flag(Flag::valid) {}
-    with_flag(T x, Flag f) : state(x), flag(f) {}
-    with_flag(Flag f) : state{}, flag(f) {}
-};
+//     with_flag() = default;
+//     with_flag(T x) : state(x), flag(Flag::valid) {}
+//     with_flag(T x, Flag f) : state(x), flag(f) {}
+//     with_flag(Flag f) : state{}, flag(f) {}
+// };
 
-template <typename T>
-inline bool is_valid(with_flag<T> x)
-{
-    return x.flag == Flag::valid;
-}
 
 /**
  * @class result_t
@@ -142,15 +143,15 @@ struct result_t {
  * //takes the initial problem info (e.g., a bracket, an
  * // initial guess) and instantiates a value of type `state`. If the
  * provided info is invalid, then return a flag indicating the error.
- * with_flag<state> initialize(F&& f, Args... args);
+ * state initialize(F&& f, Args... args);
  * //maps state to state. The actual formula of most methods is
  * // implemented here. If the iteration encounters an error, return the
  * // flag indicating the error.
  * // Some methods handle errors that other methods do not.
- * with_flag<state>& iterate(F&& f, with_flag<state>& s);
+ * state& iterate(F&& f, state& s);
  * // iterate is implemented like a compound assignment operator,
  * // updating in-place rather than using an immutable maping.
- * // It should be equivalent to with_flag<state> iterate(f, const state& s)
+ * // It should be equivalent to state iterate(f, const state& s)
  * // Where it maps a state to state, and adds a new flag if an error is
  * // encountered.
  *
@@ -193,24 +194,26 @@ struct root_finder : public Method {
           _abs_tol{abs_tol},
           _rel_tol{rel_tol} {}
 
-    using flagged_state = with_flag<typename Method::state>;
+    using state = typename Method::state;
 
     template <typename F, typename... Args>
     result_t solve(F&& func, Args&&... args)
     {
-        flagged_state s = Method::initialize(
-            std::forward<F>(func), std::forward<Args>(args)...);
+        state s = Method::initialize(
+            std::forward<F>(func), std::forward<Args>(args)...,
+            _abs_tol, _rel_tol
+        );
 
         for (size_t i = 0; i < (max_iterations + 1); ++i) {
-            if (is_valid(s)) {
-                s.flag = Method::check_convergence(s.state, _abs_tol, _rel_tol);
-            }
 
             if (!is_valid(s)) {
                 return make_result(s, i);
             }
 
-            s = Method::iterate(std::forward<F>(func), s);
+            s = Method::iterate(std::forward<F>(func), s, _abs_tol, _rel_tol);
+
+            s = Method::check_convergence(s, _abs_tol, _rel_tol);
+
         }
 
         s.flag = Flag::max_iterations;
@@ -224,9 +227,9 @@ struct root_finder : public Method {
     }
 
    private:
-    inline result_t make_result(const flagged_state& s, size_t iteration)
+    inline result_t make_result(const state& s, size_t iteration)
     {
-        return result_t{Method::root(s.state), Method::residual(s.state), iteration, s.flag};
+        return result_t{Method::root(s), Method::residual(s), iteration, s.flag};
     }
 };
 
@@ -244,28 +247,36 @@ struct graph_t {
  */
 struct secant {
     struct state {
+        Flag flag;
         graph_t last;
         graph_t best;
     };
 
     template <typename F>
-    with_flag<state> initialize(F&& fun, double x0, double x1)
+    inline state initialize(F&& fun, double x0, double x1,
+        double abs_tol, double rel_tol)
     {
         graph_t first = {x0, fun(x0)};
         graph_t second = {x1, fun(x1)};
-        return state{first, second};
+        if (is_zero(first.y, abs_tol)) {
+            return state{Flag::residual_zero, second, first};
+        }
+        if (is_zero(second.y, abs_tol)) {
+            return state{Flag::residual_zero, first, second};
+        }
+        return state{Flag::valid, first, second};
     }
 
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
 
-        auto& best = s.state.best;
-        auto& last = s.state.last;
+        auto& best = s.best;
+        auto& last = s.last;
         double r = best.y / last.y;
         double p = (best.x - last.x) * r;
         double q = 1 - r;
-        if (is_zero(q)) {
+        if (is_zero(q, abs_tol)) {
             s.flag = Flag::division_by_zero;
             return s;
         }
@@ -275,17 +286,19 @@ struct secant {
         return s;
     }
 
-    inline Flag check_convergence(const state& s, double abs_tol, double rel_tol)
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
     {
         if (is_zero(s.best.y, abs_tol)) {
-            return Flag::residual_zero;
+            s.flag = Flag::residual_zero;
+            return s;
         }
 
         if (is_close(s.last.x, s.best.x, abs_tol, rel_tol)) {
-            return Flag::delta_root_zero;
+            s.flag = Flag::delta_root_zero;
+            return s;
         }
 
-        return Flag::valid;
+        return s;
     }
 
     inline double root(const state& s)
@@ -303,17 +316,28 @@ struct secant {
 
 // methods common to newton, halley, etc.
 struct one_step_method {
-    using state = graph_t;
+    struct state {
+        Flag flag;
+        double x;
+        double y;
+    };
 
     template <typename F>
-    with_flag<state> initialize(F&& fun, double x0)
+    state initialize(F&& fun, double x0, double abs_tol, double rel_tol)
     {
-        return state{x0, fun(x0)};
+        double y0 = fun(x0);
+        if(is_zero(y0, abs_tol)) {
+            return state{Flag::residual_zero, x0, fun(x0)};
+        }
+        return state{Flag::valid, x0, fun(x0)};
     }
 
-    inline Flag check_convergence(const state& s, double abs_tol, double rel_tol)
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
     {
-        return is_zero(s.y, abs_tol) ? Flag::residual_zero : Flag::valid;
+        if (is_zero(s.y, abs_tol)){
+            s.flag = Flag::residual_zero;
+        }
+        return s;
     }
 
     inline double root(const state& s)
@@ -335,12 +359,12 @@ struct one_step_method {
  */
 struct newton : public one_step_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        double& x = s.state.x;
-        double& y = s.state.y;
+        double& x = s.x;
+        double& y = s.y;
         double slope = fun.derivative(x);
-        if (is_zero(slope)) {
+        if (is_zero(slope, abs_tol)) {
             s.flag = Flag::division_by_zero;
             return s;
         }
@@ -359,12 +383,12 @@ struct newton : public one_step_method {
  */
 struct halley : public one_step_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        double& x = s.state.x;
-        double& y = s.state.y;
+        double& x = s.x;
+        double& y = s.y;
         double df = fun.derivative(x);
-        if (is_zero(df)) {
+        if (is_zero(df, abs_tol)) {
             s = Flag::division_by_zero;
             return s;
         }
@@ -372,7 +396,7 @@ struct halley : public one_step_method {
         double a = y / df;
         double b = df2 / (2 * df);
         b *= a;
-        if (is_close(b, 1)) {
+        if (is_close(b, 1, abs_tol, rel_tol)) {
             s = Flag::halley_no_cross;
             return s;
         }
@@ -390,12 +414,12 @@ struct halley : public one_step_method {
  */
 struct steffensen : public one_step_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        double& x = s.state.x;
-        double& y = s.state.y;
+        double& x = s.x;
+        double& y = s.y;
         double g = fun(x + y) / y - 1;
-        if (is_zero(g)) {
+        if (is_zero(g, abs_tol)) {
             s.flag = Flag::division_by_zero;
             return s;
         }
@@ -406,59 +430,76 @@ struct steffensen : public one_step_method {
 };
 
 // Bracketing methods
+template<typename UpdateMethod>
 struct bracket_method {
-struct state {
-        graph_t left;
-        graph_t right;
+    struct state {
+        Flag flag;
+        double lower;
+        double width;
+        double proposal;
+        double fun_proposal;
     };
 
     template <typename F>
-    with_flag<state> initialize(F&& fun, double a, double b)
+    state initialize(F&& fun, double a, double b, double abs_tol, double rel_tol)
     {
-        graph_t left{a, fun(a)};
-        graph_t right{b, fun(b)};
-        state s{left, right};
-        if (is_zero(s.left.y) || is_zero(right.y)) {
-            return {s, Flag::residual_zero};
+        double ya = fun(a);
+        if (is_zero(ya, abs_tol)) {
+            return state{Flag::residual_zero, a, 0, a, ya};
         }
 
-        if (same_signs(left.y, right.y)) {
-            return {s, Flag::invalid_bracket};
+        double yb = fun(b);
+        if (is_zero(right.y, abs_tol)) {
+            return state{Flag::residual_zero, b, 0, b, yb};
         }
+
+        if (same_signs(ya, yb)) {
+            return state{Flag::invalid_bracket, a, b - a, b, yb};
+        }
+
+        if (ya < 0) {
+            return state{Flag::valid, a, b - a, b, yb};
+        }
+
+        return state{Flag::valid, b, a - b, a, yb};
+    }
+
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        s.fun_proposal = fun(s.proposal = UpdateMethod::propose(state& s));
+        if (s.fun_proposal <= 0.0){
+            s.lower = s.proposal;
+        }
+        return s;
+    }
+
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
+    {
+
+        if (is_zero(s.fun_proposal, abs_tol)) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
+
+        if (is_zero(s.width, abs_tol))
+            s.flag = Flag::bracket_width_zero;
 
         return s;
     }
 
-    Flag check_convergence(const state& s, double abs_tol, double rel_tol)
-    {
-
-        bool c = is_close(s.left.x, s.right.x, abs_tol, rel_tol);
-        if (c) return Flag::bracket_width_zero;
-
-        return Flag::valid;
-    }
-
     inline double root(const state& s)
     {
-        return smaller(s.left.y, s.right.y) ? s.left.x : s.right.x;
+        return s.proposal;
     }
 
     inline double residual(const state& s)
     {
-        return smaller(s.left.y, s.right.y) ? s.left.y : s.right.y;
+        return s.fun_proposal;
     }
 
     // update bracket so that sign difference is maintained
-    inline void update_bracket(graph_t& left, graph_t& right, double c, double yc)
-    {
-        if (same_signs(yc, left.y)){
-            left.x = c;
-            left.y = yc;
-        } else {
-            right.x = c;
-            right.y = yc;
-        }
-    }
+
 };
 
 /**
@@ -468,20 +509,11 @@ struct state {
  *
  * @details
  */
-struct bisection : public bracket_method {
+struct bisection : public bracket_method<bisection> {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline double propose(state& s)
     {
-        graph_t& left = s.state.left;
-        graph_t& right = s.state.right;
-        double midpoint = 0.5 * (left.x + right.x);
-        double y_midpoint = fun(midpoint);
-        if(is_zero(y_midpoint)) {
-            s.flag = Flag::residual_zero;
-            return s;
-        }
-        update_bracket(left, right, midpoint, y_midpoint);
-        return s;
+        return lower + (s.width /= 2);
     }
 };
 
@@ -494,20 +526,20 @@ struct bisection : public bracket_method {
  */
 struct regula_falsi : public bracket_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun,  with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        graph_t& left = s.state.left;
-        graph_t& right = s.state.right;
+        graph_t& left = s.left;
+        graph_t& right = s.right;
         double r = right.y / left.y; // equivalent to a secant update.
         double p = (right.x - left.x) * r;
         double q = 1 - r;
-        if (is_zero(q)) {
+        if (is_zero(q, abs_tol)) {
             s.flag = Flag::division_by_zero;
             return s;
         }
         double c = right.x + p / q;
         double fc = fun(c);
-        update_bracket(left, right, c, fc);
+        s = update_bracket(s, c, fc, abs_tol);
         return s;
     }
 };
@@ -521,10 +553,10 @@ struct regula_falsi : public bracket_method {
  */
 struct ridder : public bracket_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun,  with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        graph_t& left = s.state.left;
-        graph_t& right = s.state.right;
+        graph_t& left = s.left;
+        graph_t& right = s.right;
         double c = (left.x + right.x) / 2;
         double yc = fun(c);
 
@@ -532,14 +564,14 @@ struct ridder : public bracket_method {
         double a = yc / left.y;
         double b = right.y / left.y;
         double denom = a * a - b;
-        if (is_zero(denom)) {
+        if (is_zero(denom, abs_tol)) {
             s.flag = Flag::division_by_zero;  // is this state possible ?
             return s;
         }
 
         c  += d * a / std::sqrt(denom);
         yc = fun(c);
-        update_bracket(left, right, c, yc);
+        s = update_bracket(s, c, yc, abs_tol);
         return s;
     }
 };
