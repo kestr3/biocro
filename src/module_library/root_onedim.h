@@ -535,27 +535,46 @@ struct bracket_method {
     {
         double ya = fun(a);
         double yb = fun(b);
-        graph_t left = {a, ya};
-        graph_t right = {b, yb};
-
-        double c = (a + b) / 2;
-        graph_t proposal = {c, fun(c)};
-        state s = {Flag::valid, left, right, proposal};
+        state s{};
+        s.flag = Flag::valid;
+        s.left = {a, ya};
+        s.right = {b, yb};
 
         if (is_zero(ya, abs_tol)) {
             s.flag = Flag::residual_zero;
-            s.proposal = left;
+            s.proposal = s.left;
             return s;
         }
 
         if (is_zero(yb, abs_tol)) {
             s.flag = Flag::residual_zero;
-            s.proposal = right;
+            s.proposal = s.right;
             return s;
         }
 
         if (same_signs(ya, yb)) {
             s.flag = Flag::invalid_bracket;
+            return s;
+        }
+
+        return s;
+    }
+
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
+    {
+        bool zero_found = is_zero(s.proposal.y, abs_tol);
+        if (zero_found) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
+
+        if (is_close(s.left.x, s.right.x, abs_tol, abs_tol)) {
+            double delta_y = std::abs(s.left.y - s.right.y);
+            double delta_x = std::abs(s.left.x - s.right.x);
+            if (delta_y < (delta_x / rel_tol))
+                s.flag = Flag::bracket_width_zero;
+            else
+                s.flag = Flag::discontinuity;
             return s;
         }
 
@@ -616,29 +635,9 @@ struct bisection : public bracket_method {
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        s = update_bracket(s);
         s.proposal.x = 0.5 * (s.left.x + s.right.x);
         s.proposal.y = fun(s.proposal.x);
-        return s;
-    }
-
-    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
-    {
-        bool zero_found = is_zero(s.proposal.y, abs_tol);
-        if (zero_found) {
-            s.flag = Flag::residual_zero;
-            return s;
-        }
-
-        if (is_close(s.left.x, s.right.x, abs_tol, abs_tol)) {
-            double delta_y = std::abs(s.left.y - s.right.y);
-            double delta_x = std::abs(s.left.x - s.right.x);
-            if (delta_y < (delta_x / rel_tol))
-                s.flag = Flag::bracket_width_zero;
-            else
-                s.flag = Flag::discontinuity;
-        }
-
+        s = update_bracket(s);
         return s;
     }
 };
@@ -670,110 +669,11 @@ struct regula_falsi : public bracket_method {
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        s = update_bracket(s);
+        // division is safe if bracket is valid
         s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
                        (s.right.y - s.left.y);
         s.proposal.y = fun(s.proposal.x);
-        return s;
-    }
-
-    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
-    {
-        bool zero_found = is_zero(s.proposal.y, abs_tol);
-        if (zero_found) {
-            s.flag = Flag::residual_zero;
-            return s;
-        }
-
-        if ((s.left.x == s.proposal.x) || (s.right.x == s.proposal.x))
-            s.flag = Flag::bracket_fixed_point;
-
-        return s;
-    }
-};
-
-struct illinois {
-    struct state {
-        Flag flag;
-        graph_t left;
-        graph_t right;
-        graph_t proposal;
-        bool left_updated_last;
-    };
-
-    template <typename F>
-    state initialize(F&& fun, double a, double b, double abs_tol, double rel_tol)
-    {
-        double ya = fun(a);
-        double yb = fun(b);
-        graph_t left = {a, ya};
-        graph_t right = {b, yb};
-
-        double c = (a + b) / 2;
-        graph_t proposal = {c, fun(c)};
-        state s = {Flag::valid, left, right, proposal};
-
-        if (is_zero(ya, abs_tol)) {
-            s.flag = Flag::residual_zero;
-            s.proposal = left;
-            return s;
-        }
-
-        if (is_zero(yb, abs_tol)) {
-            s.flag = Flag::residual_zero;
-            s.proposal = right;
-            return s;
-        }
-
-        if (same_signs(ya, yb)) {
-            s.flag = Flag::invalid_bracket;
-            return s;
-        }
-
-        return s;
-    }
-
-    template <typename F>
-    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
-    {
         s = update_bracket(s);
-        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
-                       (s.right.y - s.left.y);
-        s.proposal.y = fun(s.proposal.x);
-        return s;
-    }
-
-    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
-    {
-        bool zero_found = is_zero(s.proposal.y, abs_tol);
-        if (zero_found) {
-            s.flag = Flag::residual_zero;
-            return s;
-        }
-
-        if ((s.left.x == s.proposal.x) || (s.right.x == s.proposal.x))
-            s.flag = Flag::bracket_fixed_point;
-
-        return s;
-    }
-
-    inline double root(const state& s)
-    {
-        return s.proposal.x;
-    }
-
-    inline double residual(const state& s)
-    {
-        return s.proposal.y;
-    }
-
-    inline state& update_bracket(state& s)
-    {
-        if (same_signs(s.left.y, s.proposal.y)) {
-            s.left = s.proposal;
-        } else {
-            s.right = s.proposal;
-        }
         return s;
     }
 };
@@ -804,7 +704,6 @@ struct ridder : public bracket_method {
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        s = update_bracket(s);
         s.proposal.x = (s.left.x + s.right.x) / 2;
         s.proposal.y = fun(s.proposal.x);
 
@@ -820,20 +719,7 @@ struct ridder : public bracket_method {
 
         s.proposal.x += d * a / std::sqrt(denom);
         s.proposal.y = fun(s.proposal.x);
-        return s;
-    }
-
-    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
-    {
-        bool zero_found = is_zero(s.proposal.y, abs_tol);
-        if (zero_found) {
-            s.flag = Flag::residual_zero;
-            return s;
-        }
-
-        if ((s.left.x == s.proposal.x) || (s.right.x == s.proposal.x))
-            s.flag = Flag::bracket_fixed_point;
-
+        s = update_bracket(s);
         return s;
     }
 };
