@@ -1,4 +1,4 @@
-test_module <- function(module_name, case_to_test) {
+test_module <- function(module_name, case_to_test, verbose = TRUE) {
     # Get the expected outputs
     expected_outputs <- case_to_test[["expected_outputs"]]
 
@@ -53,29 +53,66 @@ test_module <- function(module_name, case_to_test) {
 
     # Check to see if the expected and actual outputs match
     if (!isTRUE(all.equal(expected_outputs, actual_outputs))) {
-        which_not_equal <- function(x, y) {
-            abs(x - y) > sqrt(.Machine$double.eps)
+        # Collect discrepancies into a table and print it to the terminal, if
+        # desired
+        if (verbose) {
+            idx <- sapply(seq_along(expected_outputs), function(i) {
+                qname <- names(expected_outputs)[[i]]
+                expected <- expected_outputs[[i]]
+
+                actual <- if (qname %in% names(actual_outputs)) {
+                    actual_outputs[[qname]]
+                } else {
+                    NA
+                }
+
+                if (is.na(actual)) {
+                    TRUE
+                } else {
+                    abs(expected - actual) > sqrt(.Machine$double.eps)
+                }
+            })
+
+            qnames <- names(expected_outputs)[idx]
+            expected <- unlist(expected_outputs)[idx]
+
+            actual <- sapply(qnames, function(qn) {
+                if (qn %in% names(actual_outputs)) {
+                    actual_outputs[[qn]]
+                } else {
+                    NA
+                }
+            })
+
+            differences <- data.frame(
+                Quantity = qnames,
+                Expected = expected,
+                Actual = actual,
+                stringsAsFactors = FALSE
+            )
+
+            rownames(differences) <- NULL
+
+            cat(paste0(
+                '\nDifferences found for Module `',
+                module_name,
+                '` test case `',
+                case_to_test[['description']],
+                '`:\n\n'
+            ))
+
+            print(differences)
+
+            cat('\n')
         }
-        idx <- which_not_equal(
-            unlist(expected_outputs),
-            unlist(actual_outputs)
-        )
-        es <- expected_outputs[idx]
-        acs <- actual_outputs[idx]
-        out <- paste(
-            names(es), es, acs,
-            sep = "\t"
-        )
-        header <- paste("", "Expected", "Actual\t\n", sep = "\t")
+
         return(
             paste0(
                 "Module `",
                 module_name,
                 "` test case `",
                 case_to_test[["description"]],
-                "`: calculated outputs do not match expected outputs\t\n",
-                header,
-                out
+                "`: calculated outputs do not match expected outputs"
             )
         )
     } else {
@@ -378,7 +415,8 @@ module_names_from_case_directory <- function(library_name, directory) {
 test_module_library <- function(
     library_name,
     directory,
-    modules_to_skip = c()) {
+    modules_to_skip = c(),
+    verbose = TRUE) {
     # Get the module names associated with the test cases in the directory
     directory_module_names <-
         module_names_from_case_directory(library_name, directory)
@@ -442,7 +480,7 @@ test_module_library <- function(
 
         # Run each test case
         lapply(cases, function(case) {
-            test_module(module, case)
+            test_module(module, case, verbose)
         })
     })
 
