@@ -130,8 +130,8 @@ photosynthesis_outputs c4photoC(
     // Find starting guesses for the net CO2 assimilation rate. One is the
     // predicted rate at Ci = 0.4 * Ca, and the other is the predicted rate at
     // Ci = Ca.
-    double const assim_guess_0 = -RT;
-    double const assim_guess_1 = collatz_assim(Ca_pa) + RT;
+    double const assim_guess_0 = collatz_assim(0.4 * Ca_pa);
+    double const assim_guess_1 = collatz_assim(Ca_pa);
 
     // Run the secant method
 

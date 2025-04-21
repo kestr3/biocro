@@ -44,6 +44,12 @@ class root_onedim_test : public direct_module
         double* residual_op;
         double* iteration_op;
         double* flag_op;
+
+        result(state_map* output_quantities, std::string&& name) : root_op{
+            get_op(output_quantities, name + "_root")},
+            residual_op{get_op(output_quantities, name + "_residual")},
+            iteration_op{get_op(output_quantities, name + "_iteration")},
+            flag_op{get_op(output_quantities, name + "_flag")} {}
     };
 
    public:
@@ -61,14 +67,14 @@ class root_onedim_test : public direct_module
           single_guess{get_input(input_quantities, "single_guess")},
 
           // Get pointers to output quantities
-          secant_result{get_result_op(output_quantities, "secant")},
-          fixed_point_result{get_result_op(output_quantities, "fixed_point")},
-          newton_result{get_result_op(output_quantities, "newton")},
-          halley_result{get_result_op(output_quantities, "halley")},
-          steffensen_result{get_result_op(output_quantities, "steffensen")},
-          bisection_result{get_result_op(output_quantities, "bisection")},
-          regula_falsi_result{get_result_op(output_quantities, "regula_falsi")},
-          ridder_result{get_result_op(output_quantities, "ridder")}
+          secant_result{output_quantities, "secant"},
+          fixed_point_result{output_quantities, "fixed_point"},
+          newton_result{output_quantities, "newton"},
+          halley_result{output_quantities, "halley"},
+          steffensen_result{output_quantities, "steffensen"},
+          bisection_result{output_quantities, "bisection"},
+          regula_falsi_result{output_quantities, "regula_falsi"},
+          ridder_result{output_quantities, "ridder"}
 
     {
     }
@@ -100,14 +106,6 @@ class root_onedim_test : public direct_module
     // Main operation
     void do_operation() const;
 
-    result get_result_op(state_map* output_quantities, std::string&& name)
-    {
-        return result({
-            get_op(output_quantities, name + "_root"),
-            get_op(output_quantities, name + "_residual"),
-            get_op(output_quantities, name + "_iteration"),
-            get_op(output_quantities, name + "_flag")});
-    }
 
     static string_vector make_qname(std::string& name)
     {
