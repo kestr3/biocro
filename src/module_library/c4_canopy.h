@@ -28,6 +28,7 @@ class c4_canopy : public direct_module
           chil{get_input(input_quantities, "chil")},
           cosine_zenith_angle{get_input(input_quantities, "cosine_zenith_angle")},
           gbw_canopy{get_input(input_quantities, "gbw_canopy")},
+          growth_respiration_fraction{get_input(input_quantities, "growth_respiration_fraction")},
           Gs_min{get_input(input_quantities, "Gs_min")},
           k_diffuse{get_input(input_quantities, "k_diffuse")},
           kparm{get_input(input_quantities, "kparm")},
@@ -71,7 +72,8 @@ class c4_canopy : public direct_module
           canopy_gross_assimilation_molar_flux_op{get_op(output_quantities, "canopy_gross_assimilation_molar_flux")},
           canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_molar_flux")},
           canopy_photorespiration_molar_flux_op{get_op(output_quantities, "canopy_photorespiration_molar_flux")},
-          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
+          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")},
+          whole_plant_growth_respiration_molar_flux_op{get_op(output_quantities, "whole_plant_growth_respiration_molar_flux")}
     {
     }
     static string_vector get_inputs();
@@ -92,6 +94,7 @@ class c4_canopy : public direct_module
     double const& chil;
     double const& cosine_zenith_angle;
     double const& gbw_canopy;
+    double const& growth_respiration_fraction;
     double const& Gs_min;
     double const& k_diffuse;
     double const& kparm;
@@ -136,6 +139,7 @@ class c4_canopy : public direct_module
     double* canopy_non_photorespiratory_CO2_release_rate_op;
     double* canopy_photorespiration_molar_flux_op;
     double* canopy_transpiration_rate_op;
+    double* whole_plant_growth_respiration_molar_flux_op;
 
     // Main operation
     void do_operation() const;
@@ -146,18 +150,19 @@ string_vector c4_canopy::get_inputs()
     return {
         "absorbed_longwave",  // J / m^2 / s
         "alpha1",
-        "atmospheric_pressure",       // Pa
-        "atmospheric_scattering",     // dimensionless
-        "atmospheric_transmittance",  // dimensionless
-        "b0",                         // mol / m^2 / s
-        "b1",                         // dimensionless
-        "beta",                       // dimensionless
-        "Catm",                       // ppm
-        "chil",                       // dimensionless
-        "cosine_zenith_angle",        // dimensionless
-        "gbw_canopy",                 // m / s
-        "Gs_min",                     // mol / m^2 / s
-        "k_diffuse",                  // dimensionless
+        "atmospheric_pressure",         // Pa
+        "atmospheric_scattering",       // dimensionless
+        "atmospheric_transmittance",    // dimensionless
+        "b0",                           // mol / m^2 / s
+        "b1",                           // dimensionless
+        "beta",                         // dimensionless
+        "Catm",                         // ppm
+        "chil",                         // dimensionless
+        "cosine_zenith_angle",          // dimensionless
+        "gbw_canopy",                   // m / s
+        "growth_respiration_fraction",  // dimensionless
+        "Gs_min",                       // mol / m^2 / s
+        "k_diffuse",                    // dimensionless
         "kparm",
         "kpLN",
         "lai",                     // dimensionless from m^2 leaf / m^2 ground
@@ -203,7 +208,8 @@ string_vector c4_canopy::get_outputs()
         "canopy_gross_assimilation_molar_flux",                // micromol / m^2 / s
         "canopy_non_photorespiratory_CO2_release_molar_flux",  // micromol / m^2 / s
         "canopy_photorespiration_molar_flux",                  // micromol / m^2 / s
-        "canopy_transpiration_rate"                            // Mg / ha / hr
+        "canopy_transpiration_rate",                           // Mg / ha / hr
+        "whole_plant_growth_respiration_molar_flux"            // micromol / m^2 / s
     };
 }
 
@@ -238,6 +244,7 @@ void c4_canopy::do_operation() const
         chil,
         cosine_zenith_angle,
         gbw_canopy,
+        growth_respiration_fraction,
         Gs_min,
         k_diffuse,
         kparm,
@@ -264,12 +271,13 @@ void c4_canopy::do_operation() const
         nlayers);
 
     // Update the parameter list
-    update(canopy_assimilation_molar_flux_op, can_result.Assim);             // micromol / m^2 /s
-    update(canopy_conductance_op, can_result.canopy_conductance);            // mol / m^2 / s
-    update(canopy_gross_assimilation_molar_flux_op, can_result.GrossAssim);  // micromol / m^2 /s
-    update(canopy_non_photorespiratory_CO2_release_rate_op, can_result.RL);  // micromol / m^2 / s
-    update(canopy_photorespiration_molar_flux_op, can_result.Rp);            // micromol / m^2 /s
-    update(canopy_transpiration_rate_op, can_result.Trans);                  // Mg / ha / hr
+    update(canopy_assimilation_molar_flux_op, can_result.Assim);                      // micromol / m^2 /s
+    update(canopy_conductance_op, can_result.canopy_conductance);                     // mol / m^2 / s
+    update(canopy_gross_assimilation_molar_flux_op, can_result.GrossAssim);           // micromol / m^2 /s
+    update(canopy_non_photorespiratory_CO2_release_rate_op, can_result.RL);           // micromol / m^2 / s
+    update(canopy_photorespiration_molar_flux_op, can_result.Rp);                     // micromol / m^2 /s
+    update(canopy_transpiration_rate_op, can_result.Trans);                           // Mg / ha / hr
+    update(whole_plant_growth_respiration_molar_flux_op, can_result.whole_plant_gr);  // micromol / m^2 / s
 }
 }  // namespace standardBML
 #endif

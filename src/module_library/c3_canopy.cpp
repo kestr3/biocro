@@ -83,7 +83,8 @@ string_vector c3_canopy::get_outputs()
         "canopy_gross_assimilation_molar_flux",                // micromol / m^2 / s
         "canopy_non_photorespiratory_CO2_release_molar_flux",  // micromol / m^2 / s
         "canopy_photorespiration_molar_flux",                  // micromol / m^2 / s
-        "canopy_transpiration_rate"                            // Mg / ha / hr
+        "canopy_transpiration_rate",                           // Mg / ha / hr
+        "whole_plant_growth_respiration_molar_flux"            // micromol / m^2 / s
     };
 }
 
@@ -160,10 +161,11 @@ void c3_canopy::do_operation() const
         nlayers);
 
     // Update the output quantity list
-    update(canopy_assimilation_molar_flux_op, can_result.Assim);             // micromol / m^2 / s
-    update(canopy_conductance_op, can_result.canopy_conductance);            // mol / m^2 / s
-    update(canopy_gross_assimilation_molar_flux_op, can_result.GrossAssim);  // micromol / m^2 / s
-    update(canopy_non_photorespiratory_CO2_release_rate_op, can_result.RL);  // micromol / m^2 / s
-    update(canopy_photorespiration_molar_flux_op, can_result.Rp);            // micromol / m^2 / s
-    update(canopy_transpiration_rate_op, can_result.Trans);                  // Mg / ha / hr
+    update(canopy_assimilation_molar_flux_op, can_result.Assim);                      // micromol / m^2 / s
+    update(canopy_conductance_op, can_result.canopy_conductance);                     // mol / m^2 / s
+    update(canopy_gross_assimilation_molar_flux_op, can_result.GrossAssim);           // micromol / m^2 / s
+    update(canopy_non_photorespiratory_CO2_release_rate_op, can_result.RL);           // micromol / m^2 / s
+    update(canopy_photorespiration_molar_flux_op, can_result.Rp);                     // micromol / m^2 / s
+    update(canopy_transpiration_rate_op, can_result.Trans);                           // Mg / ha / hr
+    update(whole_plant_growth_respiration_molar_flux_op, can_result.whole_plant_gr);  // micromol / m^2 / s
 }
