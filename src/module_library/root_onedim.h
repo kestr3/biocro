@@ -4,7 +4,6 @@
 #include <cmath>
 #include <limits>
 #include <string>
-#include <iostream>
 
 namespace root_algorithm
 {

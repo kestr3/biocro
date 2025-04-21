@@ -6,8 +6,6 @@
 #include "root_onedim.h"
 #include "c4photo.h"
 
-#include <iostream>
-
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;
 
@@ -143,10 +141,6 @@ photosynthesis_outputs c4photoC(
         assim_guess_0,
         assim_guess_1);
 
-    if (!root_algorithm::successful_termination(result.flag)) {
-        std::cout << root_algorithm::flag_message(result.flag) << '\n';
-        std::cout << result.root << ", " << result.residual << ", " << result.iteration << '\n';
-    }
     // Convert Ci units
     double const Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromol / mol
 
