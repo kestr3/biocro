@@ -5,8 +5,12 @@
 #include <limits>
 #include <string>
 
-namespace root_algorithm
-{
+/**
+ * A C++ library for solving 1D equations.
+ */
+
+
+namespace root_algorithm {
 
 // used to hold `(x, f(x))`
 struct graph_t {
