@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "growth_resp.h"  // for growth_resp
+#include "respiration.h"  // for growth_resp
 
 namespace standardBML
 {

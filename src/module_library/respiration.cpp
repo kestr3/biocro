@@ -1,4 +1,4 @@
-#include "growth_resp.h"
+#include "respiration.h"
 #include "temperature_response_functions.h"  // for Q10_temperature_response
 
 /**
