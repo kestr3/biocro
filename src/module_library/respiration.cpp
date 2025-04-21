@@ -6,12 +6,15 @@
  *         of biomass available for growth.
  *
  *  @param [in] base_rate The base rate of carbon production that does not
- *         include respiratory losses. Any units are acceptable, such as
+ *         include respiratory losses. Any flux units are acceptable, such as
  *         mol / m^2 / s or Mg / ha / hour.
  *
- *  @param [in] grc Growth respiration coefficient (dimensionless)
+ *  @param [in] grc0 Growth respiration coefficient at the reference temperature
+ *         (dimensionless)
  *
- *  @param [in] temp Temperature (degrees C)
+ *  @param [in] Tleaf Leaf temperature (degrees C)
+ *
+ *  @param [in] Tref Reference temperature for the Q10 response (degrees C)
  *
  *  @return A rate of respiratory losses having the same units as `base_rate`
  *
@@ -28,11 +31,14 @@
  *
  *  > `A_growth = A_base * (1 - f_g) (2)
  *
- *  In this function, the temperature dependence of the respiration coefficient
- *  is modeled using a simple "Q10" method where `Q10 = 2` and the base
- *  temperature is 0 degrees C, i.e.,
+ *  In this function, the temperature dependence of the proportionality factor
+ *  is modeled using a simple "Q10" method:
  *
- *  > `f_g = f_g_0 * 2^(T / 10)` (3)
+ *  > `f_m = f_m_0 * 2^((T - Tref) / 10)` (3)
+ *
+ *  where `Tref` is the reference temperature for the Q10 response and `f_m_0`
+ *  is the maintenance respiration coefficient at the reference temperature.
+ *  This is accomplished using the `Q10_temperature_response()` function.
  *
  *  Ever since the days of WIMOVAC, there has been an additional constraint that
  *  `A_growth` is clamped to be greater than or equal to zero. From
@@ -42,7 +48,8 @@
  *  negative.
  *
  *  In the code below, `base_rate` represents `A_base`, `grc0` and `grc`
- *  represent `f_g_0` and `f_g`, and `temp` represents the temperature `T`.
+ *  represent `f_g_0` and `f_g`, `Tleaf` represents the temperature `T`, and
+ *  `Tref` represents the reference temperature.
  *
  *  ### Sources
  *
@@ -100,16 +107,90 @@
  *  - Thornley, J. H. M. "Growth, maintenance and respiration: a re-interpretation."
  *    Annals of Botany 41.6 (1977): 1191-1203.
  */
-double growth_resp(double const base_rate, double const grc0, double const temp)
+double growth_resp_Q10(
+    double const base_rate,  // any flux units
+    double const grc0,       // dimensionless
+    double const Tleaf,      // degrees C
+    double const Tref        // degrees C
+)
 {
     // Get the growth respiration coefficient at the current temperature
     double const grc{base_rate < 0 ? 1.0
-                                   : grc0 * Q10_temperature_response(temp, 0.0)};  // dimensionless
+                                   : grc0 * Q10_temperature_response(Tleaf, Tref)};  // dimensionless
 
     // Check for error conditions
     if (grc < 0.0 || grc > 1.0) {
-        throw std::range_error("Thrown in growth_resp: grc is outside [0, 1].");
+        throw std::range_error("Thrown in growth_resp_Q10: grc is outside [0, 1].");
     }
 
     return base_rate * grc;
+}
+
+/**
+ *  @brief Calculates respiratory losses associated with the total biomass of a
+ *         particular tissue.
+ *
+ *  @param [in] tissue_mass The total biomass of a tissue component (Mg / ha)
+ *
+ *  @param [in] mrc0 Maintenance respiration coefficient at the reference
+ *         temperature (dimensionless)
+ *
+ *  @param [in] Tleaf Leaf temperature (degrees C)
+ *
+ *  @param [in] Tref Reference temperature for the Q10 response (degrees C)
+ *
+ *  @return A rate of respiratory losses having the same units as `tissue_mass`
+ *
+ *  ### Model overview
+ *
+ *  The idea here is that some respiration is required to maintain living
+ *  tissue, and that the rate of CO2 use for maintenance respiration (`R_m`) is
+ *  given by
+ *
+ *  > `R_m = f_m * M_tissue (1)
+ *
+ *  where `M_tissue` is the mass of the tissue and `f_m` is a proportionality
+ *  factor. In BioCro, `M_tissue` is expressed in Mg / ha and `R_m` in
+ *  Mg / ha / hr`, so `f_m` must have dimensions of "mass per mass per time," or
+ *  kg / kg / hr using customary BioCro time units.
+ *
+ *  In this function, the temperature dependence of the proportionality factor
+ *  is modeled using a simple "Q10" method:
+ *
+ *  > `f_m = f_m_0 * 2^((T - Tref) / 10)` (3)
+ *
+ *  where `Tref` is the reference temperature for the Q10 response and `f_m_0`
+ *  is the maintenance respiration coefficient at the reference temperature.
+ *  This is accomplished using the `Q10_temperature_response()` function.
+ *
+ *  In the code below, `tissue_mass` represents `M_tissue`, `mrc0` and `mrc`
+ *  represent `f_m_0` and `f_m`, `Tleaf` represents the temperature `T`, and
+ *  `Tref` represents the reference temperature.
+ *
+ *  ### Sources
+ *
+ *  This ideas is from this paper: https://doi.org/10.1016/j.fcr.2010.07.007.
+ *
+ *  For some general discussions about respiration, see the following two
+ *  sources:
+ *
+ *  - [Amthor, J. S. "The McCree–de Wit–Penning de Vries–Thornley Respiration
+ *    Paradigms: 30 Years Later" Ann Bot 86, 1–20 (2000)]
+ *    (https://doi.org/10.1006/anbo.2000.1175)
+ *
+ *  - [Amthor, J. S. "The role of maintenance respiration in plant growth."
+ *    Plant, Cell & Environment 7, 561–569 (1984)]
+ *    (https://doi.org/10.1111/1365-3040.ep11591833)
+ */
+double maintenance_resp_Q10(
+    double const tissue_mass,  // Mg / ha
+    double const mrc0,         // kg / kg / hr
+    double const Tleaf,        // degrees C
+    double const Tref          // degrees C
+)
+{
+    // Get the maintenance respiration coefficient at the current temperature
+    double const mrc{mrc0 * Q10_temperature_response(Tleaf, Tref)};  // kg / kg / hr
+
+    return tissue_mass * mrc;
 }

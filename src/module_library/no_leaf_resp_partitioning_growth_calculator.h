@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "respiration.h"  // for growth_resp
+#include "respiration.h"  // for growth_resp_Q10
 
 namespace standardBML
 {
@@ -31,8 +31,8 @@ namespace standardBML
  *  senescence and gains due to remobilized carbon from other organs are handled
  *  elsewhere and are not included here.
  *
- *  Respiration is included via the `growth_resp()` function, which implements
- *  an empirical rule for determining the fraction of energy spent on
+ *  Respiration is included via the `growth_resp_Q10()` function, which
+ *  implements an empirical rule for determining the fraction of energy spent on
  *  respiration at a particular temperature. See the following paper for a
  *  general discussion of the importance of respiration in understanding plant
  *  growth: [Amthor, J. S. "The role of maintenance respiration in plant growth"
@@ -173,6 +173,9 @@ string_vector no_leaf_resp_partitioning_growth_calculator::get_outputs()
 
 void no_leaf_resp_partitioning_growth_calculator::do_operation() const
 {
+    // Specify the base temperature for Q10 growth respiration
+    double constexpr Tref = 0.0;  // degrees C
+
     // Calculate the rate of new leaf production, including _all_ losses due to
     // photorespiration and RL, but not accounting for water stress or any
     // additional growth respiration (Mg / ha / hr)
@@ -189,17 +192,17 @@ void no_leaf_resp_partitioning_growth_calculator::do_operation() const
     // Calculate the base rate of new stem production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_stem{kStem > 0 ? nonleaf_carbon_flux * kStem : 0};
-    double const Stem_gr_rate{growth_resp(base_rate_stem, grc_stem, temp)};
+    double const Stem_gr_rate{growth_resp_Q10(base_rate_stem, grc_stem, temp, Tref)};
 
     // Calculate the base rate of new root production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_root{kRoot > 0 ? nonleaf_carbon_flux * kRoot : 0};
-    double const Root_gr_rate{growth_resp(base_rate_root, grc_root, temp)};
+    double const Root_gr_rate{growth_resp_Q10(base_rate_root, grc_root, temp, Tref)};
 
     // Calculate the base rate of new rhizome production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_rhizome{kRhizome > 0 ? nonleaf_carbon_flux * kRhizome : 0};
-    double const Rhizome_gr_rate{growth_resp(base_rate_rhizome, grc_rhizome, temp)};
+    double const Rhizome_gr_rate{growth_resp_Q10(base_rate_rhizome, grc_rhizome, temp, Tref)};
 
     // Calculate the base rate of new grain production (Mg / ha / hr)
     double const base_rate_grain{kGrain > 0 ? nonleaf_carbon_flux * kGrain : 0};

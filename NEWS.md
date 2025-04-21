@@ -116,8 +116,10 @@ be directly added to this file to describe the related changes.
 
 ## Internal changes
 
-- Renamed the `resp()` function to `growth_resp()` to better indicate its
-  purpose, and moved it to a dedicated header.
+- Renamed the `resp()` function to `growth_resp_Q10()` to better indicate its
+  purpose, and moved it to a respiration header file. The new header file
+  (`respiration.h`) also includes a new maintenance respiration function
+  (`maintenance_respiration_Q10`).
 
 ## Bug fixes
 
