@@ -102,11 +102,11 @@ class root_onedim_test : public direct_module
 
     result get_result_op(state_map* output_quantities, std::string&& name)
     {
-        return result{
+        return result({
             get_op(output_quantities, name + "_root"),
             get_op(output_quantities, name + "_residual"),
             get_op(output_quantities, name + "_iteration"),
-            get_op(output_quantities, name + "_flag")};
+            get_op(output_quantities, name + "_flag")});
     }
 
     static string_vector make_qname(std::string& name)

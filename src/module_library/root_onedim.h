@@ -187,20 +187,18 @@ struct result_t {
  */
 template <typename Method>
 struct root_finder : public Method {
-    static constexpr double eps = std::sqrt(
-        std::numeric_limits<double>::epsilon());
 
     size_t max_iterations;
     double _abs_tol;
     double _rel_tol;
 
     root_finder() : max_iterations{100},
-                    _abs_tol{eps},
-                    _rel_tol{eps} {}
+                    _abs_tol{1e-10},
+                    _rel_tol{1e-8} {}
 
     root_finder(size_t max_iter) : max_iterations{max_iter},
-                                   _abs_tol{eps},
-                                   _rel_tol{eps} {}
+                                   _abs_tol{1e-10},
+                                   _rel_tol{1e-8} {}
     root_finder(size_t max_iter, double abs_tol, double rel_tol)
         : max_iterations{max_iter},
           _abs_tol{abs_tol},
