@@ -214,15 +214,15 @@ canopy_photosynthesis_outputs c3CanAC(
     // = 36 s * mol * Mg * m^2 / (hr * mmol * kg * ha)
     double constexpr cf2 = physical_constants::molar_mass_of_water * 36;  // (Mg / ha / hr) / (mmol / m^2 / s)
 
-    canopy_photosynthesis_outputs ans;
-    ans.Assim = CanopyA * (1.0 - growth_respiration_fraction);  // micromol / m^2 / s
-    ans.canopy_conductance = canopy_conductance;                // mol / m^2 / s
-    ans.canopy_transpiration_penman = CanopyPe;                 // mmol / m^2 / s
-    ans.canopy_transpiration_priestly = CanopyPr;               // mmol / m^2 / s
-    ans.GrossAssim = GCanopyA;                                  // micromol / m^2 / s
-    ans.Rp = canopy_rp;                                         // micromol / m^2 / s
-    ans.RL = canopy_RL;                                         // micromol / m^2 / s
-    ans.Trans = CanopyT * cf2;                                  // Mg / ha / hr
-
-    return ans;
+    return canopy_photosynthesis_outputs{
+        /* .Assim = */ CanopyA * (1.0 - growth_respiration_fraction),  // micromol / m^2 / s
+        /* .canopy_conductance = */ canopy_conductance,                // mol / m^2 / s
+        /* .canopy_transpiration_penman = */ CanopyPe,                 // mmol / m^2 / s
+        /* .canopy_transpiration_priestly = */ CanopyPr,               // mmol / m^2 / s
+        /* .GrossAssim = */ GCanopyA,                                  // micromol / m^2 / s
+        /* .RL = */ canopy_RL,                                         // micromol / m^2 / s
+        /* .Rp = */ canopy_rp,                                         // micromol / m^2 / s
+        /* .Trans = */ CanopyT * cf2,                                  // Mg / ha / hr
+        /* .whole_plant_gr = */ CanopyA * growth_respiration_fraction  // micromol / m^2 / s
+    };
 }

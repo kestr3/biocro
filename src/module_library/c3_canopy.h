@@ -86,7 +86,8 @@ class c3_canopy : public direct_module
           canopy_gross_assimilation_molar_flux_op{get_op(output_quantities, "canopy_gross_assimilation_molar_flux")},
           canopy_non_photorespiratory_CO2_release_rate_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_molar_flux")},
           canopy_photorespiration_molar_flux_op{get_op(output_quantities, "canopy_photorespiration_molar_flux")},
-          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
+          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")},
+          whole_plant_growth_respiration_molar_flux_op{get_op(output_quantities, "whole_plant_growth_respiration_molar_flux")}
     {
     }
     static string_vector get_inputs();
@@ -167,6 +168,7 @@ class c3_canopy : public direct_module
     double* canopy_non_photorespiratory_CO2_release_rate_op;
     double* canopy_photorespiration_molar_flux_op;
     double* canopy_transpiration_rate_op;
+    double* whole_plant_growth_respiration_molar_flux_op;
 
     // Main operation
     void do_operation() const;

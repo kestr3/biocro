@@ -19,7 +19,8 @@ soybean <- list(
         "BioCro:ten_layer_canopy_integrator",
         partitioning_growth_calculator = "BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator",
         "BioCro:senescence_coefficient_logistic",
-        "BioCro:carbon_assimilation_to_biomass"
+        "BioCro:carbon_assimilation_to_biomass",
+        "BioCro:maintenance_respiration_calculator"
     ),
     differential_modules = list(
         senescence = "BioCro:senescence_logistic",
@@ -198,11 +199,12 @@ soybean <- list(
         growth_respiration_fraction = 0,
 
         # no_leaf_resp_partitioning_growth_calculator_negative_assimilation_partitioned module
+        grc_leaf                        = 0.0,        # required for other partitioning growth modules
         grc_rhizome                     = 0.00270,    # dimensionless, set to the value of grc_root
         grc_root                        = 0.00270,    # dimensionless, optimized
         grc_stem                        = 0.02828,    # dimensionless, optimized. growth respiration coefficient
 
-        # maintenance respiration module
+        # maintenance_respiration_calculator module
         mrc_grain                       = 1e-5,          # kg / kg / hr, assigned a small value to ignore this
         mrc_leaf                        = 0.00048836,    # kg / kg / hr maintenance respiration coefficient. optimized
         mrc_rhizome                     = 0.00001,       # kg / kg / hr, assumed to be same as root

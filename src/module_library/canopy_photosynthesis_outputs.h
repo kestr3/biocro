@@ -14,6 +14,7 @@ struct canopy_photosynthesis_outputs {
     double RL;                             //!< Rate of non-photorespiratory CO2 release in the light (micromol / m^2 / s)
     double Rp;                             //!< Rate of photorespiration (micromol / m^2 / s)
     double Trans;                          //!< Transpiration rate (Mg / ha / hr)
+    double whole_plant_gr;                 //!< Whole-plant growth respiration rate (micromol / m^2 / s)
 };
 
 #endif

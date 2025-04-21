@@ -65,6 +65,7 @@ miscanthus_x_giganteus <- list(
         grc_rhizome                 = 0.03,
         grc_root                    = 0.03,
         grc_stem                    = 0.02,
+        growth_respiration_fraction = 0.0,
         Gs_min                      = 1e-3,
         heightf                     = 1.33, # LAI of 4 when canopy is 3 m tall
         hydrDist                    = 0,
@@ -117,7 +118,6 @@ miscanthus_x_giganteus <- list(
         min_gbw_canopy              = 0.005,
         nalphab0                    = 0.02367,
         nalphab1                    = 0.000488,
-        net_assimilation_rate_shell = 0.0,
         nileafn                     = 85,
         nkln                        = 0.5,
         nkpLN                       = 0.17,
