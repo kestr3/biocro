@@ -24,6 +24,29 @@ test_module <- function(module_name, case_to_test)
         return(gsub("\n", "", msg, fixed = TRUE))
     }
 
+    # Check to see if there are new outputs; if there are, throw a warning and
+    # proceed to check the outputs that are present in the stored test case
+    actual_output_names <- names(actual_outputs)
+    expected_output_names <- names(expected_outputs)
+
+    new_output_names <-
+        actual_output_names[!actual_output_names %in% expected_output_names]
+
+    if (length(new_output_names) > 0) {
+        warning(
+            paste0(
+                "Module `",
+                module_name,
+                "` test case `",
+                case_to_test[['description']],
+                "`: unexpected outputs were found: ",
+                paste(new_output_names, collapse = ', ')
+            )
+        )
+        actual_outputs <-
+            actual_outputs[actual_output_names %in% expected_output_names]
+    }
+
     # Make sure the outputs are ordered the same way (otherwise `all.equal` may
     # indicate a difference when there isn't one)
     expected_outputs <-  expected_outputs[order(names(expected_outputs))]

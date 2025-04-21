@@ -8,19 +8,20 @@ canopy_photosynthesis_outputs CanAC(
     const nitroParms& nitroP,
     double absorbed_longwave,  // J / m^2 / s
     double Alpha,
-    double ambient_temperature,        // degrees C
-    double atmospheric_pressure,       // Pa
-    double atmospheric_scattering,     // dimensionless
-    double atmospheric_transmittance,  // dimensionless
-    double b0,                         // mol / m^2 / s
-    double b1,                         // dimensionless
-    double beta,                       // dimensionless
-    double Catm,                       // ppm
-    double chil,                       // dimensionless
-    double cosine_zenith_angle,        // dimensionless
-    double gbw_canopy,                 // m / s
-    double Gs_min,                     // mol / m^2 / s
-    double k_diffuse,                  // dimensionless
+    double ambient_temperature,          // degrees C
+    double atmospheric_pressure,         // Pa
+    double atmospheric_scattering,       // dimensionless
+    double atmospheric_transmittance,    // dimensionless
+    double b0,                           // mol / m^2 / s
+    double b1,                           // dimensionless
+    double beta,                         // dimensionless
+    double Catm,                         // ppm
+    double chil,                         // dimensionless
+    double cosine_zenith_angle,          // dimensionless
+    double gbw_canopy,                   // m / s
+    double growth_respiration_fraction,  // dimensionless
+    double Gs_min,                       // mol / m^2 / s
+    double k_diffuse,                    // dimensionless
     double Kparm,
     double kpLN,
     double LAI,                     // dimensionless from m^2 / m^2

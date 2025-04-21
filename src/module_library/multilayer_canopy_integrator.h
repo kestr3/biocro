@@ -58,7 +58,8 @@ class multilayer_canopy_integrator : public direct_module
           canopy_gross_assimilation_molar_flux_op{get_op(output_quantities, "canopy_gross_assimilation_molar_flux")},
           canopy_photorespiration_molar_flux_op{get_op(output_quantities, "canopy_photorespiration_molar_flux")},
           canopy_RL_molar_flux_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_molar_flux")},
-          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")}
+          canopy_transpiration_rate_op{get_op(output_quantities, "canopy_transpiration_rate")},
+          whole_plant_growth_respiration_molar_flux_op{get_op(output_quantities, "whole_plant_growth_respiration_molar_flux")}
     {
     }
 
@@ -93,6 +94,7 @@ class multilayer_canopy_integrator : public direct_module
     double* canopy_photorespiration_molar_flux_op;
     double* canopy_RL_molar_flux_op;
     double* canopy_transpiration_rate_op;
+    double* whole_plant_growth_respiration_molar_flux_op;
 
     // Main operation
     virtual void do_operation() const;
@@ -150,7 +152,8 @@ string_vector multilayer_canopy_integrator::get_outputs(int /*nlayers*/)
         "canopy_gross_assimilation_molar_flux",                // micromol CO2 / m^2 / s
         "canopy_non_photorespiratory_CO2_release_molar_flux",  // micromol CO2 / m^2 / s
         "canopy_photorespiration_molar_flux",                  // micromol CO2 / m^2 / s
-        "canopy_transpiration_rate"                            // Mg / ha / hr
+        "canopy_transpiration_rate",                           // Mg / ha / hr
+        "whole_plant_growth_respiration_molar_flux"            // micromol CO2 / m^2 / s
     };
 }
 
@@ -218,6 +221,7 @@ void multilayer_canopy_integrator::run() const
     update(canopy_photorespiration_molar_flux_op, canopy_photorespiration_rate);
     update(canopy_RL_molar_flux_op, canopy_RL);
     update(canopy_transpiration_rate_op, canopy_transpiration_rate * cf2);
+    update(whole_plant_growth_respiration_molar_flux_op, growth_respiration);
 }
 
 ////////////////////////////////////////

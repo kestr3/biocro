@@ -138,12 +138,14 @@ class carbon_assimilation_to_biomass : public direct_module
           canopy_photorespiration_molar_flux{get_input(input_quantities, "canopy_photorespiration_molar_flux")},
           canopy_RL_molar_flux{get_input(input_quantities, "canopy_non_photorespiratory_CO2_release_molar_flux")},
           dry_biomass_per_carbon{get_input(input_quantities, "dry_biomass_per_carbon")},
+          whole_plant_growth_respiration_molar_flux{get_input(input_quantities, "whole_plant_growth_respiration_molar_flux")},
 
           // Get pointers to output quantities
           canopy_assimilation_rate_op{get_op(output_quantities, "canopy_assimilation_rate")},
           canopy_gross_assimilation_rate_op{get_op(output_quantities, "canopy_gross_assimilation_rate")},
           canopy_photorespiration_rate_op{get_op(output_quantities, "canopy_photorespiration_rate")},
-          canopy_RL_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate")}
+          canopy_RL_op{get_op(output_quantities, "canopy_non_photorespiratory_CO2_release_rate")},
+          whole_plant_GRR_op{get_op(output_quantities, "whole_plant_growth_respiration_rate")}
     {
     }
     static string_vector get_inputs();
@@ -157,12 +159,14 @@ class carbon_assimilation_to_biomass : public direct_module
     double const& canopy_photorespiration_molar_flux;
     double const& canopy_RL_molar_flux;
     double const& dry_biomass_per_carbon;
+    double const& whole_plant_growth_respiration_molar_flux;
 
     // Pointers to output quantities
     double* canopy_assimilation_rate_op;
     double* canopy_gross_assimilation_rate_op;
     double* canopy_photorespiration_rate_op;
     double* canopy_RL_op;
+    double* whole_plant_GRR_op;
 
     // Main operation
     void do_operation() const;
@@ -175,7 +179,8 @@ string_vector carbon_assimilation_to_biomass::get_inputs()
         "canopy_gross_assimilation_molar_flux",                // micromol CO2 / m^2 / s
         "canopy_non_photorespiratory_CO2_release_molar_flux",  // micromol CO2 / m^2 / s
         "canopy_photorespiration_molar_flux",                  // micromol CO2 / m^2 / s
-        "dry_biomass_per_carbon"                               // g biomass / mol C
+        "dry_biomass_per_carbon",                              // g biomass / mol C
+        "whole_plant_growth_respiration_molar_flux"            // micromol CO2 / m^2 / s
     };
 }
 
@@ -185,7 +190,8 @@ string_vector carbon_assimilation_to_biomass::get_outputs()
         "canopy_assimilation_rate",                      // Mg / ha / hr
         "canopy_gross_assimilation_rate",                // Mg / ha / hr
         "canopy_non_photorespiratory_CO2_release_rate",  // Mg / ha / hr
-        "canopy_photorespiration_rate"                   // Mg / ha / hr
+        "canopy_photorespiration_rate",                  // Mg / ha / hr
+        "whole_plant_growth_respiration_rate"            // Mg / ha / hr
     };
 }
 
@@ -206,6 +212,7 @@ void carbon_assimilation_to_biomass::do_operation() const
     update(canopy_gross_assimilation_rate_op, canopy_gross_assimilation_molar_flux * cf);
     update(canopy_photorespiration_rate_op, canopy_photorespiration_molar_flux * cf);
     update(canopy_RL_op, canopy_RL_molar_flux * cf);
+    update(whole_plant_GRR_op, whole_plant_growth_respiration_molar_flux * cf);
 }
 
 }  // namespace standardBML
