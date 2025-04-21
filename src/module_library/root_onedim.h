@@ -469,7 +469,7 @@ struct halley : public one_step_method {
         double& y = s.y;
         double df = fun.derivative(x);
         if (is_zero(df, abs_tol)) {
-            s = Flag::division_by_zero;
+            s.flag = Flag::division_by_zero;
             return s;
         }
         double df2 = fun.second_derivative(x);
@@ -477,7 +477,7 @@ struct halley : public one_step_method {
         double b = df2 / (2 * df);
         b *= a;
         if (is_close(b, 1, abs_tol, rel_tol)) {
-            s = Flag::halley_no_cross;
+            s.flag = Flag::halley_no_cross;
             return s;
         }
         x -= a / (1. - b);  // division by zero Only if no solution

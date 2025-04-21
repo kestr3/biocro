@@ -10,139 +10,32 @@
 namespace standardBML
 {
 
-namespace root_test_functions
-{
+// kepler function
+struct root_test_function {
+    double epsilon;
+    double answer;
+    double y;
 
-// root at 1 for all tests.
+    root_test_function(double ep, double ans) : epsilon{ep}, answer{ans}
+    {
+        y = ans - ep * std::sin(ans);
+    }
 
-struct hard_test {
     double operator()(double x)
     {
-        return x < 0 ? -1 : std::pow(x, 10) - 1;
+        return x - epsilon * std::sin(x) - y;
     }
 
     double derivative(double x)
     {
-        return x < 0 ? 0.0 : 10 * std::pow(x, 9);
+        return 1 - epsilon * std::cos(x);
     }
 
     double second_derivative(double x)
     {
-        return x < 0 ? 0.0 : 90 * std::pow(x, 8);
+        return epsilon * std::sin(x);
     }
 };
-
-struct linear {
-    double operator()(double x)
-    {
-        return (1 - x);
-    }
-
-    double derivative(double x)
-    {
-        return -1;
-    }
-
-    double second_derivative(double x)
-    {
-        return 0;
-    }
-};
-
-struct quadratic {
-    double operator()(double x)
-    {
-        return (1 - x) * (x + 1);
-    }
-
-    double derivative(double x)
-    {
-        return -2 * x;
-    }
-
-    double second_derivative(double x)
-    {
-        return -2;
-    }
-};
-
-struct double_root {
-    double operator()(double x)
-    {
-        return std::pow(x - 1, 2);
-    }
-
-    double derivative(double x)
-    {
-        return 2 * (x - 1);
-    }
-
-    double second_derivative(double x)
-    {
-        return -2;
-    }
-};
-
-struct triple_root {
-    double operator()(double x)
-    {
-        return std::pow(x - 1, 3);
-    }
-
-    double derivative(double x)
-    {
-        return 3 * std::pow(x - 1, 2);
-    }
-
-    double second_derivative(double x)
-    {
-        return 6 * (x - 1);
-    }
-};
-
-struct step_function {
-    double operator()(double x)
-    {
-        return x >= 1 ? 1 : -1;
-    }
-
-    double derivative(double x)
-    {
-        return 0;
-    }
-
-    double second_derivative(double x)
-    {
-        return 0;
-    }
-};
-
-struct singularity {
-    double operator()(double x)
-    {
-        return 1 / (x - 1);
-    }
-
-    double derivative(double x)
-    {
-        return -1 / std::pow(x - 1, 2);
-    }
-
-    double second_derivative(double x)
-    {
-        return 2 / std::pow(x - 1, 3);
-    }
-};
-const std::map<std::string, std::function<double(double)>>
-    tests = {
-        {"hard_test", hard_test{}},
-        {"linear", linear{}},
-        {"quadratic", quadratic{}},
-        {"double_root", double_root{}},
-        {"triple_root", triple_root{}},
-        {"step_function", step_function{}},
-        {"singularity", singularity{}}};
-};  // namespace root_test_functions
 
 class root_onedim_test : public direct_module
 {
@@ -158,9 +51,25 @@ class root_onedim_test : public direct_module
         : direct_module{},
 
           // Get pointers to input quantities
+          ecc{get_input(input_quantities, "ecc")},
+          answer{get_input(input_quantities, "answer")},
+          max_iterations{get_input(input_quantities, "max_iterations")},
+          abs_tol{get_input(input_quantities, "abs_tol")},
+          rel_tol{get_input(input_quantities, "rel_tol")},
+          lower_bracket{get_input(input_quantities, "lower_bracket")},
+          upper_bracket{get_input(input_quantities, "upper_bracket")},
+          single_guess{get_input(input_quantities, "single_guess")},
 
           // Get pointers to output quantities
-          results{get_result_op(output_quantities)}
+          secant_result{get_result_op(output_quantities, "secant")},
+          fixed_point_result{get_result_op(output_quantities, "fixed_point")},
+          newton_result{get_result_op(output_quantities, "newton")},
+          halley_result{get_result_op(output_quantities, "halley")},
+          steffensen_result{get_result_op(output_quantities, "steffensen")},
+          bisection_result{get_result_op(output_quantities, "bisection")},
+          regula_falsi_result{get_result_op(output_quantities, "regula_falsi")},
+          ridder_result{get_result_op(output_quantities, "ridder")}
+
     {
     }
     static string_vector get_inputs();
@@ -169,68 +78,121 @@ class root_onedim_test : public direct_module
 
    private:
     // Pointers to input quantities
+    const double& ecc;
+    const double& answer;
+    const double& max_iterations;
+    const double& abs_tol;
+    const double& rel_tol;
+    const double& lower_bracket;
+    const double& upper_bracket;
+    const double& single_guess;
 
     // Pointers to output quantities
-    std::map<std::string, result> results;
+    result secant_result;
+    result fixed_point_result;
+    result newton_result;
+    result halley_result;
+    result steffensen_result;
+    result bisection_result;
+    result regula_falsi_result;
+    result ridder_result;
 
     // Main operation
     void do_operation() const;
 
-    std::map<std::string, result> get_result_op(state_map* output_quantities)
+    result get_result_op(state_map* output_quantities, std::string&& name)
     {
-        std::map<std::string, result> out;
-        for (auto& test : root_test_functions::tests) {
-            auto name = test.first;
-            out[name] = result{
-                get_op(output_quantities, name + "_root"),
-                get_op(output_quantities, name + "_residual"),
-                get_op(output_quantities, name + "_iteration"),
-                get_op(output_quantities, name + "_flag")};
-        }
-        return out;
+        return result{
+            get_op(output_quantities, name + "_root"),
+            get_op(output_quantities, name + "_residual"),
+            get_op(output_quantities, name + "_iteration"),
+            get_op(output_quantities, name + "_flag")};
+    }
+
+    static string_vector make_qname(std::string& name)
+    {
+        return {
+            name + "_root",
+            name + "_residual",
+            name + "_iteration",
+            name + "_flag"};
+    }
+
+    void inline update_result(const result& r, root_algorithm::result_t& result) const
+    {
+        update(r.root_op, result.root);
+        update(r.residual_op, result.residual);
+        update(r.iteration_op, result.iteration);
+        update(r.flag_op, static_cast<int>(result.flag));
     }
 };
 
 string_vector root_onedim_test::get_inputs()
 {
     return {
-        // None
-    };
+        "ecc",
+        "answer",
+        "max_iterations",
+        "abs_tol",
+        "rel_tol",
+        "lower_bracket",
+        "upper_bracket",
+        "single_guess"};
 }
 
 string_vector root_onedim_test::get_outputs()
 {
     string_vector out;
-    for (auto& test : root_test_functions::tests) {
-        auto name = test.first;
-        out.push_back(name + "_root");
-        out.push_back(name + "_residual");
-        out.push_back(name + "_iteration");
-        out.push_back(name + "_flag");
+    const string_vector methods = {
+        "secant", "fixed_point", "newton", "halley", "steffensen",
+        "bisection", "regula_falsi", "ridder"};
+    for (auto name : methods) {
+        string_vector sv = make_qname(name);
+        out.insert(out.end(), sv.begin(), sv.end());
     }
+
     return out;
 }
 
 void root_onedim_test::do_operation() const
 {
     // Collect inputs and make calculations
-    root_algorithm::root_finder<root_algorithm::bisection> solver(100, 1e-14, 1e-12);
-    root_algorithm::result_t result;
+    using namespace root_algorithm;
+    result_t result;
+    root_test_function test{ecc, answer};
+    size_t iter = static_cast<size_t>(max_iterations);
 
-    for (auto& test : root_test_functions::tests) {
-        auto& name = test.first;
-        auto& func = test.second;
-        result = solver.solve(func, 0, 3);
+    result = root_finder<secant>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(secant_result, result);
 
-        auto& r = results.at(name);
+    result = root_finder<fixed_point>(iter, abs_tol, rel_tol)
+                 .solve(test, single_guess);
+    update_result(fixed_point_result, result);
 
-        update(r.root_op, result.root);
-        update(r.residual_op, result.residual);
-        update(r.iteration_op, result.iteration);
-        update(r.flag_op, static_cast<int>(result.flag));
-    }
+    result = root_finder<newton>(iter, abs_tol, rel_tol)
+                 .solve(test, single_guess);
+    update_result(newton_result, result);
 
-    // Update the output quantity list
+    result = root_finder<halley>(iter, abs_tol, rel_tol)
+                 .solve(test, single_guess);
+    update_result(halley_result, result);
+
+    result = root_finder<steffensen>(iter, abs_tol, rel_tol)
+                 .solve(test, single_guess);
+    update_result(steffensen_result, result);
+
+    result = root_finder<bisection>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(bisection_result, result);
+
+    result = root_finder<regula_falsi>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(regula_falsi_result, result);
+
+    result = root_finder<ridder>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(ridder_result, result);
 }
 
 }  // namespace standardBML
