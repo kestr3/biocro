@@ -324,6 +324,25 @@ struct secant {
     }
 };
 
+/**
+ * @brief Fixed Point Method. Provide one initial guesses for root.
+ *
+ * @details WARNING: Do not use unless you know what you're doing.
+ *
+ * The fixed point iteration assumes that `f` is defined as
+ * `f(x) = g(x) - x` and that `g` has a fixed point which is the desired root.
+ *
+ * This method iterates the following function:
+ * \f[x \mapsto x + f(x) = g(x) \f]
+ *
+ * If `g` has a fixed point and if `g` is a contraction mapping `|g'(x)| < 1` for
+ * all `x` in a neighborhood of the fixed point, then the sequence of iterates will
+ * converge to the fixed point.
+ *
+ * Because fixed point iteration was used in previous versions of BioCro to solve
+ * for the CO2 concentrations, this method is provided for cross version comparisons.
+ * However, its use is not recommended as all other methods are safer and faster!
+ */
 struct fixed_point {
     struct state {
         Flag flag;
