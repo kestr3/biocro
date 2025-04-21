@@ -83,8 +83,6 @@ test_soybean_carbon_accounting <- function(partitioning_calculator) {
         #    main = partitioning_calculator
         #))
 
-        skip('Some respiration rates are negative')
-
         # Check that all CO2 loss rates are non-negative
         with(soybean_res, {
             expect_true(all(canopy_photorespiration_rate >= 0))

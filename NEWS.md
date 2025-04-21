@@ -46,6 +46,11 @@ be directly added to this file to describe the related changes.
   This change only affects the solution at low Ci, and does not modify the
   interface of any module.
 
+- Changed how growth respiration is calculated (so the rate of growth
+  respiration is zero whenever the base rate of carbon available for growth is
+  negative) and made sure it is calculated consistently across different
+  modules.
+
 - Renamed several quantities to make their meanings more clear:
 
   - `mrc1` has been replaced by `grc_leaf` and `grc_stem` to better indicate
@@ -119,7 +124,8 @@ be directly added to this file to describe the related changes.
 - Renamed the `resp()` function to `growth_resp_Q10()` to better indicate its
   purpose, and moved it to a respiration header file. The new header file
   (`respiration.h`) also includes a new maintenance respiration function
-  (`maintenance_respiration_Q10`).
+  (`maintenance_respiration_Q10()`) and a simpler growth respiration function
+  that does not apply a Q10 response (`growth_resp()`).
 
 ## Bug fixes
 

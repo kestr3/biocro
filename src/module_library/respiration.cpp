@@ -9,12 +9,7 @@
  *         include respiratory losses. Any flux units are acceptable, such as
  *         mol / m^2 / s or Mg / ha / hour.
  *
- *  @param [in] grc0 Growth respiration coefficient at the reference temperature
- *         (dimensionless)
- *
- *  @param [in] Tleaf Leaf temperature (degrees C)
- *
- *  @param [in] Tref Reference temperature for the Q10 response (degrees C)
+ *  @param [in] grc Growth respiration coefficient (dimensionless)
  *
  *  @return A rate of respiratory losses having the same units as `base_rate`
  *
@@ -31,34 +26,90 @@
  *
  *  > `A_growth = A_base * (1 - f_g) (2)
  *
- *  In this function, the temperature dependence of the proportionality factor
- *  is modeled using a simple "Q10" method:
+ *  If `A_base` is negative, then no growth is occurring; in this case, `R_g`
+ *  should be zero. With this in mind, we actually use
  *
- *  > `f_m = f_m_0 * 2^((T - Tref) / 10)` (3)
+ *  > `R_g = 0` (3)
  *
- *  where `Tref` is the reference temperature for the Q10 response and `f_m_0`
- *  is the maintenance respiration coefficient at the reference temperature.
+ *  when `A_base < 0` in place of Equation 3.
+ *
+ *  In the code below, `base_rate` represents `A_base` and `grc` represents
+ *  `f_g`.
+ *
+ *  ### Sources
+ *
+ *  For growth respiration, see these papers:
+ *  - Apsim: (https://apsimdev.apsim.info/ApsimX/Documents/AgPastureScience.pdf)
+ *  - Thornley, J. H. M. "Growth, maintenance and respiration: a re-interpretation."
+ *    Annals of Botany 41.6 (1977): 1191-1203.
+ *
+ *  For some general discussions about respiration, see the following two
+ *  sources:
+ *
+ *  - [Amthor, J. S. "The McCree–de Wit–Penning de Vries–Thornley Respiration
+ *    Paradigms: 30 Years Later" Ann Bot 86, 1–20 (2000)]
+ *    (https://doi.org/10.1006/anbo.2000.1175)
+ *
+ *  - [Amthor, J. S. "The role of maintenance respiration in plant growth."
+ *    Plant, Cell & Environment 7, 561–569 (1984)]
+ *    (https://doi.org/10.1111/1365-3040.ep11591833)
+ */
+double growth_resp(
+    double const base_rate,  // any flux units
+    double const grc         // dimensionless
+)
+{
+    // Check for error conditions
+    if (grc < 0.0 || grc > 1.0) {
+        throw std::range_error("Thrown in growth_resp: grc is outside [0, 1].");
+    }
+
+    return base_rate < 0 ? 0.0 : base_rate * grc;
+}
+
+/**
+ *  @brief Calculates respiratory losses associated with a particular base rate
+ *         of biomass available for growth.
+ *
+ *  @param [in] base_rate The base rate of carbon production that does not
+ *         include respiratory losses. Any flux units are acceptable, such as
+ *         mol / m^2 / s or Mg / ha / hour.
+ *
+ *  @param [in] grc0 Growth respiration coefficient at the reference temperature
+ *         (dimensionless)
+ *
+ *  @param [in] Tleaf Leaf temperature (degrees C)
+ *
+ *  @param [in] Tref Reference temperature for the Q10 response (degrees C)
+ *
+ *  @return A rate of respiratory losses having the same units as `base_rate`
+ *
+ *  ### Model overview
+ *
+ *  This function follows the same general approach as `growth_resp()`, but
+ *  calculates the growth respiration coefficient using a simple "Q10" method:
+ *
+ *  > `f_g = f_g_0 * 2^((T - Tref) / 10)`
+ *
+ *  where `Tref` is the reference temperature for the Q10 response and `f_g_0`
+ *  is the growth respiration coefficient at the reference temperature.
  *  This is accomplished using the `Q10_temperature_response()` function.
- *
- *  Ever since the days of WIMOVAC, there has been an additional constraint that
- *  `A_growth` is clamped to be greater than or equal to zero. From
- *  Equation (2), we can see that `A_growth` would be negative whenever `A_base`
- *  is negative, since the fraction `f_g` must lie on [0, 1] by definition. So,
- *  this clamping operation is equivalent to setting `f_g` = 1 when `A_base` is
- *  negative.
  *
  *  In the code below, `base_rate` represents `A_base`, `grc0` and `grc`
  *  represent `f_g_0` and `f_g`, `Tleaf` represents the temperature `T`, and
  *  `Tref` represents the reference temperature.
  *
- *  ### Sources
+ *  ### Historical Notes and Sources
  *
- *  In Stephen Humphries's thesis, he describes the respiration model in the
- *  following way: "The respiration model of McCree (1970) modified according to
- *  Penning de Vries (1972) and Thornley (1970) is used here to predict plant
- *  respiration... The respiration associated with each plant structure is
- *  modified according to the temperature of the structure using a Q10
- *  approximation with a value of 2 as described by Spain and Keen (1992)."
+ *  This function was originally called `resp` and was first explained in
+ *  Stephen Humphries's thesis.
+ *
+ *  There, he describes the respiration model in the following way: "The
+ *  respiration model of McCree (1970) modified according to Penning de Vries
+ *  (1972) and Thornley (1970) is used here to predict plant respiration... The
+ *  respiration associated with each plant structure is modified according to
+ *  the temperature of the structure using a Q10 approximation with a value of 2
+ *  as described by Spain and Keen (1992)."
  *
  *  I (EBL) believe these references to be to the following documents:
  *
@@ -82,17 +133,6 @@
  *  Spain book describes the temperature dependence. Unfortunately, I can't find
  *  an online version of that book so I can't be sure.
  *
- *  For some general discussions about respiration, see the following two
- *  sources:
- *
- *  - [Amthor, J. S. "The McCree–de Wit–Penning de Vries–Thornley Respiration
- *    Paradigms: 30 Years Later" Ann Bot 86, 1–20 (2000)]
- *    (https://doi.org/10.1006/anbo.2000.1175)
- *
- *  - [Amthor, J. S. "The role of maintenance respiration in plant growth."
- *    Plant, Cell & Environment 7, 561–569 (1984)]
- *    (https://doi.org/10.1111/1365-3040.ep11591833)
- *
  *  The Humphries thesis is also unfortunately not available online:
  *
  *  Humphries, S. "Will mechanistically rich models provide us with new insights
@@ -106,6 +146,15 @@
  *  - Apsim: (https://apsimdev.apsim.info/ApsimX/Documents/AgPastureScience.pdf)
  *  - Thornley, J. H. M. "Growth, maintenance and respiration: a re-interpretation."
  *    Annals of Botany 41.6 (1977): 1191-1203.
+ *
+ *  Ever since the days of WIMOVAC, there had been an additional constraint that
+ *  `A_growth = A_base - R_g` is clamped to be greater than or equal to zero. We
+ *  can see that `A_growth` would be negative whenever `A_base` is negative,
+ *  since the fraction `f_g` must lie on [0, 1] by definition. So, this clamping
+ *  operation is equivalent to setting `f_g` = 1 when `A_base` is negative. This
+ *  caused some strange behavior with unrealistic physical meaning, because
+ *  respiration costs were allowed to be negative. This behavior has since been
+ *  changed so that no growth respiration occurs when `A_base` is negative.
  */
 double growth_resp_Q10(
     double const base_rate,  // any flux units
@@ -115,15 +164,9 @@ double growth_resp_Q10(
 )
 {
     // Get the growth respiration coefficient at the current temperature
-    double const grc{base_rate < 0 ? 1.0
-                                   : grc0 * Q10_temperature_response(Tleaf, Tref)};  // dimensionless
+    double const grc{grc0 * Q10_temperature_response(Tleaf, Tref)};  // dimensionless
 
-    // Check for error conditions
-    if (grc < 0.0 || grc > 1.0) {
-        throw std::range_error("Thrown in growth_resp_Q10: grc is outside [0, 1].");
-    }
-
-    return base_rate * grc;
+    return growth_resp(base_rate, grc);
 }
 
 /**
