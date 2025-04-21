@@ -6,6 +6,8 @@
 #include "root_onedim.h"
 #include "c4photo.h"
 
+#include <iostream>
+
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;
 
@@ -130,17 +132,21 @@ photosynthesis_outputs c4photoC(
     // Find starting guesses for the net CO2 assimilation rate. One is the
     // predicted rate at Ci = 0.4 * Ca, and the other is the predicted rate at
     // Ci = Ca.
-    double const assim_guess_0 = collatz_assim(0.4 * Ca_pa);
-    double const assim_guess_1 = collatz_assim(Ca_pa);
+    double const assim_guess_0 = -RT;
+    double const assim_guess_1 = collatz_assim(Ca_pa) + RT;
 
     // Run the secant method
 
-    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-14, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
         assim_guess_0,
         assim_guess_1);
 
+    if (!root_algorithm::successful_termination(result.flag)) {
+        std::cout << root_algorithm::flag_message(result.flag) << '\n';
+        std::cout << result.root << ", " << result.residual << ", " << result.iteration << '\n';
+    }
     // Convert Ci units
     double const Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromol / mol
 

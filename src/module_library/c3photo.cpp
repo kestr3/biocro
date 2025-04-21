@@ -8,6 +8,8 @@
 #include "root_onedim.h"                // for root_finder
 #include "c3photo.h"
 
+#include <iostream>
+
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;
 
@@ -150,11 +152,16 @@ photosynthesis_outputs c3photoC(
     });                                        // micromol / m^2 / s
 
     // Run the secant method
-    root_algorithm::root_finder<root_algorithm::secant> solver{1000, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-14, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
         assim_guess_0,
         assim_guess_1);
+
+    if (!root_algorithm::successful_termination(result.flag)) {
+        std::cout << root_algorithm::flag_message(result.flag) << '\n';
+        std::cout << result.root << ", " << result.residual << ", " << result.iteration << '\n';
+    }
 
     return photosynthesis_outputs{
         /* .Assim = */ result.root,                 // micromol / m^2 / s
