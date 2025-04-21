@@ -199,18 +199,18 @@ soybean <- list(
         growth_respiration_fraction = 0,
 
         # no_leaf_resp_partitioning_growth_calculator_negative_assimilation_partitioned module
-        grc_leaf                        = 0.0,        # required for other partitioning growth modules
-        grc_rhizome                     = 0.00270,    # dimensionless, set to the value of grc_root
+        grc_leaf                        = 0.0,        # dimensionless, required for other partitioning growth modules
+        grc_rhizome                     = 0.0,        # dimensionless, rhizome is not used in Soybean-BioCro
         grc_root                        = 0.00270,    # dimensionless, optimized
-        grc_stem                        = 0.02828,    # dimensionless, optimized. growth respiration coefficient
+        grc_stem                        = 0.02828,    # dimensionless, optimized
 
         # maintenance_respiration_calculator module
-        mrc_grain                       = 1e-5,          # kg / kg / hr, assigned a small value to ignore this
-        mrc_leaf                        = 0.00048836,    # kg / kg / hr maintenance respiration coefficient. optimized
-        mrc_rhizome                     = 0.00001,       # kg / kg / hr, assumed to be same as root
-        mrc_root                        = 0.00001,       # kg / kg / hr, optimized
-        mrc_shell                       = 1e-5,          # kg / kg / hr, assigned a small value to ignore this
-        mrc_stem                        = 0.00048836,    # kg / kg / hr, assumed to be same as leaf
+        mrc_grain                       = 0.0,         # kg / kg / hr
+        mrc_leaf                        = 0.00048836,  # kg / kg / hr, optimized
+        mrc_rhizome                     = 0.0,         # kg / kg / hr, rhizome is not used in Soybean-BioCro
+        mrc_root                        = 0.00001,     # kg / kg / hr, optimized
+        mrc_shell                       = 0.0,         # kg / kg / hr
+        mrc_stem                        = 0.00048836,  # kg / kg / hr, optimized, assumed to be same as leaf
 
         # partitioning_growth module
         retrans                     = 0.9,         # previously hard-coded in the partitioning_growth module
