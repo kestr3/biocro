@@ -45,15 +45,20 @@ class root_onedim_test : public direct_module
         double* iteration_op;
         double* flag_op;
 
-        result(state_map* output_quantities, std::string&& name) : root_op{
-            get_op(output_quantities, name + "_root")},
-            residual_op{get_op(output_quantities, name + "_residual")},
-            iteration_op{get_op(output_quantities, name + "_iteration")},
-            flag_op{get_op(output_quantities, name + "_flag")} {}
+        result(
+            state_map* output_quantities,
+            std::string&& name)
+            : root_op{get_op(output_quantities, name + "_root")},
+              residual_op{get_op(output_quantities, name + "_residual")},
+              iteration_op{get_op(output_quantities, name + "_iteration")},
+              flag_op{get_op(output_quantities, name + "_flag")}
+        {
+        }
     };
 
    public:
-    root_onedim_test(state_map const& input_quantities, state_map* output_quantities)
+    root_onedim_test(
+        state_map const& input_quantities, state_map* output_quantities)
         : direct_module{},
 
           // Get pointers to input quantities
@@ -74,7 +79,8 @@ class root_onedim_test : public direct_module
           steffensen_result{output_quantities, "steffensen"},
           bisection_result{output_quantities, "bisection"},
           regula_falsi_result{output_quantities, "regula_falsi"},
-          ridder_result{output_quantities, "ridder"}
+          ridder_result{output_quantities, "ridder"},
+          illinois_result{output_quantities, "illinois"}
 
     {
     }
@@ -102,10 +108,10 @@ class root_onedim_test : public direct_module
     result bisection_result;
     result regula_falsi_result;
     result ridder_result;
+    result illinois_result;
 
     // Main operation
     void do_operation() const;
-
 
     static string_vector make_qname(std::string& name)
     {
@@ -116,7 +122,8 @@ class root_onedim_test : public direct_module
             name + "_flag"};
     }
 
-    void inline update_result(const result& r, root_algorithm::result_t& result) const
+    void inline update_result(
+        const result& r, root_algorithm::result_t& result) const
     {
         update(r.root_op, result.root);
         update(r.residual_op, result.residual);
@@ -143,7 +150,7 @@ string_vector root_onedim_test::get_outputs()
     string_vector out;
     const string_vector methods = {
         "secant", "fixed_point", "newton", "halley", "steffensen",
-        "bisection", "regula_falsi", "ridder"};
+        "bisection", "regula_falsi", "ridder", "illinois"};
     for (auto name : methods) {
         string_vector sv = make_qname(name);
         out.insert(out.end(), sv.begin(), sv.end());
@@ -191,6 +198,10 @@ void root_onedim_test::do_operation() const
     result = root_finder<ridder>(iter, abs_tol, rel_tol)
                  .solve(test, lower_bracket, upper_bracket);
     update_result(ridder_result, result);
+
+    result = root_finder<illinois>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(illinois_result, result);
 }
 
 }  // namespace standardBML

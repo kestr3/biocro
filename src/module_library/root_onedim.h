@@ -9,8 +9,8 @@
  * A C++ library for solving 1D equations.
  */
 
-
-namespace root_algorithm {
+namespace root_algorithm
+{
 
 // used to hold `(x, f(x))`
 struct graph_t {
@@ -114,15 +114,17 @@ struct result_t {
  * See the documentation comment for each method for details on how to
  * use each method.
  *
- * List of methods:
+ * List of methods (using their name here).
  *
  * + newton (derivative)
  * + halley (derivative, second derivative)
  * + steffensen (no derivatives)
+ * + fixed_point
  * + secant (no derivatives)
  * + bisection (bracketing)
  * + regula_falsi (bracketing)
  * + ridder (bracketing)
+ * + illinois (bracketing)
  *
  * Methods range in their typical robustness and speed. Speed and robustness
  * also depend on the problem. Root-bracketing methods are typically more
@@ -133,7 +135,12 @@ struct result_t {
  * depends on how expensive evaluating the function (or its derivatives)
  * is. The function calls per iteration can be counted.
  *
+ * + If the first derivative can be evaluated, try Newton's method.
+ * + If the solution can be bracket, then try the Illinois method.
+ * + If other methods fail to converge, try the bisection method.
+ *
  * Each method contains a short description of how it works and why it might fail.
+ * References are given for more complex or less famous methods.
  *
  * A new root-finding algorithm can be added by creating a class or struct
  * with the following methods:
@@ -143,6 +150,8 @@ struct result_t {
  * //holds whatever state saved between iterations.
  * //methods do not have to be instantiated as objects
  * //should have a `Flag flag` member
+ * //Efforts should made to minimize copying / allocation between loop
+ * //iterations.
  *
  * state initialize(F&& f, Args... args);
  * // takes the initial problem info (e.g., a bracket, an
@@ -158,15 +167,15 @@ struct result_t {
  * // updating in-place rather than using an immutable maping.
  * // It should be equivalent to state iterate(f, const state& s)
  * // Where it maps a state to state, and adds a new flag if an error is
- * // encountered.
-
+ * // encountered. Ideally, convergence is not checked here.
+ *
  * state& check_convergence(state& s, _abs_tol, _rel_tol);
  * // checks the state to see if the algorithm has found a root to within
  * // tolerance; set the state flag.
  *
  * double root(const state& s);
  * // Extract a single value for the root. Should be the best guess.
-
+ *
  * double residual(const state& s);
  * // Extract the residual from the state. For user to evaluate if a root
  * // has been found.
@@ -187,7 +196,6 @@ struct result_t {
  */
 template <typename Method>
 struct root_finder : public Method {
-
     size_t max_iterations;
     double _abs_tol;
     double _rel_tol;
@@ -553,26 +561,26 @@ struct bracket_method {
     template <typename F>
     state initialize(F&& fun, double a, double b, double abs_tol, double rel_tol)
     {
-        double ya = fun(a);
-        double yb = fun(b);
-        state s{};
+        state s;
+        s.left.x = a;
+        s.right.x = b;
+        s.left.y = fun(a);
+        s.right.y = fun(b);
+        s.proposal = s.left;
         s.flag = Flag::valid;
-        s.left = {a, ya};
-        s.right = {b, yb};
 
-        if (is_zero(ya, abs_tol)) {
+        if (is_zero(s.left.y, abs_tol)) {
             s.flag = Flag::residual_zero;
-            s.proposal = s.left;
             return s;
         }
 
-        if (is_zero(yb, abs_tol)) {
+        if (is_zero(s.right.y, abs_tol)) {
             s.flag = Flag::residual_zero;
             s.proposal = s.right;
             return s;
         }
 
-        if (same_signs(ya, yb)) {
+        if (same_signs(s.left.y, s.right.y)) {
             s.flag = Flag::invalid_bracket;
             return s;
         }
@@ -650,6 +658,11 @@ struct bracket_method {
  * Note `abs_tol` is used to determine if a residual is zero or if the
  * bracket width is effectively zero. `rel_tol` sets the tolerance for
  * deciding if the function is continuous at the estimated root.
+ *
+ * References:
+ *
+ * - Press et al. (2007). Numerical recipes, 3rd edition.
+ *   Cambridge University Press. https://numerical.recipes/book.html
  */
 struct bisection : public bracket_method {
     template <typename F>
@@ -684,6 +697,12 @@ struct bisection : public bracket_method {
  * necessarily produce a sequence of brackets that shrinks to zero.
  *
  * Thus, try regula falsi and use bisection if regula falsi fails to converge.
+ *
+ * References:
+ *
+ * - Press et al. (2007). Numerical recipes, 3rd edition.
+ *   Cambridge University Press. https://numerical.recipes/book.html
+ *
  */
 struct regula_falsi : public bracket_method {
     template <typename F>
@@ -719,6 +738,15 @@ struct regula_falsi : public bracket_method {
  *
  * Ridder's method can perform well on problems that frustrate regula falsi,
  * but it is slower on quadratics.
+ *
+ * References:
+ * - Ridders, C. (1979). "A new algorithm for computing a single root of
+ *   a real continuous function". IEEE Transactions on Circuits and Systems.
+ *   26 (11): 979–980. doi:10.1109/TCS.1979.1084580
+ *
+ * - Press et al. (2007). Numerical recipes, 3rd edition.
+ *   Cambridge University Press. https://numerical.recipes/book.html
+ *
  */
 struct ridder : public bracket_method {
     template <typename F>
@@ -740,6 +768,65 @@ struct ridder : public bracket_method {
         s.proposal.x += d * a / std::sqrt(denom);
         s.proposal.y = fun(s.proposal.x);
         s = update_bracket(s);
+        return s;
+    }
+};
+
+struct illinois : public bracket_method {
+    // does not preserve left and right. Treats right as best guess.
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        // division is safe if bracket is valid
+        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
+                       (s.right.y - s.left.y);
+        s.proposal.y = fun(s.proposal.x);
+        if (opposite_signs(s.proposal.y, s.right.y)) {
+            s.left = s.right;
+        } else {
+            s.left.y /= 2;
+        }
+        s.right = s.proposal;
+        return s;
+    }
+};
+
+struct pegasus : public bracket_method {
+    // does not preserve left and right. Treats right as best guess.
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        // division is safe if bracket is valid
+        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
+                       (s.right.y - s.left.y);
+        s.proposal.y = fun(s.proposal.x);
+        if (opposite_signs(s.proposal.y, s.right.y)) {
+            s.left = s.right;
+        } else {
+            s.left.y *= s.right.y / (s.right.y + s.proposal.y);
+        }
+        s.right = s.proposal;
+        return s;
+    }
+};
+
+struct anderson_bjorck : public bracket_method {
+    // does not preserve left and right. Treats right as best guess.
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        // division is safe if bracket is valid
+        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
+                       (s.right.y - s.left.y);
+        s.proposal.y = fun(s.proposal.x);
+        if (opposite_signs(s.proposal.y, s.right.y)) {
+            s.left = s.right;
+        } else {
+            double m0 = (s.proposal.y - s.right.y) / (s.proposal.x - s.right.x);
+            double m1 = (s.right.y - s.left.y) / (s.right.x - s.left.x);
+            s.left.y *= m0 / m1;
+        }
+        s.right = s.proposal;
         return s;
     }
 };
