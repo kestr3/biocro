@@ -97,14 +97,14 @@ soybean <- list(
         sowing_fractional_doy       = 0,           # Soybean-BioCro uses the weather data to set the sowing time
 
         # partitioning_coefficient_logistic module
-        alphaLeaf                   = 23.8895,
-        alphaStem                   = 24.8248,
-        betaLeaf                    = -18.0851,
-        betaStem                    = -18.5214,
+        alphaLeaf                   = 24.7116,
+        alphaStem                   = 24.5764,
+        betaLeaf                    = -19.2275,
+        betaStem                    = -18.3517,
         alphaRoot                   = 36.9670,
         betaRoot                    = -40.1915,
-        alphaShell                  = 13.5955,
-        betaShell                   = -9.9809,
+        alphaShell                  = 10.8835,
+        betaShell                   = -7.9549,
         kRhizome_emr                = 0,
 
         # soil_evaporation module
@@ -201,32 +201,32 @@ soybean <- list(
         # no_leaf_resp_partitioning_growth_calculator_negative_assimilation_partitioned module
         grc_leaf                        = 0.0,        # dimensionless, required for other partitioning growth modules
         grc_rhizome                     = 0.0,        # dimensionless, rhizome is not used in Soybean-BioCro
-        grc_root                        = 0.00270,    # dimensionless, optimized
-        grc_stem                        = 0.02828,    # dimensionless, optimized
+        grc_root                        = 0.00253,    # dimensionless, optimized
+        grc_stem                        = 0.02256,    # dimensionless, optimized
 
         # maintenance_respiration_calculator module
         mrc_grain                       = 0.0,         # kg / kg / hr
-        mrc_leaf                        = 0.00048836,  # kg / kg / hr, optimized
+        mrc_leaf                        = 0.00036626,  # kg / kg / hr, optimized
         mrc_rhizome                     = 0.0,         # kg / kg / hr, rhizome is not used in Soybean-BioCro
-        mrc_root                        = 0.00001,     # kg / kg / hr, optimized
+        mrc_root                        = 0.00001017,     # kg / kg / hr, optimized
         mrc_shell                       = 0.0,         # kg / kg / hr
-        mrc_stem                        = 0.00048836,  # kg / kg / hr, optimized, assumed to be same as leaf
+        mrc_stem                        = 0.00036626,  # kg / kg / hr, optimized, assumed to be same as leaf
 
         # partitioning_growth module
         retrans                     = 0.9,         # previously hard-coded in the partitioning_growth module
         retrans_rhizome             = 1.0,         # previously hard-coded in the partitioning_growth module
 
         # senescence_coefficient_logistic module
-        rateSeneLeaf                = 0.012198,
-        rateSeneStem                = 0.000117,
+        rateSeneLeaf                = 0.011955,
+        rateSeneStem                = 0.000229,
         rateSeneRoot                = 0,           # senescence of root not simulated in Soybean-BioCro
         rateSeneRhizome             = 0,           # no rhizome simulated in Soybean-BioCro
-        alphaSeneLeaf               = 48.3200,
-        alphaSeneStem               = 4.1937,
+        alphaSeneLeaf               = 49.7562,
+        alphaSeneStem               = 25.2319,
         alphaSeneRoot               = 10,          # senescence of root not simulated in Soybean-BioCro (rateSeneRoot=0)
         alphaSeneRhizome            = 10,          # no rhizome in Soybean-BioCro (rateSeneRhizome=0)
-        betaSeneLeaf                = -29.5393,
-        betaSeneStem                = -3.3124,
+        betaSeneLeaf                = -30.2365,
+        betaSeneStem                = -16.3467,
         betaSeneRoot                = -10,         # senescence of root not simulated in Soybean-BioCro (rateSeneRoot=0)
         betaSeneRhizome             = -10,         # no rhizome in Soybean-BioCro (rateSeneRhizome=0)
 
