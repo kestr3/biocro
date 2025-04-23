@@ -119,6 +119,9 @@ be directly added to this file to describe the related changes.
 - Altered `test_module` (and hence `test_module_library`) so that new module
   outputs produce a warning but don't cause an error on their own.
 
+- Following changes to the behavior of some modules, the soybean model was
+  re-parameterized; see the help file for `soybean` for complete details.
+
 ## Internal changes
 
 - Renamed the `resp()` function to `growth_resp_Q10()` to better indicate its
