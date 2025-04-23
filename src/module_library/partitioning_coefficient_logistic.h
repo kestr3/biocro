@@ -21,14 +21,16 @@ double strength_term(double const alpha, double const beta, double const DVI);
  * - `partitioning_growth_calculator`
  *
  * Using the following function, calculates the percentage of carbon allocated
- * to the root, stem, leaf, shell, and grain at a given development index.
+ * to the grain, leaf, rhizome, root, shell, and stem at a given development
+ * index:
  *
  * \f[ k_i = \frac{\exp{(\alpha_i+\beta_i x)}}  {\exp{(\alpha_R+\beta_R x)} +
  * \exp{(\alpha_S+\beta_S x)} + \exp{(\alpha_L+\beta_L x)} +
- * \exp{(\alpha_{Sh}+\beta_{Sh} x)} + 1}, \f]
+ * \exp{(\alpha_{Sh}+\beta_{Sh} x)} + \exp{(\alpha_{Rhi}+\beta_{Rhi} x)} + 1},
+ * \f]
  *
- * where \f$ i = {R, S, L, Sh} \f$ for root, stem, leaf, and shell respectively,
- * and \f$ x \f$ is the development index. For the grain,
+ * where \f$ i = {L, Rhi, R, Sh, S} \f$ for leaf, rhizome, root, shell, and
+ * stem, respectively, and \f$ x \f$ is the development index. For the grain,
  *
  * \f[ k_G = \frac{1}{\exp{(\alpha_R+\beta_R x)} + \exp{(\alpha_S+\beta_S x)} +
  * \exp{(\alpha_L+\beta_L x)} + \exp{(\alpha_{Sh}+\beta_{Sh})} + 1}. \f]
@@ -36,11 +38,20 @@ double strength_term(double const alpha, double const beta, double const DVI);
  * See Matthews et al. for more description of how this module was used in
  * Soybean-BioCro and for details on the parameter fitting to identify the
  * \f$ \alpha \text{ and } \beta \f$ parameters. Note that the original model
- * did not include a shell component.
+ * did not include a rhizome or shell component.
  *
  * Although it is not used in the soybean model, this module also includes an
  * option for a rhizome to contribute carbon to other organs during emergence.
- * See comments in the code for more details.
+ * When the DVI is smaller than `kRhizome_emr`, the rhizome is considered to be
+ * acting as a carbon source, and its `k` coefficient will be set to
+ * `kRhizome_emr`. If `kRhizome_emr_DVI` is set to negative infinity, then the
+ * rhizome will never act as a carbon source, and will follow the same rules as
+ * the other tissues. See comments in the code for more details.
+ *
+ * It is possible to "disable" the rhizome by setting `betaRhizome` to negative
+ * infinity, `kRhizome_emr` to 0, and `kRhizome_emr_DVI` to zero. In this case,
+ * the resulting `kRhizome` coefficient will always be zero, and no carbon will
+ * be used for rhizome growth.
  *
  * ### References:
  *
@@ -62,15 +73,18 @@ class partitioning_coefficient_logistic : public direct_module
 
           // Get references to input quantities
           alphaLeaf{get_input(input_quantities, "alphaLeaf")},
+          alphaRhizome{get_input(input_quantities, "alphaRhizome")},
           alphaRoot{get_input(input_quantities, "alphaRoot")},
           alphaShell{get_input(input_quantities, "alphaShell")},
           alphaStem{get_input(input_quantities, "alphaStem")},
           betaLeaf{get_input(input_quantities, "betaLeaf")},
+          betaRhizome{get_input(input_quantities, "betaRhizome")},
           betaRoot{get_input(input_quantities, "betaRoot")},
           betaShell{get_input(input_quantities, "betaShell")},
           betaStem{get_input(input_quantities, "betaStem")},
           DVI{get_input(input_quantities, "DVI")},
           kRhizome_emr{get_input(input_quantities, "kRhizome_emr")},
+          kRhizome_emr_DVI{get_input(input_quantities, "kRhizome_emr_DVI")},
 
           // Get pointers to output quantities
           kGrain_op{get_op(output_quantities, "kGrain")},
@@ -88,15 +102,18 @@ class partitioning_coefficient_logistic : public direct_module
    private:
     // Pointers to input quantities
     const double& alphaLeaf;
+    const double& alphaRhizome;
     const double& alphaRoot;
     const double& alphaShell;
     const double& alphaStem;
     const double& betaLeaf;
+    const double& betaRhizome;
     const double& betaRoot;
     const double& betaShell;
     const double& betaStem;
     const double& DVI;
     const double& kRhizome_emr;
+    const double& kRhizome_emr_DVI;
 
     // Pointers to output quantities
     double* kGrain_op;
@@ -113,16 +130,19 @@ class partitioning_coefficient_logistic : public direct_module
 string_vector partitioning_coefficient_logistic::get_inputs()
 {
     return {
-        "alphaLeaf",    // dimensionless
-        "alphaRoot",    // dimensionless
-        "alphaShell",   // dimensionless
-        "alphaStem",    // dimensionless
-        "betaLeaf",     // dimensionless
-        "betaRoot",     // dimensionless
-        "betaShell",    // dimensionless
-        "betaStem",     // dimensionless
-        "DVI",          // dimensionless
-        "kRhizome_emr"  // dimensionless
+        "alphaLeaf",        // dimensionless
+        "alphaRhizome",     // dimensionless
+        "alphaRoot",        // dimensionless
+        "alphaShell",       // dimensionless
+        "alphaStem",        // dimensionless
+        "betaLeaf",         // dimensionless
+        "betaRhizome",      // dimensionless
+        "betaRoot",         // dimensionless
+        "betaShell",        // dimensionless
+        "betaStem",         // dimensionless
+        "DVI",              // dimensionless
+        "kRhizome_emr",     // dimensionless
+        "kRhizome_emr_DVI"  // dimensionless
     };
 }
 
@@ -140,16 +160,29 @@ string_vector partitioning_coefficient_logistic::get_outputs()
 
 void partitioning_coefficient_logistic::do_operation() const
 {
+    // Check for error conditions; kRhizome_emr should be zero or negative,
+    // since it applies when the rhizome is acting as a carbon source.
+    if (kRhizome_emr > 0.0) {
+        throw std::range_error("Thrown in partitioning_coefficient_logistic: kRhizome_emr is positive.");
+    }
+
     // Determine partitioning coefficients using multinomial logistic equations
     // from Osborne et al., 2015 JULES-crop https://doi.org/10.5194/gmd-8-1139-2015
 
     // Calculate the sink strength of each tissue (relative to grain)
-    double const leaf_strength = strength_term(alphaLeaf, betaLeaf, DVI);
-    double const root_strength = strength_term(alphaRoot, betaRoot, DVI);
-    double const shell_strength = strength_term(alphaShell, betaShell, DVI);
-    double const stem_strength = strength_term(alphaStem, betaStem, DVI);
-    double constexpr grain_strength = 1.0;
-    double constexpr rhizome_strength = 0.0;
+    double const leaf_strength{strength_term(alphaLeaf, betaLeaf, DVI)};
+    double const root_strength{strength_term(alphaRoot, betaRoot, DVI)};
+    double const shell_strength{strength_term(alphaShell, betaShell, DVI)};
+    double const stem_strength{strength_term(alphaStem, betaStem, DVI)};
+    double constexpr grain_strength{1};
+
+    // The rhizome is treated different from the other tissues. When the plant
+    // is in its emergence stage (DVI < 0), the rhizome acts like a carbon
+    // source. In this case, its demand for carbon is zero. Otherwise, it
+    // follows the same rules as the other tissues.
+    double const rhizome_strength{DVI < kRhizome_emr_DVI
+                                      ? 0
+                                      : strength_term(alphaRhizome, betaRhizome, DVI)};
 
     // Calculate the total sink strength
     double const total_strength =
@@ -157,12 +190,18 @@ void partitioning_coefficient_logistic::do_operation() const
         stem_strength + grain_strength;
 
     // The k values are the fraction of total demand from each tissue
-    double const kGrain{grain_strength / total_strength};                               // dimensionless
-    double const kLeaf{leaf_strength / total_strength};                                 // dimensionless
-    double const kRhizome{DVI < 0 ? kRhizome_emr : rhizome_strength / total_strength};  // dimensionless
-    double const kRoot{root_strength / total_strength};                                 // dimensionless
-    double const kShell{shell_strength / total_strength};                               // dimensionless
-    double const kStem{stem_strength / total_strength};                                 // dimensionless
+    double const kGrain{grain_strength / total_strength};  // dimensionless
+    double const kLeaf{leaf_strength / total_strength};    // dimensionless
+    double const kRoot{root_strength / total_strength};    // dimensionless
+    double const kShell{shell_strength / total_strength};  // dimensionless
+    double const kStem{stem_strength / total_strength};    // dimensionless
+
+    // The rhizome is treated different from the other tissues. When DVI < 0,
+    // its k value is given by kRhizome_emr. Otherwise, it follows the same
+    // rules as the other tissues.
+    double const kRhizome{DVI < kRhizome_emr_DVI
+                              ? kRhizome_emr
+                              : rhizome_strength / total_strength};  // dimensionless
 
     // Update the output quantities
     update(kGrain_op, kGrain);      // dimensionless

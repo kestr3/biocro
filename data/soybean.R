@@ -98,14 +98,17 @@ soybean <- list(
 
         # partitioning_coefficient_logistic module
         alphaLeaf                   = 24.7116,
+        alphaRhizome                = 0,         # rhizome is not used in Soybean-BioCro
+        alphaRoot                   = 36.9670,
+        alphaShell                  = 10.8835,
         alphaStem                   = 24.5764,
         betaLeaf                    = -19.2275,
-        betaStem                    = -18.3517,
-        alphaRoot                   = 36.9670,
+        betaRhizome                 = -Inf,      # rhizome is not used in Soybean-BioCro
         betaRoot                    = -40.1915,
-        alphaShell                  = 10.8835,
         betaShell                   = -7.9549,
-        kRhizome_emr                = 0,
+        betaStem                    = -18.3517,
+        kRhizome_emr                = 0,         # rhizome is not used in Soybean-BioCro
+        kRhizome_emr_DVI            = 0,         # rhizome is not used in Soybean-BioCro
 
         # soil_evaporation module
         rsec                        = 0.2,
