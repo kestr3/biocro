@@ -107,18 +107,20 @@
     one (\code{BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator}).
     Regarding parameters, several modules now require new input parameters whose
     values were previously hard-coded: \code{dry_biomass_per_carbon},
-    \code{grc_leaf}, \code{grc_rhizome}, \code{mrc_rhizome}, \code{mrc_shell},
-    and several parameters related to the temperature dependence of FvCB model
-    parameters (e.g. \code{Gstar_c} and \code{Gstar_Ea}). A few parameters have
-    also been renamed to better indicate their meaning, such as \code{Rd}
-    becoming \code{RL_at_25}. Finally, due to changes in the calculation of
-    growth respiration rates, the model needed to be re-parameterized against
-    the 2002-2006 biomass data sets. This resulted in changes to the values of
-    \code{alphaLeaf}, \code{alphaStem}, \code{betaLeaf}, \code{betaStem},
-    \code{alphaShell}, \code{betaShell}, \code{grc_root}, \code{grc_stem},
-    \code{mrc_leaf}, \code{mrc_root}, \code{mrc_stem}, \code{rateSeneLeaf},
-    \code{rateSeneStem}, \code{alphaSeneLeaf}, \code{alphaSeneStem},
-    \code{betaSeneLeaf}, and \code{betaSeneStem}.
+    \code{grc_leaf}, \code{grc_rhizome}, \code{grc_grain}, \code{grc_shell},
+    \code{mrc_rhizome}, \code{mrc_shell}, \code{alphaRhizome},
+    \code{betaRhizome}, \code{kRhizome_emr_DVI}, and several parameters related
+    to the temperature dependence of FvCB model parameters (e.g. \code{Gstar_c}
+    and \code{Gstar_Ea}). A few parameters have also been renamed to better
+    indicate their meaning, such as \code{Rd} becoming \code{RL_at_25}. Finally,
+    due to changes in the calculation of growth respiration rates, the model
+    needed to be re-parameterized against the 2002-2006 biomass data sets. This
+    resulted in changes to the values of \code{alphaLeaf}, \code{alphaStem},
+    \code{betaLeaf}, \code{betaStem}, \code{alphaShell}, \code{betaShell},
+    \code{grc_root}, \code{grc_stem}, \code{mrc_leaf}, \code{mrc_root},
+    \code{mrc_stem}, \code{rateSeneLeaf}, \code{rateSeneStem},
+    \code{alphaSeneLeaf}, \code{alphaSeneStem}, \code{betaSeneLeaf}, and
+    \code{betaSeneStem}.
   }
 
   Whenever a reparameterization is made, this list should be updated, and any
