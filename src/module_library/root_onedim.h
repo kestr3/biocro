@@ -24,8 +24,6 @@ struct graph_t {
 inline bool is_close(
     double x, double y, double tol, double rtol); // true if x == y
 inline bool is_zero(double x, double tol); // true if x == 0
-// inline bool both_almost_zero(
-//     graph_t& left, graph_t& right, double tol, double rtol);
 inline bool same_signs(double x, double y);     // true if sign(x) == sign(y)
 inline bool opposite_signs(double x, double y); // true if sign(x) != sign(y)
 inline bool smaller(double x, double y);        // true if |x| < |y|
@@ -965,15 +963,6 @@ inline bool is_zero(double x, double tol)
 {
     return std::abs(x) <= tol;
 }
-
-// inline bool both_almost_zero(
-//     graph_t& left, graph_t& right, double tol, double rtol)
-// {
-//     using std::abs;
-//     using std::max;
-//     double norm = max(abs(left.x), abs(right.x));
-//     return abs(left.y) + abs(right.y) <= max(tol, rtol * norm);
-// }
 
 inline bool same_signs(double x, double y)
 {
