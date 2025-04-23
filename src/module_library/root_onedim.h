@@ -12,21 +12,24 @@
 namespace root_algorithm
 {
 
-// used to hold `(x, f(x))`
+/**
+ * @brief Used to hold points `(x, f(x))` on the graph of the function.
+ */
 struct graph_t {
     double x;
     double y;
 };
 
 // Helper function declarations
-inline bool is_close(double x, double y, double tol, double rtol);
-inline bool is_zero(double x, double tol);
-inline bool both_almost_zero(
-    graph_t& left, graph_t& right, double tol, double rtol);
-inline bool same_signs(double x, double y);
-inline bool opposite_signs(double x, double y);
-inline bool smaller(double x, double y);
-inline bool is_between(double x, double a, double b);
+inline bool is_close(
+    double x, double y, double tol, double rtol); // true if x == y
+inline bool is_zero(double x, double tol); // true if x == 0
+// inline bool both_almost_zero(
+//     graph_t& left, graph_t& right, double tol, double rtol);
+inline bool same_signs(double x, double y);     // true if sign(x) == sign(y)
+inline bool opposite_signs(double x, double y); // true if sign(x) != sign(y)
+inline bool smaller(double x, double y);        // true if |x| < |y|
+inline bool is_between(double x, double a, double b); // true if `x` is `[a,b]`
 
 // For error handling. These flags indicate the reason for termination.
 enum class Flag {
@@ -253,9 +256,15 @@ struct root_finder : public Method {
 /**
  * @brief Secant Method. Provide two initial guesses for root.
  *
- * @details The secant method uses two points `a` and `b` to locally estimate
- * the first derivative to approximate the function as a linear function.
- * The zero of the secant is used as a new guess for a new root.
+ * @details The secant method uses two points \f$x_{n-1}\f$ and \f$x_n\f$ to
+ * locally estimate the first derivative to approximate the function as a linear
+ * polynomial. The zero of the secant is used as a new guess for a new root.
+ *
+ * \f[ x_{n+1} = x_n - f(x_n)\left(\frac{ x_n - x_{n-1}}{f(x_n) - f(x_{n-1})}\right \f]
+ *
+ * Or written this way.
+ *
+ * \f[ x_{n+1} = \frac{f(x_n) x_{n-1} - f(x_{n-1}) x_{n}}{f(x_n) - f(x_{n-1})} \f]
  *
  * The speed of convergence is about 1.618 per iteration and per evaluation.
  * Although slower than the top speed of Newton's method, the secant method can
@@ -396,7 +405,6 @@ struct fixed_point {
 };
 
 // Householder methods
-
 // methods common to newton, halley, etc.
 struct one_step_method {
     struct state {
@@ -475,7 +483,7 @@ struct newton : public one_step_method {
  * `double derivative(double x)` and `double second_derivative(double x)`
  * implementing the first and second derivatives. Provide an initual guesss.
  *
- * @details Halley's method uses a first and second order Taylor series
+ * @details Halley's rational method uses a first and second order Taylor series
  * approximation to refine a guess for the root. Essentially Newton's method
  * is used to pick a direction, and the second derivative is used to pick a
  * good step size (reducing the step size when high curvature is present).
@@ -488,6 +496,9 @@ struct newton : public one_step_method {
  * Only use if derivatives can be evaluated directly, prefer the `secant`
  * method if derivatives cannot be evaluated.
  *
+ * This method is Halley's rational method. Halley's irrational method solves the
+ * quadratic of the Taylor series, using the Newton step to select a root of the
+ * quadratic.
  */
 struct halley : public one_step_method {
     template <typename F>
@@ -548,7 +559,20 @@ struct steffensen : public one_step_method {
     }
 };
 
-// Bracketing methods
+/**
+ * @brief Common to all bracketing methods defined here. See `bisection` method
+ * or `regula_falsi` for an example.  In general, a bracket method maintains
+ * an interval, a pair of points below and above the root.
+ *
+ * The `state` struct holds the `proposal` so that each new point can be checked
+ * before it's used to update the bracket.
+ *
+ * These methods use `abs_tol` to test whether the residual is zero and whether
+ * the bracket width is zero. For the latter, `abs_tol` is both the absolute and
+ * relative tolerance. It is possible that the bracket zeroes in on a root without
+ * reaching the absolute tolerance. The `rel_tol` is only used to determine
+ * whether or not the bracket of zero-width contains a zero, by testing continuity.
+ */
 struct bracket_method {
     struct state {
         Flag flag;
@@ -785,6 +809,10 @@ struct ridder : public bracket_method {
     }
 };
 
+/**
+ * @brief Not a method. Illinois-type methods use the update bracket defined here.
+ * See the documentation of the `illinois` method for details.
+ */
 struct illinois_type : public bracket_method {
     inline state& update_bracket(state& s, double gamma)
     {
@@ -812,9 +840,22 @@ struct illinois_type : public bracket_method {
  * the value of the function is reduced by half for computing the next
  * iterate.
  *
+ * Let \f$ [x_{n-1}, x_n]\f$ be a bracket, where the "right" side is most recent
+ * endpoint. It is possible to have $x_n < x_{n-1}$ even though intervals are not
+ * normally written that way. A new point is generated by the secant formula:
+ *
+ * \f[ x_{n+1} = \frac{f(x_n) x_{n-1} - f(x_{n-1}) x_{n}}{f(x_n) - f(x_{n-1})} \f]
+ *
+ * If the sign of \f$f(x_{n+1})\f$ is the same as \f$f(x_{n-1})\f$ then we form
+ * a new bracket \f$ [x_n , x_{n+1} ] \f$ as normal in "regula falsi". Otherwise,
+ * if the sign of \f$f(x_{n+1})\f$ is the same as \f$f(x_{n})\f$ then we build a
+ * new bracket \f$[x_{n-1} , x_{n+1} ]\f$ but for the next iteration, we use the
+ * value \f$f(x_{n-1})/2 \f$ instead of \f$f(x_{n-1})\f$. In practice, the saved
+ * result `left.y = f(left.x)` is simply halved: ` left.y /= 2 `.
+ *
  * The illinois method is the simplest of a family of methods, which
  * all rescale the value of the function `f` at the retained endpoint when
- * an endpoint is retained twice. The illinois method scales by 1/2.
+ * that endpoint is retained for a second iteration. `left.y *= gamma`.
  *
  * This method is basically always faster than "regula falsi" and has
  * robustness similar to the bisection method.
@@ -838,6 +879,31 @@ struct illinois : public illinois_type {
     }
 };
 
+/**
+ * @brief The "pegasus" method. An Illinois-type bracketing method. Provide a
+ * valid bracket.
+ *
+ * @details The `pegasus` has the same general idea as the `illinois` method but
+ * uses a different update for when the same endpoint is retained twice. See the
+ * `illinois` method for details.
+ *
+ * The scaling factor is the ratio:
+ *
+ * \f[ \gamma = \frac{f(x_n)}{f(x_n) + f(x_{n+1})} \f]
+ *
+ * which is always positive because the update only occurs when \f$f(x_n)\f$ and
+ * \f$f(x_{n+1})\f$ have the same same sign.
+ *
+ * It is slightly faster than the `illinois` method in numerical tests.
+ * See references for additional details.
+ *
+ * References:
+ * - Ford, J. A. (1995). "Improved Illinois-type methods for the solution
+ *   of nonlinear equations." Technical Report, University of Essex Press.
+ *
+ * - Dowell, M., Jarratt, P. The “Pegasus” method for computing the root of an
+ *   equation. BIT 12, 503–508 (1972). https://doi.org/10.1007/BF01932959
+ */
 struct pegasus : public illinois_type {
     // does not preserve left and right. Treats right as best guess.
     template <typename F>
@@ -851,6 +917,27 @@ struct pegasus : public illinois_type {
     }
 };
 
+/**
+ * @brief The "Anderson-Björck" method. An Illinois-type bracketing method. Provide a
+ * valid bracket.
+ *
+ * @details The same general idea as the `illinois` method but using a different
+ * update for when the same endpoint is retained twice. See the `illinois` method
+ * for details.
+ *
+ *  The scaling factor is the ratio of the divided differences:
+ * \f[ \gamma = \frac{f[x_{n+1}, x_n]}{f[x_n, x_{n-1}]} \f]
+ * Whether the divided difference is:
+ *
+ * \f[ f[x_{n+1}, x_n] = \frac{f(x_{n+1}) - f(x_n)}{x_{n+1} - x_n}\f]
+ *
+ * See reference for details.
+ *
+ * References:
+ * - Ford, J. A. (1995). "Improved Illinois-type methods for the solution
+ *   of nonlinear equations." Technical Report, University of Essex Press.
+ *
+ */
 struct anderson_bjorck : public illinois_type {
     // does not preserve left and right. Treats right as best guess.
     template <typename F>
@@ -879,14 +966,14 @@ inline bool is_zero(double x, double tol)
     return std::abs(x) <= tol;
 }
 
-inline bool both_almost_zero(
-    graph_t& left, graph_t& right, double tol, double rtol)
-{
-    using std::abs;
-    using std::max;
-    double norm = max(abs(left.x), abs(right.x));
-    return abs(left.y) + abs(right.y) <= max(tol, rtol * norm);
-}
+// inline bool both_almost_zero(
+//     graph_t& left, graph_t& right, double tol, double rtol)
+// {
+//     using std::abs;
+//     using std::max;
+//     double norm = max(abs(left.x), abs(right.x));
+//     return abs(left.y) + abs(right.y) <= max(tol, rtol * norm);
+// }
 
 inline bool same_signs(double x, double y)
 {

@@ -80,7 +80,9 @@ class root_onedim_test : public direct_module
           bisection_result{output_quantities, "bisection"},
           regula_falsi_result{output_quantities, "regula_falsi"},
           ridder_result{output_quantities, "ridder"},
-          illinois_result{output_quantities, "illinois"}
+          illinois_result{output_quantities, "illinois"},
+          pegasus_result{output_quantities, "pegasus"},
+          anderson_bjorck_result{output_quantities, "anderson_bjorck"}
 
     {
     }
@@ -109,6 +111,8 @@ class root_onedim_test : public direct_module
     result regula_falsi_result;
     result ridder_result;
     result illinois_result;
+    result pegasus_result;
+    result anderson_bjorck_result;
 
     // Main operation
     void do_operation() const;
@@ -150,7 +154,8 @@ string_vector root_onedim_test::get_outputs()
     string_vector out;
     const string_vector methods = {
         "secant", "fixed_point", "newton", "halley", "steffensen",
-        "bisection", "regula_falsi", "ridder", "illinois"};
+        "bisection", "regula_falsi", "ridder",
+        "illinois", "pegasus", "anderson_bjorck"};
     for (auto name : methods) {
         string_vector sv = make_qname(name);
         out.insert(out.end(), sv.begin(), sv.end());
@@ -202,6 +207,14 @@ void root_onedim_test::do_operation() const
     result = root_finder<illinois>(iter, abs_tol, rel_tol)
                  .solve(test, lower_bracket, upper_bracket);
     update_result(illinois_result, result);
+
+    result = root_finder<pegasus>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(pegasus_result, result);
+
+    result = root_finder<anderson_bjorck>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(anderson_bjorck_result, result);
 }
 
 }  // namespace standardBML
