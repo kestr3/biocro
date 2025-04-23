@@ -53,7 +53,6 @@
 #include "multilayer_canopy_properties.h"
 #include "multilayer_rue_canopy.h"
 #include "night_and_day_trackers.h"
-#include "no_leaf_resp_neg_assim_partitioning_growth_calculator.h"
 #include "no_leaf_resp_partitioning_growth_calculator.h"
 #include "nr_ex.h"
 #include "one_layer_soil_profile.h"
@@ -147,7 +146,6 @@ creator_map standardBML::module_library::library_entries =
      {"Module_2",                                              &create_mc<Module_2>},
      {"Module_3",                                              &create_mc<Module_3>},
      {"night_and_day_trackers",                                &create_mc<night_and_day_trackers>},
-     {"no_leaf_resp_neg_assim_partitioning_growth_calculator", &create_mc<no_leaf_resp_neg_assim_partitioning_growth_calculator>},
      {"no_leaf_resp_partitioning_growth_calculator",           &create_mc<no_leaf_resp_partitioning_growth_calculator>},
      {"nr_ex",                                                 &create_mc<nr_ex>},
      {"one_layer_soil_profile",                                &create_mc<one_layer_soil_profile>},

@@ -110,7 +110,6 @@ test_soybean_carbon_accounting <- function(partitioning_calculator) {
 
 # Test each possible partitioning growth calculator module
 partitioning_calculator_modules <- c(
-    'BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator',
     'BioCro:no_leaf_resp_partitioning_growth_calculator',
     'BioCro:partitioning_growth_calculator'
 )
@@ -122,17 +121,7 @@ for (pm in partitioning_calculator_modules) {
 # Make sure all partitioning growth calculators produce the same outputs
 test_that('all partitioning calculators produce the same outputs', {
     expect_equal(
-        module_info('BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator', verbose = FALSE)$outputs,
+        module_info('BioCro:partitioning_growth_calculator', verbose = FALSE)$outputs,
         module_info('BioCro:no_leaf_resp_partitioning_growth_calculator', verbose = FALSE)$outputs
-    )
-
-    expect_equal(
-        module_info('BioCro:no_leaf_resp_partitioning_growth_calculator', verbose = FALSE)$outputs,
-        module_info('BioCro:partitioning_growth_calculator', verbose = FALSE)$outputs
-    )
-
-    expect_equal(
-        module_info('BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator', verbose = FALSE)$outputs,
-        module_info('BioCro:partitioning_growth_calculator', verbose = FALSE)$outputs
     )
 })

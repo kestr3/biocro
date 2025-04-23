@@ -215,15 +215,11 @@ void partitioning_growth_calculator::do_operation() const
     double const base_rate_rhizome{kRhizome > 0 ? canopy_assim * kRhizome : 0};
     double const Rhizome_gr_rate{growth_resp_Q10(base_rate_rhizome, grc_rhizome, temp, Tref)};
 
-    // Calculate the base rate of new grain production and the associated
-    // respiratory costs, which are chosen to prevent biomass decreases
-    // (Mg / ha / hr)
+    // Calculate the base rate of new grain production (Mg / ha / hr)
     double const base_rate_grain{kGrain > 0 ? canopy_assim * kGrain : 0};
     double const Grain_gr_rate{0};
 
-    // Calculate the base rate of new shell production and the associated
-    // respiratory costs, which are chosen to prevent biomass decreases
-    // (Mg / ha / hr)
+    // Calculate the base rate of new shell production (Mg / ha / hr)
     double const base_rate_shell{kShell > 0 ? canopy_assim * kShell : 0};
     double const Shell_gr_rate{0};
 

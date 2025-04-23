@@ -15,7 +15,6 @@ namespace standardBML
  * Osborne et al 2015.
  *
  * Intended to be used with any of the following modules:
- * - `no_leaf_resp_neg_assim_partitioning_growth_calculator`
  * - `no_leaf_resp_partitioning_growth_calculator`
  * - `partitioning_growth_calculator`
  *
