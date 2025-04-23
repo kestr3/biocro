@@ -549,7 +549,6 @@ struct steffensen : public one_step_method {
 };
 
 // Bracketing methods
-// template <typename UpdateMethod>
 struct bracket_method {
     struct state {
         Flag flag;
@@ -628,6 +627,25 @@ struct bracket_method {
         }
         return s;
     }
+
+    template <typename F>
+    inline state& midpoint_proposal(F&& fun, state& s)
+    {
+        // division is safe if bracket is valid
+        s.proposal.x = 0.5 * (s.left.x + s.right.x);
+        s.proposal.y = fun(s.proposal.x);
+        return s;
+    }
+
+    template <typename F>
+    inline state& secant_proposal(F&& fun, state& s)
+    {
+        // division is safe if bracket is valid
+        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
+                       (s.right.y - s.left.y);
+        s.proposal.y = fun(s.proposal.x);
+        return s;
+    }
 };
 
 /**
@@ -668,8 +686,7 @@ struct bisection : public bracket_method {
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        s.proposal.x = 0.5 * (s.left.x + s.right.x);
-        s.proposal.y = fun(s.proposal.x);
+        s = midpoint_proposal(std::forward<F>(fun), s);
         s = update_bracket(s);
         return s;
     }
@@ -708,10 +725,7 @@ struct regula_falsi : public bracket_method {
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        // division is safe if bracket is valid
-        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
-                       (s.right.y - s.left.y);
-        s.proposal.y = fun(s.proposal.x);
+        s = secant_proposal(std::forward<F>(fun), s);
         s = update_bracket(s);
         return s;
     }
@@ -752,8 +766,7 @@ struct ridder : public bracket_method {
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        s.proposal.x = (s.left.x + s.right.x) / 2;
-        s.proposal.y = fun(s.proposal.x);
+        s = midpoint_proposal(std::forward<F>(fun), s);
 
         double d = s.proposal.x - s.left.x;
         double a = s.proposal.y / s.left.y;
@@ -772,61 +785,81 @@ struct ridder : public bracket_method {
     }
 };
 
-struct illinois : public bracket_method {
-    // does not preserve left and right. Treats right as best guess.
-    template <typename F>
-    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+struct illinois_type : public bracket_method {
+    inline state& update_bracket(state& s, double gamma)
     {
-        // division is safe if bracket is valid
-        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
-                       (s.right.y - s.left.y);
-        s.proposal.y = fun(s.proposal.x);
         if (opposite_signs(s.proposal.y, s.right.y)) {
             s.left = s.right;
         } else {
-            s.left.y /= 2;
+            s.left.y *= gamma;
         }
         s.right = s.proposal;
         return s;
     }
 };
 
-struct pegasus : public bracket_method {
+/**
+ * @brief The "Illinois" method. Provide a function object and an initial
+ * valid bracket. Bracket is valid if the sign of the function differs at
+ * the end points.
+ *
+ * @details The "Illinois" method, so called because it was developed at
+ * the University of Illinois in the 1950s, is effectively the same as
+ * "regula falsi" except it catches the failure mode of the regula falsi.
+ *
+ * Regula falsi is slow if the same end point is retained twice in a row.
+ * In the Illinois method, if the same end point is retained twice then
+ * the value of the function is reduced by half for computing the next
+ * iterate.
+ *
+ * The illinois method is the simplest of a family of methods, which
+ * all rescale the value of the function `f` at the retained endpoint when
+ * an endpoint is retained twice. The illinois method scales by 1/2.
+ *
+ * This method is basically always faster than "regula falsi" and has
+ * robustness similar to the bisection method.
+ *
+ * References:
+ * - Ford, J. A. (1995). "Improved Illinois-type methods for the solution
+ *   of nonlinear equations." Technical Report, University of Essex Press.
+ *
+ * - Dowell, M.; Jarratt, P. (1971). "A modified regula falsi method for
+ *   computing the root of an equation". BIT. 11 (2): 168–174.
+ *   doi:10.1007/BF01934364
+ */
+struct illinois : public illinois_type {
     // does not preserve left and right. Treats right as best guess.
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        // division is safe if bracket is valid
-        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
-                       (s.right.y - s.left.y);
-        s.proposal.y = fun(s.proposal.x);
-        if (opposite_signs(s.proposal.y, s.right.y)) {
-            s.left = s.right;
-        } else {
-            s.left.y *= s.right.y / (s.right.y + s.proposal.y);
-        }
-        s.right = s.proposal;
+        s = secant_proposal(std::forward<F>(fun), s);
+        s = update_bracket(s, 0.5);
         return s;
     }
 };
 
-struct anderson_bjorck : public bracket_method {
+struct pegasus : public illinois_type {
     // does not preserve left and right. Treats right as best guess.
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        // division is safe if bracket is valid
-        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
-                       (s.right.y - s.left.y);
-        s.proposal.y = fun(s.proposal.x);
-        if (opposite_signs(s.proposal.y, s.right.y)) {
-            s.left = s.right;
-        } else {
-            double m0 = (s.proposal.y - s.right.y) / (s.proposal.x - s.right.x);
-            double m1 = (s.right.y - s.left.y) / (s.right.x - s.left.x);
-            s.left.y *= m0 / m1;
-        }
-        s.right = s.proposal;
+        s = secant_proposal(std::forward<F>(fun), s);
+        s = update_bracket(
+            s,
+            s.right.y / (s.right.y + s.proposal.y));
+        return s;
+    }
+};
+
+struct anderson_bjorck : public illinois_type {
+    // does not preserve left and right. Treats right as best guess.
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        s = secant_proposal(std::forward<F>(fun), s);
+        double m0 = (s.proposal.y - s.right.y) / (s.proposal.x - s.right.x);
+        double m1 = (s.right.y - s.left.y) / (s.right.x - s.left.x);
+        s = update_bracket(s, m0 / m1);
         return s;
     }
 };
