@@ -5,20 +5,30 @@
 #include <limits>
 #include <string>
 
+/**
+ * A C++ library for solving 1D equations.
+ */
+
 namespace root_algorithm
 {
 
+// used to hold `(x, f(x))`
+struct graph_t {
+    double x;
+    double y;
+};
+
 // Helper function declarations
 inline bool is_close(double x, double y, double tol, double rtol);
-inline bool is_close(double x, double y);
 inline bool is_zero(double x, double tol);
-inline bool is_zero(double x);
+inline bool both_almost_zero(
+    graph_t& left, graph_t& right, double tol, double rtol);
 inline bool same_signs(double x, double y);
 inline bool opposite_signs(double x, double y);
 inline bool smaller(double x, double y);
 inline bool is_between(double x, double a, double b);
 
-// For error handling.
+// For error handling. These flags indicate the reason for termination.
 enum class Flag {
     valid,  // don't terminate
     residual_zero,
@@ -27,45 +37,28 @@ enum class Flag {
     max_iterations,
     invalid_bracket,
     division_by_zero,
-    halley_no_cross
-};
-inline bool successful_termination(Flag flag);
-inline std::string flag_message(Flag flag);
-
-/*
-For error handling, this struct adds flags to a state used in the
-iterations. This is designed to be a monad, meaning the following rules
-should be respected: For any function/function object with the signature:
-`T f(T x)` there is a function `with_flag<T> f(with_flag<T> x)` such that
-if (is_valid(x)) return with_flag<T>{f(x.state)}; else return x;
-
-*/
-template <typename T>
-struct with_flag {
-    T state;
-    Flag flag;
-
-    with_flag() = default;
-    with_flag(T x) : state(x), flag(Flag::valid) {}
-    with_flag(T x, Flag f) : state(x), flag(f) {}
-    with_flag(Flag f) : state{}, flag(f) {}
+    halley_no_cross,
+    discontinuity,
+    bracket_fixed_point
 };
 
 template <typename T>
-inline bool is_valid(with_flag<T> x)
+inline bool is_valid(T x)
 {
     return x.flag == Flag::valid;
 }
+inline bool successful_termination(Flag flag);
+inline std::string flag_message(Flag flag);
 
 /**
  * @class result_t
  *
- * @brief Result from root finding algorithm.
+ * @brief Result from a root finding algorithm.
  *
- * @param root The identified root.
+ * @param root The identified root of a function `f`.
  *
- * @param residual The output value (root); should equal zero if
- * successful.
+ * @param residual The value of `f` at `root`; `f(root) == 0` if the
+ * algorithm was successful.
  *
  * @param iteration The number of iterations performed.
  *
@@ -82,7 +75,7 @@ struct result_t {
 /**
  * @class root_finder
  *
- * @brief Function object for finding the root or zero of a function.
+ * @brief Function object for finding the zero of a function `f`.
  *
  * @param [in] max_iter The total number of iterations allowed.
  *
@@ -94,13 +87,13 @@ struct result_t {
  * comparing floating point number equality. E.g., rel_tol = 1e-12 means
  * x equals y if the first 12 digits match. Used for convergernce testing.
  *
- * @details This class creates a function object whose solve or call method
+ * @details This class creates a function object whose `solve` or call method
  * is an interface for using any of the root finding methods. A class template
  * so an instance of this class must be declared with a method as the template
  * argument. Example usage:
  *
  * @code{.cpp}
- * // Zero is the sqrt of 3
+ * // The zero of `f` equals sqrt(3)
  * double f(double x) { return x*x - 3; };
  *
  * //Declare the solver
@@ -110,57 +103,82 @@ struct result_t {
  * root_algorithm::result_t result = solver.solve(f, 1., 2.);
  * @endcode
  *
- * The function can be a c++ function, lambda function, or function object.
- * We will say function object for all of these options.
+ * The function `f` can be a c++ function, lambda function, or function object.
+ * We will say function `f` in mathematical sense for all of these options.
  * For algorithms which explicitly evaluate derivatives, you must
- * pass a function object with a `double derivative(double x)` method.
+ * pass a function object with a `double derivative(double x)` method. If
+ * not possible or easy to evaluate derivatives, prefer methods which
+ * approximate the derivatives rather than using finite differences to
+ * approximate the derivatives.
  *
- * See documentation for each method for details.
+ * See the documentation comment for each method for details on how to
+ * use each method.
  *
- * List of methods:
+ * List of methods (using their name here).
  *
- * + newton
- * + halley
- * + steffensen
- * + secant
- * + bisection
- * + regula_falsi
- * + ridder
+ * + newton (derivative)
+ * + halley (derivative, second derivative)
+ * + steffensen (no derivatives)
+ * + fixed_point
+ * + secant (no derivatives)
+ * + bisection (bracketing)
+ * + regula_falsi (bracketing)
+ * + ridder (bracketing)
+ * + illinois (bracketing)
  *
- * The robustness and efficiency of each method is problem-dependent.
- * Root-bracketing methods are typically more robust, but methods that use
- * derivatives almost always take fewer iterations. Computational efficiency
+ * Methods range in their typical robustness and speed. Speed and robustness
+ * also depend on the problem. Root-bracketing methods are typically more
+ * robust, since they are guaranteed to converge for a continuous function.
+ * However, that safety comes at the cost of speed methods, as local approximation
+ * methods usually require fewer iterations, and methods that evaluate derivatives
+ * almost always take fewer iterations. The actual speed of computation
  * depends on how expensive evaluating the function (or its derivatives)
  * is. The function calls per iteration can be counted.
  *
- * A new algorithm can be added by creating a class or struct with the
- * following methods:
+ * + If the first derivative can be evaluated, try Newton's method.
+ * + If the solution can be bracket, then try the Illinois method.
+ * + If other methods fail to converge, try the bisection method.
+ *
+ * Each method contains a short description of how it works and why it might fail.
+ * References are given for more complex or less famous methods.
+ *
+ * A new root-finding algorithm can be added by creating a class or struct
+ * with the following methods:
  *
  * @code{.cpp}
- * //holds whatever state saved between iterations.
  * struct state;
- * //takes the initial problem info (e.g., a bracket, an
+ * //holds whatever state saved between iterations.
+ * //methods do not have to be instantiated as objects
+ * //should have a `Flag flag` member
+ * //Efforts should made to minimize copying / allocation between loop
+ * //iterations.
+ *
+ * state initialize(F&& f, Args... args);
+ * // takes the initial problem info (e.g., a bracket, an
  * // initial guess) and instantiates a value of type `state`. If the
- * provided info is invalid, then return a flag indicating the error.
- * with_flag<state> initialize(F&& f, Args... args);
- * //maps state to state. The actual formula of most methods is
+ * //  provided info is invalid, then return a flag indicating the error.
+ *
+ * state& iterate(F&& f, state& s);
+ * // maps state to state. The actual formula of most methods is
  * // implemented here. If the iteration encounters an error, return the
  * // flag indicating the error.
  * // Some methods handle errors that other methods do not.
- * with_flag<state>& iterate(F&& f, with_flag<state>& s);
  * // iterate is implemented like a compound assignment operator,
  * // updating in-place rather than using an immutable maping.
- * // It should be equivalent to with_flag<state> iterate(f, const state& s)
+ * // It should be equivalent to state iterate(f, const state& s)
  * // Where it maps a state to state, and adds a new flag if an error is
- * // encountered.
+ * // encountered. Ideally, convergence is not checked here.
  *
+ * state& check_convergence(state& s, _abs_tol, _rel_tol);
  * // checks the state to see if the algorithm has found a root to within
- * // tolerance; return the appropriate flag, else return `Flag::valid`
- * Flag check_convergence(const state& s, _abs_tol, _rel_tol);
- * // Extract a single value for the root.
+ * // tolerance; set the state flag.
+ *
  * double root(const state& s);
- * // Extract the residual from the state.
+ * // Extract a single value for the root. Should be the best guess.
+ *
  * double residual(const state& s);
+ * // Extract the residual from the state. For user to evaluate if a root
+ * // has been found.
  * @endcode
  *
  * Several methods have the same convergence checks and state; so a struct
@@ -175,42 +193,42 @@ struct result_t {
  * used to make this decision. `root` and `residual` extract the last best
  *  guess and the function's residual at that root from the `state`.
  *
- *
  */
 template <typename Method>
 struct root_finder : public Method {
-    static constexpr double eps = std::numeric_limits<double>::epsilon();
-    size_t max_iterations = 100;
-    double _abs_tol = 2 * eps;
-    double _rel_tol = 2 * eps;
+    size_t max_iterations;
+    double _abs_tol;
+    double _rel_tol;
 
-    root_finder() {}
+    root_finder() : max_iterations{100},
+                    _abs_tol{1e-10},
+                    _rel_tol{1e-8} {}
+
     root_finder(size_t max_iter) : max_iterations{max_iter},
-          _abs_tol{2 * eps},
-          _rel_tol{2 * eps} {}
+                                   _abs_tol{1e-10},
+                                   _rel_tol{1e-8} {}
     root_finder(size_t max_iter, double abs_tol, double rel_tol)
         : max_iterations{max_iter},
           _abs_tol{abs_tol},
           _rel_tol{rel_tol} {}
 
-    using flagged_state = with_flag<typename Method::state>;
+    using state = typename Method::state;
 
     template <typename F, typename... Args>
     result_t solve(F&& func, Args&&... args)
     {
-        flagged_state s = Method::initialize(
-            std::forward<F>(func), std::forward<Args>(args)...);
+        state s = Method::initialize(
+            std::forward<F>(func), std::forward<Args>(args)...,
+            _abs_tol, _rel_tol);
 
         for (size_t i = 0; i < (max_iterations + 1); ++i) {
-            if (is_valid(s)) {
-                s.flag = Method::check_convergence(s.state, _abs_tol, _rel_tol);
-            }
-
             if (!is_valid(s)) {
                 return make_result(s, i);
             }
 
-            s = Method::iterate(std::forward<F>(func), s);
+            s = Method::iterate(std::forward<F>(func), s, _abs_tol, _rel_tol);
+
+            s = Method::check_convergence(s, _abs_tol, _rel_tol);
         }
 
         s.flag = Flag::max_iterations;
@@ -224,15 +242,10 @@ struct root_finder : public Method {
     }
 
    private:
-    inline result_t make_result(const flagged_state& s, size_t iteration)
+    inline result_t make_result(const state& s, size_t iteration)
     {
-        return result_t{Method::root(s.state), Method::residual(s.state), iteration, s.flag};
+        return result_t{Method::root(s), Method::residual(s), iteration, s.flag};
     }
-};
-
-struct graph_t {
-    double x;
-    double y;
 };
 
 // Householder and multistep methods
@@ -240,32 +253,48 @@ struct graph_t {
 /**
  * @brief Secant Method. Provide two initial guesses for root.
  *
- * @details
+ * @details The secant method uses two points `a` and `b` to locally estimate
+ * the first derivative to approximate the function as a linear function.
+ * The zero of the secant is used as a new guess for a new root.
+ *
+ * The speed of convergence is about 1.618 per iteration and per evaluation.
+ * Although slower than the top speed of Newton's method, the secant method can
+ * be more stable.
+ *
+ * Functions with flat regions (slope is almost zero) or high curvature can cause
+ * the secant method to diverge or converge slowly. The second method also converges
+ * more slowly for non-simple roots (roots of multiplicity greater than 1).
  */
 struct secant {
     struct state {
+        Flag flag;
         graph_t last;
         graph_t best;
     };
 
     template <typename F>
-    with_flag<state> initialize(F&& fun, double x0, double x1)
+    inline state initialize(F&& fun, double x0, double x1, double abs_tol, double rel_tol)
     {
         graph_t first = {x0, fun(x0)};
         graph_t second = {x1, fun(x1)};
-        return state{first, second};
+        if (is_zero(first.y, abs_tol)) {
+            return state{Flag::residual_zero, second, first};
+        }
+        if (is_zero(second.y, abs_tol)) {
+            return state{Flag::residual_zero, first, second};
+        }
+        return state{Flag::valid, first, second};
     }
 
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-
-        auto& best = s.state.best;
-        auto& last = s.state.last;
+        auto& best = s.best;
+        auto& last = s.last;
         double r = best.y / last.y;
         double p = (best.x - last.x) * r;
         double q = 1 - r;
-        if (is_zero(q)) {
+        if (is_zero(q, abs_tol)) {
             s.flag = Flag::division_by_zero;
             return s;
         }
@@ -275,17 +304,19 @@ struct secant {
         return s;
     }
 
-    inline Flag check_convergence(const state& s, double abs_tol, double rel_tol)
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
     {
         if (is_zero(s.best.y, abs_tol)) {
-            return Flag::residual_zero;
+            s.flag = Flag::residual_zero;
+            return s;
         }
 
         if (is_close(s.last.x, s.best.x, abs_tol, rel_tol)) {
-            return Flag::delta_root_zero;
+            s.flag = Flag::delta_root_zero;
+            return s;
         }
 
-        return Flag::valid;
+        return s;
     }
 
     inline double root(const state& s)
@@ -299,21 +330,97 @@ struct secant {
     }
 };
 
+/**
+ * @brief Fixed Point Method. Provide one initial guesses for root.
+ *
+ * @details WARNING: Do not use unless you know what you're doing.
+ *
+ * The fixed point iteration assumes that `f` is defined as
+ * `f(x) = g(x) - x` and that `g` has a fixed point which is the desired root.
+ *
+ * This method iterates the following function:
+ * \f[x \mapsto x + f(x) = g(x) \f]
+ *
+ * If `g` has a fixed point and if `g` is a contraction mapping `|g'(x)| < 1` for
+ * all `x` in a neighborhood of the fixed point, then the sequence of iterates will
+ * converge to the fixed point.
+ *
+ * Because fixed point iteration was used in previous versions of BioCro to solve
+ * for the CO2 concentrations, this method is provided for cross version comparisons.
+ * However, its use is not recommended as all other methods are safer and faster!
+ */
+struct fixed_point {
+    struct state {
+        Flag flag;
+        double x;
+        double y;
+    };
+
+    template <typename F>
+    inline state initialize(F&& fun, double x0, double abs_tol, double rel_tol)
+    {
+        state s{Flag::valid, x0, fun(x0)};
+        if (is_zero(s.y, abs_tol)) {
+            s.flag = Flag::residual_zero;
+        }
+        return s;
+    }
+
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        s.x += s.y;  // x + f(x) <-> x = g(x) if f(x) = g(x) - x
+        s.y = fun(s.x);
+        return s;
+    }
+
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
+    {
+        if (is_zero(s.y, abs_tol)) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
+
+        return s;
+    }
+
+    inline double root(const state& s)
+    {
+        return s.x;
+    }
+
+    inline double residual(const state& s)
+    {
+        return s.y;
+    }
+};
+
 // Householder methods
 
 // methods common to newton, halley, etc.
 struct one_step_method {
-    using state = graph_t;
+    struct state {
+        Flag flag;
+        double x;
+        double y;
+    };
 
     template <typename F>
-    with_flag<state> initialize(F&& fun, double x0)
+    state initialize(F&& fun, double x0, double abs_tol, double rel_tol)
     {
-        return state{x0, fun(x0)};
+        double y0 = fun(x0);
+        if (is_zero(y0, abs_tol)) {
+            return state{Flag::residual_zero, x0, fun(x0)};
+        }
+        return state{Flag::valid, x0, fun(x0)};
     }
 
-    inline Flag check_convergence(const state& s, double abs_tol, double rel_tol)
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
     {
-        return is_zero(s.y, abs_tol) ? Flag::residual_zero : Flag::valid;
+        if (is_zero(s.y, abs_tol)) {
+            s.flag = Flag::residual_zero;
+        }
+        return s;
     }
 
     inline double root(const state& s)
@@ -331,16 +438,29 @@ struct one_step_method {
  * @brief Newton's Method. Provide a function object with `double derivative(double x)`
  * method implementing the derivative. Provide an initual guesss.
  *
- * @details
+ * @details Newton's method uses the zero of a first-order Taylor series
+ * approximation of `f`to refine guesses for the root.
+ *
+ * Newton's method is quite fast, especially if the derivative and
+ * function can be evaluated simultaneously. Convergence under optimal
+ * conditions is quadratic.
+ *
+ * Regions where the first derivative is zero can cause divergent behavior.
+ * Chaotic behavior can occur at the boundary between basins of attraction.
+ * Non-simple roots tend to slow convergence.
+ *
+ * Use Newton's method preferentially if the derivatives can be evaluated. If not,
+ * use the secant method, rather than approximate the first derivative.
+ *
  */
 struct newton : public one_step_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        double& x = s.state.x;
-        double& y = s.state.y;
+        double& x = s.x;
+        double& y = s.y;
         double slope = fun.derivative(x);
-        if (is_zero(slope)) {
+        if (is_zero(slope, abs_tol)) {
             s.flag = Flag::division_by_zero;
             return s;
         }
@@ -355,25 +475,37 @@ struct newton : public one_step_method {
  * `double derivative(double x)` and `double second_derivative(double x)`
  * implementing the first and second derivatives. Provide an initual guesss.
  *
- * @details
+ * @details Halley's method uses a first and second order Taylor series
+ * approximation to refine a guess for the root. Essentially Newton's method
+ * is used to pick a direction, and the second derivative is used to pick a
+ * good step size (reducing the step size when high curvature is present).
+ *
+ * Halley's method is even faster than Newton's method, but requires evaluating
+ * the second derivative. Not usually feasible for problems where `f`
+ * involves complicated expressions, but fast for polynomials or simple
+ * transcendental equations.
+ *
+ * Only use if derivatives can be evaluated directly, prefer the `secant`
+ * method if derivatives cannot be evaluated.
+ *
  */
 struct halley : public one_step_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        double& x = s.state.x;
-        double& y = s.state.y;
+        double& x = s.x;
+        double& y = s.y;
         double df = fun.derivative(x);
-        if (is_zero(df)) {
-            s = Flag::division_by_zero;
+        if (is_zero(df, abs_tol)) {
+            s.flag = Flag::division_by_zero;
             return s;
         }
         double df2 = fun.second_derivative(x);
         double a = y / df;
         double b = df2 / (2 * df);
         b *= a;
-        if (is_close(b, 1)) {
-            s = Flag::halley_no_cross;
+        if (is_close(b, 1, abs_tol, rel_tol)) {
+            s.flag = Flag::halley_no_cross;
             return s;
         }
         x -= a / (1. - b);  // division by zero Only if no solution
@@ -386,16 +518,27 @@ struct halley : public one_step_method {
  * @brief Steffensen's Method. Provide a function object and
  * an initial guesss.
  *
- * @details
+ * @details Steffensen's method approximates the function `f` with
+ * a first order Taylor series, using the formula:
+ *
+ * \f[ f'(x) \approx \frac{f(x + h) - h}{h} \qquad h = f(x) \f]
+ *
+ * to approximate the first derivative. This expression requires two function
+ * evaluations per iteration. This experession achieves quadratic convergence
+ * rates under optimal conditions. I.e., it can be as fast as Newton's method
+ * however, it is far less stable than either Newton's method or the secant
+ * method if the initial guesss is not close to a root. Moreover, the rate
+ * of convergence per function call is higher for the secant method.
+ *
  */
 struct steffensen : public one_step_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        double& x = s.state.x;
-        double& y = s.state.y;
+        double& x = s.x;
+        double& y = s.y;
         double g = fun(x + y) / y - 1;
-        if (is_zero(g)) {
+        if (is_zero(g, abs_tol)) {
             s.flag = Flag::division_by_zero;
             return s;
         }
@@ -407,57 +550,101 @@ struct steffensen : public one_step_method {
 
 // Bracketing methods
 struct bracket_method {
-struct state {
+    struct state {
+        Flag flag;
         graph_t left;
         graph_t right;
+        graph_t proposal;
     };
 
     template <typename F>
-    with_flag<state> initialize(F&& fun, double a, double b)
+    state initialize(F&& fun, double a, double b, double abs_tol, double rel_tol)
     {
-        graph_t left{a, fun(a)};
-        graph_t right{b, fun(b)};
-        state s{left, right};
-        if (is_zero(s.left.y) || is_zero(right.y)) {
-            return {s, Flag::residual_zero};
+        state s;
+        s.left.x = a;
+        s.right.x = b;
+        s.left.y = fun(a);
+        s.right.y = fun(b);
+        s.proposal = s.left;
+        s.flag = Flag::valid;
+
+        if (is_zero(s.left.y, abs_tol)) {
+            s.flag = Flag::residual_zero;
+            return s;
         }
 
-        if (same_signs(left.y, right.y)) {
-            return {s, Flag::invalid_bracket};
+        if (is_zero(s.right.y, abs_tol)) {
+            s.flag = Flag::residual_zero;
+            s.proposal = s.right;
+            return s;
+        }
+
+        if (same_signs(s.left.y, s.right.y)) {
+            s.flag = Flag::invalid_bracket;
+            return s;
         }
 
         return s;
     }
 
-    Flag check_convergence(const state& s, double abs_tol, double rel_tol)
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
     {
+        bool zero_found = is_zero(s.proposal.y, abs_tol);
+        if (zero_found) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
 
-        bool c = is_close(s.left.x, s.right.x, abs_tol, rel_tol);
-        if (c) return Flag::bracket_width_zero;
+        if (is_close(s.left.x, s.right.x, abs_tol, abs_tol)) {
+            double delta_y = std::abs(s.left.y - s.right.y);
+            double delta_x = std::abs(s.left.x - s.right.x);
+            if (delta_y < (delta_x / rel_tol))
+                s.flag = Flag::bracket_width_zero;
+            else
+                s.flag = Flag::discontinuity;
+            return s;
+        }
 
-        return Flag::valid;
+        return s;
     }
 
     inline double root(const state& s)
     {
-        return smaller(s.left.y, s.right.y) ? s.left.x : s.right.x;
+        return s.proposal.x;
     }
 
     inline double residual(const state& s)
     {
-        return smaller(s.left.y, s.right.y) ? s.left.y : s.right.y;
+        return s.proposal.y;
     }
 
-    // update bracket so that sign difference is maintained
-    inline void update_bracket(graph_t& left, graph_t& right, double c, double yc)
+    inline state& update_bracket(state& s)
     {
-        if (same_signs(yc, left.y)){
-            left.x = c;
-            left.y = yc;
+        if (same_signs(s.left.y, s.proposal.y)) {
+            s.left = s.proposal;
         } else {
-            right.x = c;
-            right.y = yc;
+            s.right = s.proposal;
         }
+        return s;
+    }
+
+    template <typename F>
+    inline state& midpoint_proposal(F&& fun, state& s)
+    {
+        // division is safe if bracket is valid
+        s.proposal.x = 0.5 * (s.left.x + s.right.x);
+        s.proposal.y = fun(s.proposal.x);
+        return s;
+    }
+
+    template <typename F>
+    inline state& secant_proposal(F&& fun, state& s)
+    {
+        // division is safe if bracket is valid
+        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
+                       (s.right.y - s.left.y);
+        s.proposal.y = fun(s.proposal.x);
+        return s;
     }
 };
 
@@ -466,21 +653,41 @@ struct state {
  * valid bracket. Bracket is valid if the sign of the function differs at
  * the end points.
  *
- * @details
+ * @details The bisection method is a bracketing method: if `(a, b)` is
+ * either side of a simple root then `f(a)` and `f(b)` will have different
+ * signs. The bisection method finds roots by finding where `f` switches
+ * sign between positive and negative. At each iteration, this method
+ * divides the interval in half `c = (a + b) / 2` and then replace `a` with
+ * `c` if the sign of `f(c)` is the same as `f(a)`, otherwise `c` replaces
+ * `b`.
+ *
+ * For a continuous function, this method is guaranteed to converge to
+ * a root, provided a valid bracket. However, its convergence is quite slow
+ * as it only halves the interval at each step. Regardless of problem,
+ * 50-150 iterations is common depending on the desired accuracy.
+ *
+ * The bisection method is not guaranteed to converge to a double root.
+ * It does work for any number of roots provided that there is an odd number
+ * inside the bracket. It can also converge to discontinuities and singularities
+ * if the function switches sign at those points. For instance, the bisection
+ * method will correctly identify `x = 0` as the sign switch point for
+ * `f(x) = 1 / x` or for `f(x) = signum(x)`.
+ *
+ * Note `abs_tol` is used to determine if a residual is zero or if the
+ * bracket width is effectively zero. `rel_tol` sets the tolerance for
+ * deciding if the function is continuous at the estimated root.
+ *
+ * References:
+ *
+ * - Press et al. (2007). Numerical recipes, 3rd edition.
+ *   Cambridge University Press. https://numerical.recipes/book.html
  */
 struct bisection : public bracket_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun, with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        graph_t& left = s.state.left;
-        graph_t& right = s.state.right;
-        double midpoint = 0.5 * (left.x + right.x);
-        double y_midpoint = fun(midpoint);
-        if(is_zero(y_midpoint)) {
-            s.flag = Flag::residual_zero;
-            return s;
-        }
-        update_bracket(left, right, midpoint, y_midpoint);
+        s = midpoint_proposal(std::forward<F>(fun), s);
+        s = update_bracket(s);
         return s;
     }
 };
@@ -490,70 +697,181 @@ struct bisection : public bracket_method {
  * Provide a function object and an initial valid bracket.
  * Bracket is valid if the sign of the function differs at the end points.
  *
- * @details
+ * @details Regula falsi, or the false position method, is a bracketing
+ * method: if `(a, b)` is either side of a simple root then `f(a)` and
+ * `f(b)` will have different signs. The method finds roots by finding
+ * where `f` switches sign between positive and negative.
+ * This method computes a new bracket using the secant of the end points,
+ * replacing the end points based on the signs.
+ *
+ * Regula falsi has the same safety as the bisection method but with better
+ * speed. However, it usually is not as fast as the secant method. The secant
+ * method uses the best guesses found so far to achieve a better convergence
+ * rate, while regula falsi sacrifices some speed for robustness.
+ *
+ * Regula falsi can converge much slower than the bisection method for a
+ * function with large curvature within the bracket. Regula falsi doesn't
+ * necessarily produce a sequence of brackets that shrinks to zero.
+ *
+ * Thus, try regula falsi and use bisection if regula falsi fails to converge.
+ *
+ * References:
+ *
+ * - Press et al. (2007). Numerical recipes, 3rd edition.
+ *   Cambridge University Press. https://numerical.recipes/book.html
+ *
  */
 struct regula_falsi : public bracket_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun,  with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        graph_t& left = s.state.left;
-        graph_t& right = s.state.right;
-        double r = right.y / left.y; // equivalent to a secant update.
-        double p = (right.x - left.x) * r;
-        double q = 1 - r;
-        if (is_zero(q)) {
-            s.flag = Flag::division_by_zero;
-            return s;
-        }
-        double c = right.x + p / q;
-        double fc = fun(c);
-        update_bracket(left, right, c, fc);
+        s = secant_proposal(std::forward<F>(fun), s);
+        s = update_bracket(s);
         return s;
     }
 };
 
 /**
- * @brief The Bisection Method. Provide a function object and an initial
+ * @brief Ridder's Method. Provide a function object and an initial
  * valid bracket. Bracket is valid if the sign of the function differs at
  * the end points.
  *
- * @details
+ * @details Ridder's method is a bracketing method: if `(a, b)` is either
+ * side of a simple root then `f(a)` and `f(b)` will have different signs.
+ * The method finds roots by finding where `f` switches sign between
+ * positive and negative.
+ *
+ * In essence, Ridder's method fits an exponential to the end points and
+ * the mid point to estimate `m` in:
+ *
+ * \f[ h(x) = f(x) \exp(m x) \f]
+ *
+ * The exponential fit corrects high curvature, especially for exponential
+ * like functions. A secant `h(x)` is then used to generate a new bracket
+ * endpoint.
+ *
+ * Ridder's method can perform well on problems that frustrate regula falsi,
+ * but it is slower on quadratics.
+ *
+ * References:
+ * - Ridders, C. (1979). "A new algorithm for computing a single root of
+ *   a real continuous function". IEEE Transactions on Circuits and Systems.
+ *   26 (11): 979–980. doi:10.1109/TCS.1979.1084580
+ *
+ * - Press et al. (2007). Numerical recipes, 3rd edition.
+ *   Cambridge University Press. https://numerical.recipes/book.html
+ *
  */
 struct ridder : public bracket_method {
     template <typename F>
-    inline with_flag<state>& iterate(F&& fun,  with_flag<state>& s)
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        graph_t& left = s.state.left;
-        graph_t& right = s.state.right;
-        double c = (left.x + right.x) / 2;
-        double yc = fun(c);
+        s = midpoint_proposal(std::forward<F>(fun), s);
 
-        double d = c - left.x;
-        double a = yc / left.y;
-        double b = right.y / left.y;
+        double d = s.proposal.x - s.left.x;
+        double a = s.proposal.y / s.left.y;
+        double b = s.right.y / s.left.y;
         double denom = a * a - b;
-        if (is_zero(denom)) {
-            s.flag = Flag::division_by_zero;  // is this state possible ?
+        if (is_zero(denom, abs_tol)) {
+            // is this state possible ? fall back to bisection
+            s.flag = Flag::division_by_zero;
             return s;
         }
 
-        c  += d * a / std::sqrt(denom);
-        yc = fun(c);
-        update_bracket(left, right, c, yc);
+        s.proposal.x += d * a / std::sqrt(denom);
+        s.proposal.y = fun(s.proposal.x);
+        s = update_bracket(s);
+        return s;
+    }
+};
+
+struct illinois_type : public bracket_method {
+    inline state& update_bracket(state& s, double gamma)
+    {
+        if (opposite_signs(s.proposal.y, s.right.y)) {
+            s.left = s.right;
+        } else {
+            s.left.y *= gamma;
+        }
+        s.right = s.proposal;
+        return s;
+    }
+};
+
+/**
+ * @brief The "Illinois" method. Provide a function object and an initial
+ * valid bracket. Bracket is valid if the sign of the function differs at
+ * the end points.
+ *
+ * @details The "Illinois" method, so called because it was developed at
+ * the University of Illinois in the 1950s, is effectively the same as
+ * "regula falsi" except it catches the failure mode of the regula falsi.
+ *
+ * Regula falsi is slow if the same end point is retained twice in a row.
+ * In the Illinois method, if the same end point is retained twice then
+ * the value of the function is reduced by half for computing the next
+ * iterate.
+ *
+ * The illinois method is the simplest of a family of methods, which
+ * all rescale the value of the function `f` at the retained endpoint when
+ * an endpoint is retained twice. The illinois method scales by 1/2.
+ *
+ * This method is basically always faster than "regula falsi" and has
+ * robustness similar to the bisection method.
+ *
+ * References:
+ * - Ford, J. A. (1995). "Improved Illinois-type methods for the solution
+ *   of nonlinear equations." Technical Report, University of Essex Press.
+ *
+ * - Dowell, M.; Jarratt, P. (1971). "A modified regula falsi method for
+ *   computing the root of an equation". BIT. 11 (2): 168–174.
+ *   doi:10.1007/BF01934364
+ */
+struct illinois : public illinois_type {
+    // does not preserve left and right. Treats right as best guess.
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        s = secant_proposal(std::forward<F>(fun), s);
+        s = update_bracket(s, 0.5);
+        return s;
+    }
+};
+
+struct pegasus : public illinois_type {
+    // does not preserve left and right. Treats right as best guess.
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        s = secant_proposal(std::forward<F>(fun), s);
+        s = update_bracket(
+            s,
+            s.right.y / (s.right.y + s.proposal.y));
+        return s;
+    }
+};
+
+struct anderson_bjorck : public illinois_type {
+    // does not preserve left and right. Treats right as best guess.
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        s = secant_proposal(std::forward<F>(fun), s);
+        double m0 = (s.proposal.y - s.right.y) / (s.proposal.x - s.right.x);
+        double m1 = (s.right.y - s.left.y) / (s.right.x - s.left.x);
+        s = update_bracket(s, m0 / m1);
         return s;
     }
 };
 
 // Helper function definitions.
+
 inline bool is_close(double x, double y, double tol, double rtol)
 {
-    return std::abs(x - y) <= tol + rtol * std::abs(y);
-}
-
-inline bool is_close(double x, double y)
-{
-    constexpr double tol = 2 * std::numeric_limits<double>::epsilon();
-    return is_close(x, y, tol, tol);
+    using std::abs;
+    using std::max;
+    double norm = max(abs(x), abs(y));
+    return abs(x - y) <= max(tol, rtol * norm);
 }
 
 inline bool is_zero(double x, double tol)
@@ -561,15 +879,18 @@ inline bool is_zero(double x, double tol)
     return std::abs(x) <= tol;
 }
 
-inline bool is_zero(double x)
+inline bool both_almost_zero(
+    graph_t& left, graph_t& right, double tol, double rtol)
 {
-    constexpr double tol = 2 * std::numeric_limits<double>::epsilon();
-    return is_zero(x, tol);
+    using std::abs;
+    using std::max;
+    double norm = max(abs(left.x), abs(right.x));
+    return abs(left.y) + abs(right.y) <= max(tol, rtol * norm);
 }
 
 inline bool same_signs(double x, double y)
 {
-    return x * y >= 0;
+    return x * y > 0;
 }
 
 inline bool opposite_signs(double x, double y)
@@ -616,82 +937,16 @@ std::string flag_message(Flag flag)
             return "Division by zero occurred.";
         case Flag::halley_no_cross:
             return "Halley update failed; local quadratic does not cross zero.";
+        case Flag::discontinuity:
+            return "Found a probable discontinuity or singularity.";
+        case Flag::bracket_fixed_point:
+            return "Bracket stopped shrinking.";
         case Flag::valid:
-            return "Valid state, but convergence not reached.";
+            return "Valid state, but convergence not reached. Normally not a termination.";
         default:
             return "Flag not recognized.";
     }
 }
 
-// Test functions
-struct hard_test {
-    double answer() { return 1.; }
-
-    double operator()(double x)
-    {
-        return x < 0 ? -0.25 : (std::pow(x, 4) - 1) / 4;
-    }
-
-    double derivative(double x)
-    {
-        return x < 0 ? 0.0 : std::pow(x, 3);
-    }
-
-    double second_derivative(double x)
-    {
-        return x < 0 ? 0.0 : 3 * std::pow(x, 2);
-    }
-};
-
-struct easy_test {
-    double operator()(double x)
-    {
-        return (1 - x) * (x + 1);
-    }
-
-    double derivative(double x)
-    {
-        return -2 * x;
-    }
-
-    double second_derivative(double x)
-    {
-        return -2;
-    }
-};
-
-struct double_root {
-    double operator()(double x)
-    {
-        return std::pow(x - 1, 2);
-    }
-
-    double derivative(double x)
-    {
-        return 2 * (x - 1);
-    }
-
-    double second_derivative(double x)
-    {
-        return -2;
-    }
-};
-
-struct triple_root {
-    double operator()(double x)
-    {
-        return std::pow(x - 1, 3);
-    }
-
-    double derivative(double x)
-    {
-        return 3 * std::pow(x - 1, 2);
-    }
-
-    double second_derivative(double x)
-    {
-        return 6 * (x - 1);
-    }
-};
 }  // namespace root_algorithm
 #endif

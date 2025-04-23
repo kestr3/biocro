@@ -71,6 +71,7 @@
 #include "priestley_transpiration.h"
 #include "rasmussen_specific_heat.h"
 #include "rh_to_mole_fraction.h"
+#include "root_onedim_test.h"
 #include "rue_leaf_photosynthesis.h"
 #include "senescence_coefficient_logistic.h"
 #include "senescence_logistic.h"
@@ -165,6 +166,7 @@ creator_map standardBML::module_library::library_entries =
      {"priestley_transpiration",                               &create_mc<priestley_transpiration>},
      {"rasmussen_specific_heat",                               &create_mc<rasmussen_specific_heat>},
      {"rh_to_mole_fraction",                                   &create_mc<rh_to_mole_fraction>},
+     {"root_onedim_test",                                      &create_mc<root_onedim_test>},
      {"rue_leaf_photosynthesis",                               &create_mc<rue_leaf_photosynthesis>},
      {"senescence_coefficient_logistic",                       &create_mc<senescence_coefficient_logistic>},
      {"senescence_logistic",                                   &create_mc<senescence_logistic>},

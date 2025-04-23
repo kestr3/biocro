@@ -150,7 +150,7 @@ photosynthesis_outputs c3photoC(
     });                                        // micromol / m^2 / s
 
     // Run the secant method
-    root_algorithm::root_finder<root_algorithm::secant> solver{1000, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
         assim_guess_0,

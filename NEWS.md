@@ -35,6 +35,10 @@ be directly added to this file to describe the related changes.
 
 ## Minor User-Facing Changes
 
+- Added custom C++ library for the numerical approximation of the zeros of real
+  valued 1D functions. See the header file `roots_onedim.h` for example usage,
+  and list of available methods.
+
 - Swapped fixed point iteration for the secant method in Ci calculation. To
   incorporate the effect of stomatal conductance, the Ball-Berry and FvCB model
   require solving for the correct intercellular CO2 concentrations by
