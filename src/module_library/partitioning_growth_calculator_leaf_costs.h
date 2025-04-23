@@ -1,5 +1,5 @@
-#ifndef NO_LEAF_RESP_PARTITIONING_GROWTH_CALCULATOR_H
-#define NO_LEAF_RESP_PARTITIONING_GROWTH_CALCULATOR_H
+#ifndef PARTITIONING_GROWTH_CALCULATOR_LEAF_COSTS_H
+#define PARTITIONING_GROWTH_CALCULATOR_LEAF_COSTS_H
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
@@ -8,7 +8,7 @@
 namespace standardBML
 {
 /**
- *  @class no_leaf_resp_partitioning_growth_calculator
+ *  @class partitioning_growth_calculator_leaf_costs
  *
  *  @brief Uses a set of partitioning coefficients to determine net assimilation
  *  rates due to photosynthesis and respiration for several plant organs.
@@ -60,10 +60,10 @@ namespace standardBML
  *  Along with the growth rate of each tissue, this module also calculates
  *  growth respiration rates; the associated quantity names end with `_gr_rate`.
  */
-class no_leaf_resp_partitioning_growth_calculator : public direct_module
+class partitioning_growth_calculator_leaf_costs : public direct_module
 {
    public:
-    no_leaf_resp_partitioning_growth_calculator(
+    partitioning_growth_calculator_leaf_costs(
         state_map const& input_quantities,
         state_map* output_quantities)
         : direct_module{},
@@ -99,7 +99,7 @@ class no_leaf_resp_partitioning_growth_calculator : public direct_module
     }
     static string_vector get_inputs();
     static string_vector get_outputs();
-    static std::string get_name() { return "no_leaf_resp_partitioning_growth_calculator"; }
+    static std::string get_name() { return "partitioning_growth_calculator_leaf_costs"; }
 
    private:
     // Pointers to input quantities
@@ -135,7 +135,7 @@ class no_leaf_resp_partitioning_growth_calculator : public direct_module
     void do_operation() const;
 };
 
-string_vector no_leaf_resp_partitioning_growth_calculator::get_inputs()
+string_vector partitioning_growth_calculator_leaf_costs::get_inputs()
 {
     return {
         "canopy_assimilation_rate",  // Mg / ha / hour
@@ -152,7 +152,7 @@ string_vector no_leaf_resp_partitioning_growth_calculator::get_inputs()
     };
 }
 
-string_vector no_leaf_resp_partitioning_growth_calculator::get_outputs()
+string_vector partitioning_growth_calculator_leaf_costs::get_outputs()
 {
     return {
         "Grain_gr_rate",                  // Mg / ha / hour
@@ -171,7 +171,7 @@ string_vector no_leaf_resp_partitioning_growth_calculator::get_outputs()
     };
 }
 
-void no_leaf_resp_partitioning_growth_calculator::do_operation() const
+void partitioning_growth_calculator_leaf_costs::do_operation() const
 {
     // Specify the base temperature for Q10 growth respiration
     double constexpr Tref = 0.0;  // degrees C
