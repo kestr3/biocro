@@ -5,6 +5,7 @@ output:
     toc: true
     number_sections: true
     fig_caption: yes
+    math_method: mathml
 vignette: >
   %\VignetteIndexEntry{Energy Balance, Transpiration, and Leaf Temperature}
   %\VignetteEngine{knitr::rmarkdown}

@@ -5,6 +5,7 @@ output:
     toc: true
     number_sections: true
     fig_caption: yes
+    math_method: mathml
 vignette: >
   %\VignetteIndexEntry{Avoiding Pitfalls When Using the FvCB Model}
   %\VignetteEngine{knitr::rmarkdown}
