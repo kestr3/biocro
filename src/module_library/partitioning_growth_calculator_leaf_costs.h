@@ -13,25 +13,41 @@ namespace standardBML
  *  @brief Uses a set of partitioning coefficients to determine net assimilation
  *  rates due to photosynthesis and respiration for several plant organs.
  *
- *  ### Partitioning overview
+ *  ### Module overview
  *
- *  BioCro includes several partitioning growth calculators that determine these
- *  rates using slightly different methods. The different modules can be
- *  distinguished by the sets of tissues they use, the ways they apply
- *  respiration and water stress, and their responses to negative canopy
- *  assimilation rates. (A negative canopy assimilation rate indicates that the
- *  leaves are respiring more than they are photosynthesizing.)
+ *  BioCro provides two partitioning growth calculators that determine these
+ *  rates using slightly different methods. They can be distinguished by their
+ *  responses to negative canopy assimilation rates; a negative canopy
+ *  assimilation rate indicates that the leaves are releasing more CO2 than they
+ *  are assimilating through photosynthesis. This situation typically occurs
+ *  when the incident light is low.
+ *
+ *  When the canopy assimilation rate is negative, this module ensures that all
+ *  losses come from the leaf, and the growth rates for the other organs are set
+ *  to zero since no carbon is flowing out of the leaf.
+ *
+ *  ### Partitioning overview
  *
  *  In all partitioning growth calculators, the base growth rate for an organ is
  *  determined from the net canopy assimilation rate and a coefficient that
  *  determines the fraction of the net assimilation that is "partitioned" to
  *  that organ. Then, further modifications may take place to account for water
- *  stress, maintenance respiration, or other processes that affect the amount
- *  of carbon available to the organ for growth. Note that losses due to
- *  senescence and gains due to remobilized carbon from other organs are handled
- *  elsewhere and are not included here.
+ *  stress and growth respiration costs. Note that losses due to senescence and
+ *  gains due to remobilized carbon from other organs are handled elsewhere and
+ *  are not included here.
  *
- *  Respiration is included via the `growth_resp_Q10()` function, which
+ *  Each partitioning growth module includes five organs:
+ *  - `Leaf`: The leaf growth rate is modified by water stress and then
+ *     respiration. Note that if `grc_leaf` is nonzero, this effectively
+ *     double-counts leaf respiration because the net canopy assimilation rate
+ *     already includes it.
+ *  - `Stem`: The stem growth rate is modified by respiration.
+ *  - `Root`: The root growth rate is modified by respiration.
+ *  - `Rhizome`: The rhizome growth rate is modified by respiration.
+ *  - `Grain`: The grain growth rate is modified by respiration.
+ *  - `Shell`: The shell growth rate is modified by respiration.
+ *
+ *  Growth respiration is included via the `growth_resp_Q10()` function, which
  *  implements an empirical rule for determining the fraction of energy spent on
  *  respiration at a particular temperature. See the following paper for a
  *  general discussion of the importance of respiration in understanding plant
@@ -39,26 +55,27 @@ namespace standardBML
  *  Plant, Cell & Environment 7, 561–569 (1984)]
  *  (https://doi.org/10.1111/1365-3040.ep11591833).
  *
- *  ### Specifics of this module
+ *  Here it is assumed that the major effect of water stress on mass
+ *  accumulation is a reduction in the leaf growth rate, following
+ *  [Boyer, J. S. "Leaf Enlargement and Metabolic Rates in Corn, Soybean, and
+ *  Sunflower at Various Leaf Water Potentials" Plant Physiology 46, 233–235 (1970)]
+ *  (https://doi.org/10.1104/pp.46.2.233). The effect of water stress on the
+ *  leaf growth rate is included via the `growth_resp()` function with the
+ *  "growth respiration coefficient" set to `1.0 - LeafWS`.
  *
- *  When the canopy assimilation rate is negative, this module ensures that all
- *  losses come from the leaf, and the growth rates for the other organs are set
- *  to zero since no carbon is flowing out of the leaf.
+ *  Note that growth respiration can be disabled for any tissue by setting the
+ *  corresponding "growth respiration coefficient" input to 0. For example,
+ *  setting `grc_leaf` to 0 disables growth respiration in the leaf.
  *
- *  This module does not attempt to explicitly include any effect due to water
- *  stress.
+ *  Also note that the effect of water stress on leaf growth can be disabled by
+ *  setting `LeafWS` to 0. Otherwise, `LeafWS` can be determined from the soil
+ *  water content using the `BioCro:leaf_water_stress_linear` or
+ *  `BioCro:leaf_water_stress_exponential` modules.
  *
- *  This module includes five organs:
- *  - `Leaf`: The leaf growth rate is *not* modified by respiration because the
- *     net canopy assimilation rate already includes it.
- *  - `Stem`: The stem growth rate is modified by respiration.
- *  - `Root`: The root growth rate is modified by respiration.
- *  - `Rhizome`: The rhizome growth rate is modified by respiration.
- *  - `Grain`: The grain growth rate is *not* modified by respiration.
- *  - `Shell`: The shell growth rate is *not* modified by respiration.
- *
- *  Along with the growth rate of each tissue, this module also calculates
- *  growth respiration rates; the associated quantity names end with `_gr_rate`.
+ *  Along with the growth rate of each tissue, each partitioning calculator
+ *  module also calculates growth respiration rates; the associated quantity
+ *  names end with `_gr_rate`. The amount of carbon lost due to leaf water
+ *  stress is returned as the `Leaf_WS_loss_rate` quantity.
  */
 class partitioning_growth_calculator_leaf_costs : public direct_module
 {
