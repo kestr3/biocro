@@ -78,9 +78,11 @@ class partitioning_growth_calculator : public direct_module
 
           // Get references to input quantities
           canopy_assim{get_input(input_quantities, "canopy_assimilation_rate")},
+          grc_grain{get_input(input_quantities, "grc_grain")},
           grc_leaf{get_input(input_quantities, "grc_leaf")},
           grc_rhizome{get_input(input_quantities, "grc_rhizome")},
           grc_root{get_input(input_quantities, "grc_root")},
+          grc_shell{get_input(input_quantities, "grc_shell")},
           grc_stem{get_input(input_quantities, "grc_stem")},
           kGrain{get_input(input_quantities, "kGrain")},
           kLeaf{get_input(input_quantities, "kLeaf")},
@@ -114,9 +116,11 @@ class partitioning_growth_calculator : public direct_module
    private:
     // References to input quantities
     const double& canopy_assim;
+    const double& grc_grain;
     const double& grc_leaf;
     const double& grc_rhizome;
     const double& grc_root;
+    const double& grc_shell;
     const double& grc_stem;
     const double& kGrain;
     const double& kLeaf;
@@ -150,9 +154,11 @@ string_vector partitioning_growth_calculator::get_inputs()
 {
     return {
         "canopy_assimilation_rate",  // Mg / ha / hour
+        "grc_grain",                 // dimensionless
         "grc_leaf",                  // dimensionless
         "grc_rhizome",               // dimensionless
         "grc_root",                  // dimensionless
+        "grc_shell",                 // dimensionless
         "grc_stem",                  // dimensionless
         "kGrain",                    // dimensionless
         "kLeaf",                     // dimensionless
@@ -217,11 +223,11 @@ void partitioning_growth_calculator::do_operation() const
 
     // Calculate the base rate of new grain production (Mg / ha / hr)
     double const base_rate_grain{kGrain > 0 ? canopy_assim * kGrain : 0};
-    double const Grain_gr_rate{0};
+    double const Grain_gr_rate{growth_resp_Q10(base_rate_grain, grc_grain, temp, Tref)};
 
     // Calculate the base rate of new shell production (Mg / ha / hr)
     double const base_rate_shell{kShell > 0 ? canopy_assim * kShell : 0};
-    double const Shell_gr_rate{0};
+    double const Shell_gr_rate{growth_resp_Q10(base_rate_shell, grc_shell, temp, Tref)};
 
     // Update the output quantity list
     update(Grain_gr_rate_op, Grain_gr_rate);

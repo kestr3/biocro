@@ -199,9 +199,11 @@ soybean <- list(
         growth_respiration_fraction = 0,
 
         # partitioning_growth_calculator module
+        grc_grain                       = 0.0,        # dimensionless
         grc_leaf                        = 0.0,        # dimensionless
         grc_rhizome                     = 0.0,        # dimensionless, rhizome is not used in Soybean-BioCro
         grc_root                        = 0.00253,    # dimensionless, optimized
+        grc_shell                       = 0.0,        # dimensionless
         grc_stem                        = 0.02256,    # dimensionless, optimized
 
         # maintenance_respiration_calculator module

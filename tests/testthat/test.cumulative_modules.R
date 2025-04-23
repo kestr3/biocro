@@ -118,8 +118,13 @@ for (pm in partitioning_calculator_modules) {
     test_soybean_carbon_accounting(pm)
 }
 
-# Make sure all partitioning growth calculators produce the same outputs
-test_that('all partitioning calculators produce the same outputs', {
+# Make sure all partitioning growth calculators have the same inputs and outputs
+test_that('all partitioning calculators have the same inputs and outputs', {
+    expect_equal(
+        module_info('BioCro:partitioning_growth_calculator', verbose = FALSE)$inputs,
+        module_info('BioCro:partitioning_growth_calculator_leaf_costs', verbose = FALSE)$inputs
+    )
+
     expect_equal(
         module_info('BioCro:partitioning_growth_calculator', verbose = FALSE)$outputs,
         module_info('BioCro:partitioning_growth_calculator_leaf_costs', verbose = FALSE)$outputs

@@ -70,8 +70,11 @@ class partitioning_growth_calculator_leaf_costs : public direct_module
 
           // Get references to input quantities
           canopy_assim{get_input(input_quantities, "canopy_assimilation_rate")},
+          grc_grain{get_input(input_quantities, "grc_grain")},
+          grc_leaf{get_input(input_quantities, "grc_leaf")},
           grc_rhizome{get_input(input_quantities, "grc_rhizome")},
           grc_root{get_input(input_quantities, "grc_root")},
+          grc_shell{get_input(input_quantities, "grc_shell")},
           grc_stem{get_input(input_quantities, "grc_stem")},
           kGrain{get_input(input_quantities, "kGrain")},
           kLeaf{get_input(input_quantities, "kLeaf")},
@@ -79,6 +82,7 @@ class partitioning_growth_calculator_leaf_costs : public direct_module
           kRoot{get_input(input_quantities, "kRoot")},
           kShell{get_input(input_quantities, "kShell")},
           kStem{get_input(input_quantities, "kStem")},
+          LeafWS{get_input(input_quantities, "LeafWS")},
           temp{get_input(input_quantities, "temp")},
 
           // Get pointers to output quantities
@@ -105,8 +109,11 @@ class partitioning_growth_calculator_leaf_costs : public direct_module
     // Pointers to input quantities
     // References to input quantities
     const double& canopy_assim;
+    const double& grc_grain;
+    const double& grc_leaf;
     const double& grc_rhizome;
     const double& grc_root;
+    const double& grc_shell;
     const double& grc_stem;
     const double& kGrain;
     const double& kLeaf;
@@ -114,6 +121,7 @@ class partitioning_growth_calculator_leaf_costs : public direct_module
     const double& kRoot;
     const double& kShell;
     const double& kStem;
+    const double& LeafWS;
     const double& temp;
 
     // Pointers to output quantities
@@ -139,8 +147,11 @@ string_vector partitioning_growth_calculator_leaf_costs::get_inputs()
 {
     return {
         "canopy_assimilation_rate",  // Mg / ha / hour
+        "grc_grain",                 // dimensionless
+        "grc_leaf",                  // dimensionless
         "grc_rhizome",               // dimensionless
         "grc_root",                  // dimensionless
+        "grc_shell",                 // dimensionless
         "grc_stem",                  // dimensionless
         "kGrain",                    // dimensionless
         "kLeaf",                     // dimensionless
@@ -148,6 +159,7 @@ string_vector partitioning_growth_calculator_leaf_costs::get_inputs()
         "kRoot",                     // dimensionless
         "kShell",                    // dimensionless
         "kStem",                     // dimensionless
+        "LeafWS",                    // dimensionless
         "temp"                       // degrees C
     };
 }
@@ -176,15 +188,19 @@ void partitioning_growth_calculator_leaf_costs::do_operation() const
     // Specify the base temperature for Q10 growth respiration
     double constexpr Tref = 0.0;  // degrees C
 
-    // Calculate the rate of new leaf production, including _all_ losses due to
-    // photorespiration and RL, but not accounting for water stress or any
-    // additional growth respiration (Mg / ha / hr)
+    // Calculate the base rate of new leaf production, accounting for water
+    // stress and the associated respiratory costs (Mg / ha / hr)
     double const base_rate_leaf{
         kLeaf <= 0         ? 0
         : canopy_assim < 0 ? canopy_assim
                            : canopy_assim * kLeaf};
-    double constexpr Leaf_WS_loss_rate{0.0};
-    double constexpr Leaf_gr_rate{0.0};
+
+    double const Leaf_WS_loss_rate{growth_resp(
+        base_rate_leaf,
+        (1.0 - LeafWS))};
+
+    double const Leaf_gr_rate{growth_resp_Q10(
+        base_rate_leaf - Leaf_WS_loss_rate, grc_leaf, temp, Tref)};
 
     // Determine the carbon flux to use for the non-leaf organs (Mg / ha / hr)
     double const nonleaf_carbon_flux{canopy_assim > 0 ? canopy_assim : 0};
@@ -206,18 +222,18 @@ void partitioning_growth_calculator_leaf_costs::do_operation() const
 
     // Calculate the base rate of new grain production (Mg / ha / hr)
     double const base_rate_grain{kGrain > 0 ? nonleaf_carbon_flux * kGrain : 0};
-    double const Grain_gr_rate{0.0};
+    double const Grain_gr_rate{growth_resp_Q10(base_rate_grain, grc_grain, temp, Tref)};
 
     // Calculate the base rate of new shell production (Mg / ha / hr)
     double const base_rate_shell{kShell > 0 ? nonleaf_carbon_flux * kShell : 0};
-    double const Shell_gr_rate{0.0};
+    double const Shell_gr_rate{growth_resp_Q10(base_rate_shell, grc_shell, temp, Tref)};
 
     // Update the output quantity list
     update(Grain_gr_rate_op, Grain_gr_rate);
     update(Leaf_gr_rate_op, Leaf_gr_rate);
     update(Leaf_WS_loss_rate_op, Leaf_WS_loss_rate);
     update(net_assimilation_rate_grain_op, base_rate_grain - Grain_gr_rate);
-    update(net_assimilation_rate_leaf_op, base_rate_leaf - Leaf_gr_rate);
+    update(net_assimilation_rate_leaf_op, base_rate_leaf - Leaf_gr_rate - Leaf_WS_loss_rate);
     update(net_assimilation_rate_rhizome_op, base_rate_rhizome - Rhizome_gr_rate);
     update(net_assimilation_rate_root_op, base_rate_root - Root_gr_rate);
     update(net_assimilation_rate_shell_op, base_rate_shell - Shell_gr_rate);
