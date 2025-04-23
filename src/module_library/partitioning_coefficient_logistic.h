@@ -7,6 +7,8 @@
 
 namespace standardBML
 {
+double strength_term(double const alpha, double const beta, double const DVI);
+
 /**
  * @class partitioning_coefficient_logistic
  *
@@ -50,8 +52,6 @@ namespace standardBML
  * UK Land Environment Simulator." Geoscientific Model Development 8(4): 1139–55.]
  * (https://doi.org/10.5194/gmd-8-1139-2015)
  */
-double kcoeff(double alpha, double beta, double DVI, double denom);
-
 class partitioning_coefficient_logistic : public direct_module
 {
    public:
@@ -61,24 +61,24 @@ class partitioning_coefficient_logistic : public direct_module
         : direct_module{},
 
           // Get references to input quantities
-          DVI{get_input(input_quantities, "DVI")},
-          alphaRoot{get_input(input_quantities, "alphaRoot")},
-          alphaStem{get_input(input_quantities, "alphaStem")},
           alphaLeaf{get_input(input_quantities, "alphaLeaf")},
+          alphaRoot{get_input(input_quantities, "alphaRoot")},
           alphaShell{get_input(input_quantities, "alphaShell")},
-          betaRoot{get_input(input_quantities, "betaRoot")},
-          betaStem{get_input(input_quantities, "betaStem")},
+          alphaStem{get_input(input_quantities, "alphaStem")},
           betaLeaf{get_input(input_quantities, "betaLeaf")},
+          betaRoot{get_input(input_quantities, "betaRoot")},
           betaShell{get_input(input_quantities, "betaShell")},
+          betaStem{get_input(input_quantities, "betaStem")},
+          DVI{get_input(input_quantities, "DVI")},
           kRhizome_emr{get_input(input_quantities, "kRhizome_emr")},
 
           // Get pointers to output quantities
-          kRoot_op{get_op(output_quantities, "kRoot")},
-          kStem_op{get_op(output_quantities, "kStem")},
-          kLeaf_op{get_op(output_quantities, "kLeaf")},
-          kShell_op{get_op(output_quantities, "kShell")},
           kGrain_op{get_op(output_quantities, "kGrain")},
-          kRhizome_op{get_op(output_quantities, "kRhizome")}
+          kLeaf_op{get_op(output_quantities, "kLeaf")},
+          kRhizome_op{get_op(output_quantities, "kRhizome")},
+          kRoot_op{get_op(output_quantities, "kRoot")},
+          kShell_op{get_op(output_quantities, "kShell")},
+          kStem_op{get_op(output_quantities, "kStem")}
     {
     }
     static string_vector get_inputs();
@@ -87,24 +87,24 @@ class partitioning_coefficient_logistic : public direct_module
 
    private:
     // Pointers to input quantities
-    const double& DVI;
-    const double& alphaRoot;
-    const double& alphaStem;
     const double& alphaLeaf;
+    const double& alphaRoot;
     const double& alphaShell;
-    const double& betaRoot;
-    const double& betaStem;
+    const double& alphaStem;
     const double& betaLeaf;
+    const double& betaRoot;
     const double& betaShell;
+    const double& betaStem;
+    const double& DVI;
     const double& kRhizome_emr;
 
     // Pointers to output quantities
-    double* kRoot_op;
-    double* kStem_op;
-    double* kLeaf_op;
-    double* kShell_op;
     double* kGrain_op;
+    double* kLeaf_op;
     double* kRhizome_op;
+    double* kRoot_op;
+    double* kShell_op;
+    double* kStem_op;
 
     // Implement the pure virtual function do_operation():
     void do_operation() const override final;
@@ -113,15 +113,15 @@ class partitioning_coefficient_logistic : public direct_module
 string_vector partitioning_coefficient_logistic::get_inputs()
 {
     return {
-        "DVI",          // dimensionless, development index
-        "alphaRoot",    // dimensionless
-        "alphaStem",    // dimensionless
         "alphaLeaf",    // dimensionless
+        "alphaRoot",    // dimensionless
         "alphaShell",   // dimensionless
-        "betaRoot",     // dimensionless
-        "betaStem",     // dimensionless
+        "alphaStem",    // dimensionless
         "betaLeaf",     // dimensionless
+        "betaRoot",     // dimensionless
         "betaShell",    // dimensionless
+        "betaStem",     // dimensionless
+        "DVI",          // dimensionless
         "kRhizome_emr"  // dimensionless
     };
 }
@@ -129,12 +129,12 @@ string_vector partitioning_coefficient_logistic::get_inputs()
 string_vector partitioning_coefficient_logistic::get_outputs()
 {
     return {
-        "kRoot",    // dimensionless
-        "kStem",    // dimensionless
-        "kLeaf",    // dimesnionless
-        "kShell",   // dimensionless
-        "kGrain",   // dimensionless
-        "kRhizome"  // dimensionless
+        "kGrain",    // dimensionless
+        "kLeaf",     // dimesnionless
+        "kRhizome",  // dimensionless
+        "kRoot",     // dimensionless
+        "kShell",    // dimensionless
+        "kStem"      // dimensionless
     };
 }
 
@@ -143,36 +143,39 @@ void partitioning_coefficient_logistic::do_operation() const
     // Determine partitioning coefficients using multinomial logistic equations
     // from Osborne et al., 2015 JULES-crop https://doi.org/10.5194/gmd-8-1139-2015
 
-    // denominator term for kRoot, kStem, kLeaf, and kGrain
-    double kDenom = exp(alphaRoot + betaRoot * DVI) +
-                    exp(alphaStem + betaStem * DVI) +
-                    exp(alphaLeaf + betaLeaf * DVI) +
-                    exp(alphaShell + betaShell * DVI) + 1.0;  // dimensionless
+    // Calculate the sink strength of each tissue (relative to grain)
+    double const leaf_strength = strength_term(alphaLeaf, betaLeaf, DVI);
+    double const root_strength = strength_term(alphaRoot, betaRoot, DVI);
+    double const shell_strength = strength_term(alphaShell, betaShell, DVI);
+    double const stem_strength = strength_term(alphaStem, betaStem, DVI);
+    double constexpr grain_strength = 1.0;
+    double constexpr rhizome_strength = 0.0;
 
-    double kRoot = kcoeff(alphaRoot, betaRoot, DVI, kDenom);     // dimensionless
-    double kStem = kcoeff(alphaStem, betaStem, DVI, kDenom);     // dimensionless
-    double kLeaf = kcoeff(alphaLeaf, betaLeaf, DVI, kDenom);     // dimensionless
-    double kShell = kcoeff(alphaShell, betaShell, DVI, kDenom);  // dimensionless
-    double kGrain = 1.0 / kDenom;                                // dimensionless
+    // Calculate the total sink strength
+    double const total_strength =
+        leaf_strength + rhizome_strength + root_strength + shell_strength +
+        stem_strength + grain_strength;
 
-    // Give option for rhizome to contribute to growth during the emergence stage,
-    // kRhizome_emr is an input parameter and should be non-positive.
-    // To ignore rhizome, set kRhizome_emr to 0 in input parameter file, and
-    // adjust initial leaf, stem, and root biomasses accordingly.
-    double kRhizome{DVI < 0 ? kRhizome_emr : 0};  // dimensionless
+    // The k values are the fraction of total demand from each tissue
+    double const kGrain{grain_strength / total_strength};                               // dimensionless
+    double const kLeaf{leaf_strength / total_strength};                                 // dimensionless
+    double const kRhizome{DVI < 0 ? kRhizome_emr : rhizome_strength / total_strength};  // dimensionless
+    double const kRoot{root_strength / total_strength};                                 // dimensionless
+    double const kShell{shell_strength / total_strength};                               // dimensionless
+    double const kStem{stem_strength / total_strength};                                 // dimensionless
 
     // Update the output quantities
-    update(kRoot_op, kRoot);        // dimensionless
-    update(kStem_op, kStem);        // dimensionless
-    update(kLeaf_op, kLeaf);        // dimensionless
-    update(kShell_op, kShell);      // dimensionless
     update(kGrain_op, kGrain);      // dimensionless
+    update(kLeaf_op, kLeaf);        // dimensionless
     update(kRhizome_op, kRhizome);  // dimensionless
+    update(kRoot_op, kRoot);        // dimensionless
+    update(kShell_op, kShell);      // dimensionless
+    update(kStem_op, kStem);        // dimensionless
 }
 
-double kcoeff(double alpha, double beta, double DVI, double denom)
+double strength_term(double const alpha, double const beta, double const DVI)
 {
-    return exp(alpha + beta * DVI) / denom;  // dimensionless
+    return exp(alpha + beta * DVI);  // dimensionless
 }
 
 }  // namespace standardBML
