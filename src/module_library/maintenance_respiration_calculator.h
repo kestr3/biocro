@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "temperature_response_functions.h"  // for Q10_temprature_response
+#include "respiration.h"  // for maintenance_resp_Q10
 
 namespace standardBML
 {
@@ -121,23 +121,13 @@ void maintenance_respiration_calculator::do_operation() const
     // Define the reference temperature for the Q10 function
     double constexpr Tref = 25.0;
 
-    // Calculate the multiplier for the Q10 response
-    double Q10 = Q10_temperature_response(temp, Tref);  // dimensionless
-
-    // Calculate each maintenance respiration rate (mrr)
-    double const Grain_mr_rate = Grain * mrc_grain * Q10;        // Mg / ha / hr
-    double const Leaf_mr_rate = Leaf * mrc_leaf * Q10;           // Mg / ha / hr
-    double const Rhizome_mr_rate = Rhizome * mrc_rhizome * Q10;  // Mg / ha / hr
-    double const Root_mr_rate = Root * mrc_root * Q10;           // Mg / ha / hr
-    double const Shell_mr_rate = Shell * mrc_shell * Q10;        // Mg / ha / hr
-    double const Stem_mr_rate = Stem * mrc_stem * Q10;           // Mg / ha / hr
-
-    update(Grain_mr_rate_op, Grain_mr_rate);      // Mg / ha / hr
-    update(Leaf_mr_rate_op, Leaf_mr_rate);        // Mg / ha / hr
-    update(Rhizome_mr_rate_op, Rhizome_mr_rate);  // Mg / ha / hr
-    update(Root_mr_rate_op, Root_mr_rate);        // Mg / ha / hr
-    update(Shell_mr_rate_op, Shell_mr_rate);      // Mg / ha / hr
-    update(Stem_mr_rate_op, Stem_mr_rate);        // Mg / ha / hr
+    // Calculate the maintenance respiration rates (Mg / ha / hr)
+    update(Grain_mr_rate_op, maintenance_resp_Q10(Grain, mrc_grain, temp, Tref));
+    update(Leaf_mr_rate_op, maintenance_resp_Q10(Leaf, mrc_leaf, temp, Tref));
+    update(Rhizome_mr_rate_op, maintenance_resp_Q10(Rhizome, mrc_rhizome, temp, Tref));
+    update(Root_mr_rate_op, maintenance_resp_Q10(Root, mrc_root, temp, Tref));
+    update(Shell_mr_rate_op, maintenance_resp_Q10(Shell, mrc_shell, temp, Tref));
+    update(Stem_mr_rate_op, maintenance_resp_Q10(Stem, mrc_stem, temp, Tref));
 }
 
 }  // namespace standardBML

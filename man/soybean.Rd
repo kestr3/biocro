@@ -79,16 +79,43 @@
     \item \emph{2024-09-12}: Several changes have been made: (1) The
     \code{mrc1} and \code{mrc2} were renamed to \code{grc_stem} and
     \code{grc_root}, respectively. These two parameters are used to scale the
-    assimilate rate, which is commonly called growth respiration coefficient (grc).
-    (2) A new module, \code{BioCro:maintenance_respiration}, has been added to
-    account for maintenance respiration during the biomass partitioning. This
-    module removes a fraction from each organ by a constant parameter called \code{mrc_*}
-    (e.g., \code{mrc_leaf}) and also by a temperature-dependent Q10 scaling factor.
-    Among these \code{mrc_*} parameters, \code{mrc_leaf} and \code{mrc_stem} are set
-    equal to represent maintenance respiration for the shoot, while \code{mrc_grain}
-    is assigned a negligible value to prevent grain biomass reduction at the season end.
-    No decreasing trends have been seen in the observed data. (3) Parameter optimizations
-    against the 2002-2006 biomass datasets were performed to accommodate these changes.
+    assimilate rate, which is commonly called growth respiration coefficient
+    (grc). (2) A new module, \code{BioCro:maintenance_respiration}, has been
+    added to account for maintenance respiration during the biomass
+    partitioning. This module removes a fraction from each organ by a constant
+    parameter called \code{mrc_*} (e.g., \code{mrc_leaf}) and also by a
+    temperature-dependent Q10 scaling factor. Among these \code{mrc_*}
+    parameters, \code{mrc_leaf} and \code{mrc_stem} are set equal to represent
+    maintenance respiration for the shoot, while \code{mrc_grain} is assigned a
+    negligible value to prevent grain biomass reduction at the season end. No
+    decreasing trends have been seen in the observed data. (3) Parameter
+    optimizations against the 2002-2006 biomass datasets were performed to
+    accommodate these changes.
+
+    \item \emph{2025-04-23}: Several changes have been made since the previous
+    update. Regarding modules, several new modules have been added:
+    \code{BioCro:format_time}, \code{BioCro:sla_linear},
+    \code{BioCro:carbon_assimilation_to_biomass}, and
+    \code{BioCro:maintenance_respiration_calculator}. These modules do not
+    change the model's overall behavior; rather, they make some new quantities
+    available in the outputs, such as maintenance respiration rates. The
+    \code{BioCro:format_time} module is related to a change in how BioCro
+    defines time; previously it was defined in units of days, but now it is
+    given in hours. Regarding parameters, several modules now require new input
+    parameters whose values were previously hard-coded:
+    \code{dry_biomass_per_carbon}, \code{grc_leaf}, \code{grc_rhizome},
+    \code{mrc_rhizome}, \code{mrc_shell}, and several parameters related to the
+    temperature dependence of FvCB model parameters (e.g. \code{Gstar_c} and
+    \code{Gstar_Ea}). A few parameters have also been renamed to better indicate
+    their meaning, such as \code{Rd} becoming \code{RL_at_25}. Finally, due to
+    changes in the calculation of growth respiration rates, the model needed to
+    be re-parameterized against the 2002-2006 biomass data sets. This resulted
+    in changes to the values of \code{alphaLeaf}, \code{alphaStem},
+    \code{betaLeaf}, \code{betaStem}, \code{alphaShell}, \code{betaShell},
+    \code{grc_root}, \code{grc_stem}, \code{mrc_leaf}, \code{mrc_root},
+    \code{mrc_stem}, \code{rateSeneLeaf}, \code{rateSeneStem},
+    \code{alphaSeneLeaf}, \code{alphaSeneStem}, \code{betaSeneLeaf}, and
+    \code{betaSeneStem}.
   }
 
   Whenever a reparameterization is made, this list should be updated, and any
@@ -140,7 +167,8 @@
     \item The \code{sowing_fractional_doy} input to the
     \code{soybean_development_rate_calculator} module is set to 0 because
     Soybean-BioCro uses the weather data to set the sowing time. In other words,
-    the weather data is truncated so it begins at the beggining of the simulation.
+    the weather data is truncated so it begins at the beginning of the
+    simulation.
 
     \item Leaf reflectance and transmittance in the PAR band are estimated from
     [\doi{10.2134/agronmonogr31.c7}],
