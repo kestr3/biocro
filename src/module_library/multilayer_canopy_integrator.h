@@ -5,6 +5,7 @@
 #include "../framework/state_map.h"
 #include "../framework/module.h"
 #include "../framework/constants.h"  // for molar_mass_of_water, molar_mass_of_glucose
+#include "respiration.h"             // for growth_resp
 
 namespace standardBML
 {
@@ -198,15 +199,9 @@ void multilayer_canopy_integrator::run() const
                      *shaded_RL_ips[i] * shaded_lai;
     }
 
-    // Modify net assimilation to account for respiration
-    // Note: this was originally only done for the C3 canopy
-    // Note: it seems like this should not be necessary since the assimilation
-    //   model includes respiration
-    double const growth_respiration =
-        growth_respiration_fraction * fabs(canopy_assimilation_rate);  // micromol / m^2 / s
-
-    canopy_assimilation_rate =
-        canopy_assimilation_rate - growth_respiration;  // micromol / m^2 / s
+    // Calculate the rate of whole-plant growth respiration
+    double const whole_plant_gr =
+        growth_resp(canopy_assimilation_rate, growth_respiration_fraction);  // micromol / m^2 / s
 
     // For transpiration, we need to convert mmol / m^2 / s into Mg / ha / hr
     // using the molar mass of water in kg / mol, which can be accomplished by
@@ -215,13 +210,13 @@ void multilayer_canopy_integrator::run() const
     // = 36 s * mol * Mg * m^2 / (hr * mmol * kg * ha)
     const double cf2 = physical_constants::molar_mass_of_water * 36;  // (Mg / ha / hr) / (mmol / m^2 / s)
 
-    update(canopy_assimilation_molar_flux_op, canopy_assimilation_rate);
+    update(canopy_assimilation_molar_flux_op, canopy_assimilation_rate - whole_plant_gr);
     update(canopy_conductance_op, canopy_conductance);
     update(canopy_gross_assimilation_molar_flux_op, canopy_gross_assimilation_rate);
     update(canopy_photorespiration_molar_flux_op, canopy_photorespiration_rate);
     update(canopy_RL_molar_flux_op, canopy_RL);
     update(canopy_transpiration_rate_op, canopy_transpiration_rate * cf2);
-    update(whole_plant_growth_respiration_molar_flux_op, growth_respiration);
+    update(whole_plant_growth_respiration_molar_flux_op, whole_plant_gr);
 }
 
 ////////////////////////////////////////

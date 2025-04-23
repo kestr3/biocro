@@ -1,12 +1,13 @@
 #include <algorithm>  // for std::min, std::max
 #include <vector>
-#include "CanAC.h"
 #include "../framework/constants.h"  // for molar_mass_of_water, molar_mass_of_glucose
 #include "BioCro.h"                  // for WINDprof
 #include "c4photo.h"                 // for c4photoC
 #include "leaf_energy_balance.h"     // for leaf_energy_balance
 #include "lightME.h"                 // for lightME
+#include "respiration.h"             // for growth_resp
 #include "sunML.h"                   // for sunML
+#include "CanAC.h"
 
 canopy_photosynthesis_outputs CanAC(
     const nitroParms& nitroP,
@@ -205,6 +206,10 @@ canopy_photosynthesis_outputs CanAC(
         canopy_conductance += Leafsun * direct_photo.Gs + Leafshade * diffuse_photo.Gs;  // mol / m^2 / s
     }
 
+    // Calculate the rate of whole-plant growth respiration
+    double const whole_plant_gr =
+        growth_resp(CanopyA, growth_respiration_fraction);  // micromol / m^2 / s
+
     // For transpiration, we need to convert mmol / m^2 / s into Mg / ha / hr
     // using the molar mass of water in kg / mol, which can be accomplished by
     // the following conversion factor:
@@ -213,14 +218,14 @@ canopy_photosynthesis_outputs CanAC(
     const double cf2 = physical_constants::molar_mass_of_water * 36;  // (Mg / ha / hr) / (mmol / m^2 / s)
 
     return canopy_photosynthesis_outputs{
-        /* .Assim = */ CanopyA * (1.0 - growth_respiration_fraction),  // micromol / m^2 / s
-        /* .canopy_conductance = */ canopy_conductance,                // mol / m^2 / s
-        /* .canopy_transpiration_penman = */ CanopyPe,                 // mmol / m^2 / s
-        /* .canopy_transpiration_priestly = */ CanopyPr,               // mmol / m^2 / s
-        /* .GrossAssim = */ GCanopyA,                                  // micromol / m^2 / s
-        /* .RL = */ canopy_RL,                                         // micromol / m^2 / s
-        /* .Rp = */ canopy_rp,                                         // micromol / m^2 / s
-        /* .Trans = */ CanopyT * cf2,                                  // Mg / ha / hr
-        /* .whole_plant_gr = */ CanopyA * growth_respiration_fraction  // micromol / m^2 / s
+        /* .Assim = */ CanopyA - whole_plant_gr,          // micromol / m^2 / s
+        /* .canopy_conductance = */ canopy_conductance,   // mol / m^2 / s
+        /* .canopy_transpiration_penman = */ CanopyPe,    // mmol / m^2 / s
+        /* .canopy_transpiration_priestly = */ CanopyPr,  // mmol / m^2 / s
+        /* .GrossAssim = */ GCanopyA,                     // micromol / m^2 / s
+        /* .RL = */ canopy_RL,                            // micromol / m^2 / s
+        /* .Rp = */ canopy_rp,                            // micromol / m^2 / s
+        /* .Trans = */ CanopyT * cf2,                     // Mg / ha / hr
+        /* .whole_plant_gr = */ whole_plant_gr            // micromol / m^2 / s
     };
 }

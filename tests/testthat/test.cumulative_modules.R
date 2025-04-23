@@ -71,6 +71,40 @@ test_soybean_carbon_accounting <- function(partitioning_calculator) {
             soybean_res$canopy_gross_assimilation,
             soybean_res$total_carbon_use
         )
+
+        ## Uncomment this when debugging test failures to visually check whether
+        ## the difference is real
+        #dev.new()
+        #print(lattice::xyplot(
+        #    total_carbon_use + canopy_gross_assimilation ~ fractional_doy,
+        #    data = soybean_res,
+        #    type = 'l',
+        #    auto = TRUE,
+        #    main = partitioning_calculator
+        #))
+
+        # Check that all CO2 loss rates are non-negative
+        with(soybean_res, {
+            expect_true(all(canopy_photorespiration_rate >= 0))
+            expect_true(all(canopy_non_photorespiratory_CO2_release_rate >= 0))
+            expect_true(all(Grain_gr_rate >= 0))
+            expect_true(all(Grain_mr_rate >= 0))
+            expect_true(all(Leaf_gr_rate >= 0))
+            expect_true(all(Leaf_mr_rate >= 0))
+            expect_true(all(Leaf_WS_loss_rate >= 0))
+            expect_true(all(Rhizome_gr_rate >= 0))
+            expect_true(all(Rhizome_mr_rate >= 0))
+            expect_true(all(Root_gr_rate >= 0))
+            expect_true(all(Root_mr_rate >= 0))
+            expect_true(all(Shell_gr_rate >= 0))
+            expect_true(all(Shell_mr_rate >= 0))
+            expect_true(all(Stem_gr_rate >= 0))
+            expect_true(all(Stem_mr_rate >= 0))
+            expect_true(all(whole_plant_growth_respiration_rate >= 0))
+        })
+
+        # Check that gross assimilation is non-negative
+        expect_true(all(soybean_res$canopy_gross_assimilation >= 0))
     })
 }
 

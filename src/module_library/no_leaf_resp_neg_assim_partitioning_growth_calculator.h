@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "growth_resp.h"  // for growth_resp
+#include "respiration.h"  // for growth_resp_Q10, growth_resp
 
 namespace standardBML
 {
@@ -31,13 +31,16 @@ namespace standardBML
  *  senescence and gains due to remobilized carbon from other organs are handled
  *  elsewhere and are not included here.
  *
- *  Respiration is included via the `growth_resp()` function, which implements
- *  an empirical rule for determining the fraction of energy spent on
+ *  Respiration is included via the `growth_resp_Q10()` function, which
+ *  implements an empirical rule for determining the fraction of energy spent on
  *  respiration at a particular temperature. See the following paper for a
  *  general discussion of the importance of respiration in understanding plant
  *  growth: [Amthor, J. S. "The role of maintenance respiration in plant growth"
  *  Plant, Cell & Environment 7, 561–569 (1984)]
  *  (https://doi.org/10.1111/1365-3040.ep11591833).
+ *
+ *  The effect of leaf water stress is included via the `growth_resp()` function
+ *  with the "growth respiration coefficient" set to `1.0 - LeafWS`.
  *
  *  ### Specifics of this module
  *
@@ -181,26 +184,33 @@ string_vector no_leaf_resp_neg_assim_partitioning_growth_calculator::get_outputs
 
 void no_leaf_resp_neg_assim_partitioning_growth_calculator::do_operation() const
 {
+    // Specify the base temperature for Q10 growth respiration
+    double constexpr Tref = 0.0;  // degrees C
+
     // Calculate the base rate of new leaf production, accounting for water
     // stress but no additional respiratory costs (Mg / ha / hr)
-    double const base_rate_leaf{kLeaf > 0 ? canopy_assim * kLeaf * LeafWS : 0};
-    double const Leaf_WS_loss_rate{kLeaf > 0 ? canopy_assim * kLeaf * (1.0 - LeafWS) : 0};
+    double const base_rate_leaf{kLeaf > 0 ? canopy_assim * kLeaf : 0};
+
+    double const Leaf_WS_loss_rate{growth_resp(
+        base_rate_leaf,
+        (1.0 - LeafWS))};
+
     double constexpr Leaf_gr_rate{0.0};
 
     // Calculate the base rate of new stem production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_stem{kStem > 0 ? canopy_assim * kStem : 0};
-    double const Stem_gr_rate{growth_resp(base_rate_stem, grc_stem, temp)};
+    double const Stem_gr_rate{growth_resp_Q10(base_rate_stem, grc_stem, temp, Tref)};
 
     // Calculate the base rate of new root production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_root{kRoot > 0 ? canopy_assim * kRoot : 0};
-    double const Root_gr_rate{growth_resp(base_rate_root, grc_root, temp)};
+    double const Root_gr_rate{growth_resp_Q10(base_rate_root, grc_root, temp, Tref)};
 
     // Calculate the base rate of new rhizome production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_rhizome{kRhizome > 0 ? canopy_assim * kRhizome : 0};
-    double const Rhizome_gr_rate{growth_resp(base_rate_rhizome, grc_rhizome, temp)};
+    double const Rhizome_gr_rate{growth_resp_Q10(base_rate_rhizome, grc_rhizome, temp, Tref)};
 
     // Calculate the base rate of new grain production (Mg / ha / hr)
     double const base_rate_grain{kGrain > 0 ? canopy_assim * kGrain : 0};
@@ -215,7 +225,7 @@ void no_leaf_resp_neg_assim_partitioning_growth_calculator::do_operation() const
     update(Leaf_gr_rate_op, Leaf_gr_rate);
     update(Leaf_WS_loss_rate_op, Leaf_WS_loss_rate);
     update(net_assimilation_rate_grain_op, base_rate_grain - Grain_gr_rate);
-    update(net_assimilation_rate_leaf_op, base_rate_leaf - Leaf_gr_rate);
+    update(net_assimilation_rate_leaf_op, base_rate_leaf - Leaf_gr_rate - Leaf_WS_loss_rate);
     update(net_assimilation_rate_rhizome_op, base_rate_rhizome - Rhizome_gr_rate);
     update(net_assimilation_rate_root_op, base_rate_root - Root_gr_rate);
     update(net_assimilation_rate_shell_op, base_rate_shell - Shell_gr_rate);

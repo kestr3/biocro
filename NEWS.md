@@ -46,6 +46,11 @@ be directly added to this file to describe the related changes.
   This change only affects the solution at low Ci, and does not modify the
   interface of any module.
 
+- Changed how growth respiration is calculated (so the rate of growth
+  respiration is zero whenever the base rate of carbon available for growth is
+  negative) and made sure it is calculated consistently across different
+  modules.
+
 - Renamed several quantities to make their meanings more clear:
 
   - `mrc1` has been replaced by `grc_leaf` and `grc_stem` to better indicate
@@ -114,10 +119,16 @@ be directly added to this file to describe the related changes.
 - Altered `test_module` (and hence `test_module_library`) so that new module
   outputs produce a warning but don't cause an error on their own.
 
+- Following changes to the behavior of some modules, the soybean model was
+  re-parameterized; see the help file for `soybean` for complete details.
+
 ## Internal changes
 
-- Renamed the `resp()` function to `growth_resp()` to better indicate its
-  purpose, and moved it to a dedicated header.
+- Renamed the `resp()` function to `growth_resp_Q10()` to better indicate its
+  purpose, and moved it to a respiration header file. The new header file
+  (`respiration.h`) also includes a new maintenance respiration function
+  (`maintenance_respiration_Q10()`) and a simpler growth respiration function
+  that does not apply a Q10 response (`growth_resp()`).
 
 ## Bug fixes
 

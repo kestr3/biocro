@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "growth_resp.h"  // for growth_resp
+#include "respiration.h"  // for growth_resp_Q10, growth_resp
 
 namespace standardBML
 {
@@ -31,13 +31,16 @@ namespace standardBML
  *  senescence and gains due to remobilized carbon from other organs are handled
  *  elsewhere and are not included here.
  *
- *  Respiration is included via the `growth_resp()` function, which implements
- *  an empirical rule for determining the fraction of energy spent on
+ *  Respiration is included via the `growth_resp_Q10()` function, which
+ *  implements an empirical rule for determining the fraction of energy spent on
  *  respiration at a particular temperature. See the following paper for a
  *  general discussion of the importance of respiration in understanding plant
  *  growth: [Amthor, J. S. "The role of maintenance respiration in plant growth"
  *  Plant, Cell & Environment 7, 561–569 (1984)]
  *  (https://doi.org/10.1111/1365-3040.ep11591833).
+ *
+ *  The effect of leaf water stress is included via the `growth_resp()` function
+ *  with the "growth respiration coefficient" set to `1.0 - LeafWS`.
  *
  *  ### Specifics of this module
  *
@@ -47,17 +50,14 @@ namespace standardBML
  *
  *  This module includes five organs:
  *  - `Leaf`: The leaf growth rate is modified by water stress and then
- *     respiration. Note that this effectively double-counts leaf respiration
- *     because the net canopy assimilation rate already includes it.
+ *     respiration. Note that if `grc_leaf` is nonzero, this effectively
+ *     double-counts leaf respiration because the net canopy assimilation rate
+ *     already includes it.
  *  - `Stem`: The stem growth rate is modified by respiration.
  *  - `Root`: The root growth rate is modified by respiration.
  *  - `Rhizome`: The rhizome growth rate is modified by respiration.
- *  - `Grain`: The grain growth rate is *not* modified by respiration and is not
- *     allowed to become negative, even when the canopy assimilation rate is
- *     negative.
- *  - `Shell`: The shell growth rate is *not* modified by respiration and is not
- *     allowed to become negative, even when the canopy assimilation rate is
- *     negative.
+ *  - `Grain`: The grain growth rate is *not* modified by respiration.
+ *  - `Shell`: The shell growth rate is *not* modified by respiration.
  *
  *  Here it is assumed that the major effect of water stress on mass
  *  accumulation is a reduction in the leaf growth rate, following
@@ -186,45 +186,53 @@ string_vector partitioning_growth_calculator::get_outputs()
 
 void partitioning_growth_calculator::do_operation() const
 {
+    // Specify the base temperature for Q10 growth respiration
+    double constexpr Tref = 0.0;  // degrees C
+
     // Calculate the base rate of new leaf production, accounting for water
     // stress and the associated respiratory costs (Mg / ha / hr)
-    double const base_rate_leaf{kLeaf > 0 ? canopy_assim * kLeaf * LeafWS : 0};
-    double const Leaf_WS_loss_rate{kLeaf > 0 ? canopy_assim * kLeaf * (1.0 - LeafWS) : 0};
-    double const Leaf_gr_rate{growth_resp(base_rate_leaf, grc_leaf, temp)};
+    double const base_rate_leaf{kLeaf > 0 ? canopy_assim * kLeaf : 0};
+
+    double const Leaf_WS_loss_rate{growth_resp(
+        base_rate_leaf,
+        (1.0 - LeafWS))};
+
+    double const Leaf_gr_rate{growth_resp_Q10(
+        base_rate_leaf - Leaf_WS_loss_rate, grc_leaf, temp, Tref)};
 
     // Calculate the base rate of new stem production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_stem{kStem > 0 ? canopy_assim * kStem : 0};
-    double const Stem_gr_rate{growth_resp(base_rate_stem, grc_stem, temp)};
+    double const Stem_gr_rate{growth_resp_Q10(base_rate_stem, grc_stem, temp, Tref)};
 
     // Calculate the base rate of new root production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_root{kRoot > 0 ? canopy_assim * kRoot : 0};
-    double const Root_gr_rate{growth_resp(base_rate_root, grc_root, temp)};
+    double const Root_gr_rate{growth_resp_Q10(base_rate_root, grc_root, temp, Tref)};
 
     // Calculate the base rate of new rhizome production and the associated
     // respiratory costs (Mg / ha / hr)
     double const base_rate_rhizome{kRhizome > 0 ? canopy_assim * kRhizome : 0};
-    double const Rhizome_gr_rate{growth_resp(base_rate_rhizome, grc_rhizome, temp)};
+    double const Rhizome_gr_rate{growth_resp_Q10(base_rate_rhizome, grc_rhizome, temp, Tref)};
 
     // Calculate the base rate of new grain production and the associated
     // respiratory costs, which are chosen to prevent biomass decreases
     // (Mg / ha / hr)
     double const base_rate_grain{kGrain > 0 ? canopy_assim * kGrain : 0};
-    double const Grain_gr_rate{base_rate_grain < 0 ? base_rate_grain : 0};
+    double const Grain_gr_rate{0};
 
     // Calculate the base rate of new shell production and the associated
     // respiratory costs, which are chosen to prevent biomass decreases
     // (Mg / ha / hr)
     double const base_rate_shell{kShell > 0 ? canopy_assim * kShell : 0};
-    double const Shell_gr_rate{base_rate_shell < 0 ? base_rate_shell : 0};
+    double const Shell_gr_rate{0};
 
     // Update the output quantity list
     update(Grain_gr_rate_op, Grain_gr_rate);
     update(Leaf_gr_rate_op, Leaf_gr_rate);
     update(Leaf_WS_loss_rate_op, Leaf_WS_loss_rate);
     update(net_assimilation_rate_grain_op, base_rate_grain - Grain_gr_rate);
-    update(net_assimilation_rate_leaf_op, base_rate_leaf - Leaf_gr_rate);
+    update(net_assimilation_rate_leaf_op, base_rate_leaf - Leaf_gr_rate - Leaf_WS_loss_rate);
     update(net_assimilation_rate_rhizome_op, base_rate_rhizome - Rhizome_gr_rate);
     update(net_assimilation_rate_root_op, base_rate_root - Root_gr_rate);
     update(net_assimilation_rate_shell_op, base_rate_shell - Shell_gr_rate);
