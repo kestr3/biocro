@@ -17,7 +17,7 @@ soybean <- list(
         "BioCro:ten_layer_canopy_properties",
         canopy_photosynthesis = "BioCro:ten_layer_c3_canopy",
         "BioCro:ten_layer_canopy_integrator",
-        partitioning_growth_calculator = "BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator",
+        partitioning_growth_calculator = "BioCro:partitioning_growth_calculator",
         "BioCro:senescence_coefficient_logistic",
         "BioCro:carbon_assimilation_to_biomass",
         "BioCro:maintenance_respiration_calculator"
@@ -98,14 +98,17 @@ soybean <- list(
 
         # partitioning_coefficient_logistic module
         alphaLeaf                   = 24.7116,
+        alphaRhizome                = 0,         # rhizome is not used in Soybean-BioCro
+        alphaRoot                   = 36.9670,
+        alphaShell                  = 10.8835,
         alphaStem                   = 24.5764,
         betaLeaf                    = -19.2275,
-        betaStem                    = -18.3517,
-        alphaRoot                   = 36.9670,
+        betaRhizome                 = -Inf,      # rhizome is not used in Soybean-BioCro
         betaRoot                    = -40.1915,
-        alphaShell                  = 10.8835,
         betaShell                   = -7.9549,
-        kRhizome_emr                = 0,
+        betaStem                    = -18.3517,
+        kRhizome_emr                = 0,         # rhizome is not used in Soybean-BioCro
+        kRhizome_emr_DVI            = 0,         # rhizome is not used in Soybean-BioCro
 
         # soil_evaporation module
         rsec                        = 0.2,
@@ -198,17 +201,19 @@ soybean <- list(
         # ten_layer_canopy_integrator module
         growth_respiration_fraction = 0,
 
-        # no_leaf_resp_partitioning_growth_calculator_negative_assimilation_partitioned module
-        grc_leaf                        = 0.0,        # dimensionless, required for other partitioning growth modules
+        # partitioning_growth_calculator module
+        grc_grain                       = 0.0,        # dimensionless
+        grc_leaf                        = 0.0,        # dimensionless
         grc_rhizome                     = 0.0,        # dimensionless, rhizome is not used in Soybean-BioCro
         grc_root                        = 0.00253,    # dimensionless, optimized
+        grc_shell                       = 0.0,        # dimensionless
         grc_stem                        = 0.02256,    # dimensionless, optimized
 
         # maintenance_respiration_calculator module
         mrc_grain                       = 0.0,         # kg / kg / hr
         mrc_leaf                        = 0.00036626,  # kg / kg / hr, optimized
         mrc_rhizome                     = 0.0,         # kg / kg / hr, rhizome is not used in Soybean-BioCro
-        mrc_root                        = 0.00001017,     # kg / kg / hr, optimized
+        mrc_root                        = 0.00001017,  # kg / kg / hr, optimized
         mrc_shell                       = 0.0,         # kg / kg / hr
         mrc_stem                        = 0.00036626,  # kg / kg / hr, optimized, assumed to be same as leaf
 

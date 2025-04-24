@@ -101,16 +101,21 @@
     available in the outputs, such as maintenance respiration rates. The
     \code{BioCro:format_time} module is related to a change in how BioCro
     defines time; previously it was defined in units of days, but now it is
-    given in hours. Regarding parameters, several modules now require new input
-    parameters whose values were previously hard-coded:
-    \code{dry_biomass_per_carbon}, \code{grc_leaf}, \code{grc_rhizome},
-    \code{mrc_rhizome}, \code{mrc_shell}, and several parameters related to the
-    temperature dependence of FvCB model parameters (e.g. \code{Gstar_c} and
-    \code{Gstar_Ea}). A few parameters have also been renamed to better indicate
-    their meaning, such as \code{Rd} becoming \code{RL_at_25}. Finally, due to
-    changes in the calculation of growth respiration rates, the model needed to
-    be re-parameterized against the 2002-2006 biomass data sets. This resulted
-    in changes to the values of \code{alphaLeaf}, \code{alphaStem},
+    given in hours. The partitioning growth calculator module was also changed
+    to \code{BioCro:partitioning_growth_calculator}, since the previous module
+    was removed from the library; this module has identical behavior to the old
+    one (\code{BioCro:no_leaf_resp_neg_assim_partitioning_growth_calculator}).
+    Regarding parameters, several modules now require new input parameters whose
+    values were previously hard-coded: \code{dry_biomass_per_carbon},
+    \code{grc_leaf}, \code{grc_rhizome}, \code{grc_grain}, \code{grc_shell},
+    \code{mrc_rhizome}, \code{mrc_shell}, \code{alphaRhizome},
+    \code{betaRhizome}, \code{kRhizome_emr_DVI}, and several parameters related
+    to the temperature dependence of FvCB model parameters (e.g. \code{Gstar_c}
+    and \code{Gstar_Ea}). A few parameters have also been renamed to better
+    indicate their meaning, such as \code{Rd} becoming \code{RL_at_25}. Finally,
+    due to changes in the calculation of growth respiration rates, the model
+    needed to be re-parameterized against the 2002-2006 biomass data sets. This
+    resulted in changes to the values of \code{alphaLeaf}, \code{alphaStem},
     \code{betaLeaf}, \code{betaStem}, \code{alphaShell}, \code{betaShell},
     \code{grc_root}, \code{grc_stem}, \code{mrc_leaf}, \code{mrc_root},
     \code{mrc_stem}, \code{rateSeneLeaf}, \code{rateSeneStem},

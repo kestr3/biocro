@@ -106,8 +106,20 @@ be directly added to this file to describe the related changes.
   module called `BioCro:maintenance_respiration_calculator`) to make maintenance
   respiration rates available as outputs.
 
-- The partitioning growth calculator modules now include growth respiration
-  rates in their outputs.
+- Several changes were made to the partitioning growth calculator modules:
+
+  - Now there are only two such modules: `BioCro:partitioning_growth_calculator`
+    and `BioCro:partitioning_growth_calculator_leaf_costs`.
+
+  - The partitioning growth calculator modules now include growth respiration
+    rates in their outputs.
+
+  - They have also been standardized so they apply growth respiration to all
+    tissues, and they both incorporate reductions in leaf growth rate due to
+    water stress.
+
+- The `BioCro:partitioning_coefficient_logistic` module can now calculate the
+  rhizome partitioning coefficient using the logistic model.
 
 - Two new modules were added for calculating cumulative flows of CO2 and water:
   `BioCro:cumulative_carbon_dynamics` and `BioCro:cumulative_water_dynamics`.
