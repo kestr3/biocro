@@ -2,6 +2,7 @@
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/BioCro)](https://CRAN.R-project.org/package=BioCro)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/BioCro)](https://CRAN.R-project.org/package=BioCro)
 [![Build Status](https://github.com/biocro/biocro/workflows/R-CMD-check/badge.svg)](https://github.com/biocro/biocro/actions?query=workflow%3AR-CMD-check)
 <!-- badges: end -->
 
