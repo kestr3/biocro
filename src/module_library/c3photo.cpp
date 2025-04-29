@@ -5,7 +5,7 @@
 #include "c3_temperature_response.h"    // for c3_temperature_response
 #include "conductance_limited_assim.h"  // for conductance_limited_assim
 #include "FvCB_assim.h"                 // for FvCB_assim
-#include "secant_method.h"              // for find_root_secant_method
+#include "root_onedim.h"                // for root_finder
 #include "c3photo.h"
 
 using physical_constants::dr_boundary;
@@ -150,22 +150,15 @@ photosynthesis_outputs c3photoC(
     });                                        // micromol / m^2 / s
 
     // Run the secant method
-    double Assim_check{};  // Will be modified by find_root_secant_method
-    size_t iterations;     // Will be modified by find_root_secant_method
-
-    double const co2_assim_rate = find_root_secant_method(
+    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    root_algorithm::result_t result = solver.solve(
         check_assim_rate,
         assim_guess_0,
-        assim_guess_1,
-        1000,
-        1e-12,
-        1e-12,
-        Assim_check,
-        iterations);
+        assim_guess_1);
 
     return photosynthesis_outputs{
-        /* .Assim = */ co2_assim_rate,              // micromol / m^2 / s
-        /* .Assim_check = */ Assim_check,           // micromol / m^2 / s
+        /* .Assim = */ result.root,                 // micromol / m^2 / s
+        /* .Assim_check = */ result.residual,       // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
         /* .Ci = */ Ci,                             // micromol / mol
         /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
@@ -174,7 +167,7 @@ photosynthesis_outputs c3photoC(
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .RL = */ RL,                             // micromol / m^2 / s
         /* .Rp = */ FvCB_res.Vc * Gstar / Ci,       // micromol / m^2 / s
-        /* .iterations = */ iterations              // not a physical quantity
+        /* .iterations = */ result.iteration        // not a physical quantity
     };
 }
 

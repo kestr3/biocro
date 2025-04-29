@@ -3,7 +3,7 @@
 #include "../framework/quadratic_root.h"  // for quadratic_root_min
 #include "ball_berry_gs.h"                // for ball_berry_gs
 #include "conductance_limited_assim.h"    // for conductance_limited_assim
-#include "secant_method.h"                // for find_root_secant_method
+#include "root_onedim.h"
 #include "c4photo.h"
 
 using physical_constants::dr_boundary;
@@ -134,33 +134,27 @@ photosynthesis_outputs c4photoC(
     double const assim_guess_1 = collatz_assim(Ca_pa);
 
     // Run the secant method
-    double Assim_check{};  // Will be modified by find_root_secant_method
-    size_t iterations;     // Will be modified by find_root_secant_method
 
-    double const Assim = find_root_secant_method(
+    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    root_algorithm::result_t result = solver.solve(
         check_assim_rate,
         assim_guess_0,
-        assim_guess_1,
-        1000,
-        1e-12,
-        1e-12,
-        Assim_check,
-        iterations);
+        assim_guess_1);
 
     // Convert Ci units
     double const Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromol / mol
 
     return photosynthesis_outputs{
-        /* .Assim = */ Assim,                       // micromol / m^2 /s
-        /* .Assim_check = */ Assim_check,           // micromol / m^2 / s
+        /* .Assim = */ result.root,                 // micromol / m^2 /s
+        /* .Assim_check = */ result.residual,       // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
         /* .Ci = */ Ci,                             // micromol / mol
         /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
-        /* .GrossAssim = */ Assim + RT,             // micromol / m^2 / s
+        /* .GrossAssim = */ result.root + RT,       // micromol / m^2 / s
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .RL = */ RT,                             // micromol / m^2 / s
         /* .Rp = */ 0,                              // micromol / m^2 / s
-        /* .iterations = */ iterations              // not a physical quantity
+        /* .iterations = */ result.iteration        // not a physical quantity
     };
 }
