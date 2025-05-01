@@ -5,7 +5,6 @@ output:
   bookdown::html_vignette2:
     toc: true
     number_sections: true
-    math_method: mathml
 vignette: >
   %\VignetteIndexEntry{Light Absorption by a Thick Layer}
   %\VignetteEngine{knitr::rmarkdown}
