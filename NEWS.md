@@ -151,6 +151,9 @@ be directly added to this file to describe the related changes.
 - Fixed a an issue where setting `adaptive_max_steps` to `NA` in R would cause
   `run_biocro` to fail at the first time point.
 
+- Fixed a typo in the calculation of relative humidity just above the canopy
+  (`RH_canopy`).
+
 # Changes in BioCro version 3.2.0
 
 ## Minor User-Facing Changes
