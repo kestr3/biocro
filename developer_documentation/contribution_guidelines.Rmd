@@ -144,6 +144,14 @@ been mitigated by designating most vignettes as "web only."
     changes in an `UNRELEASED` section of `NEWS.md`. For more information about
     updating the changelog, please see the comment at the top of `NEWS.md`.
 
+  - To avoid confusion, the version numbers on `main` and `develop` should never
+    be identical. In general, if `main` is a stable release with version number
+    `X.Y.Z`, then the version number on `develop` should be `X.Y.Z-D`, where `D`
+    is a "development" component that begins at 0. This will indicate that the
+    version contains unreleased developments that have occurred since the
+    release of version `X.Y.Z`. The fourth component can be incremented as
+    necessary if a feature branch introduces an important change.
+
 * The following is a short description of BioCro's implementation of the
   git-flow branching model:
 
@@ -184,6 +192,10 @@ been mitigated by designating most vignettes as "web only."
     the other changes in `develop`.) If there are no merge conflicts or test
     failures, this second request can be merged without any additional approval.
     When both merges are complete, the release branch should be deleted.
+
+  - When the version number on `main` is changed, either through a release or
+    hotfix, then the version number on `develop` should also be changed shortly
+    afterward, as described above.
 
 ### Etiquette for pull requests {#pr-etiquette}
 
