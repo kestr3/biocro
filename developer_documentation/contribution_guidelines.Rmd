@@ -147,8 +147,8 @@ been mitigated by designating most vignettes as "web only."
   - To avoid confusion, the version numbers on `main` and `develop` should never
     be identical. In general, if `main` is a stable release with version number
     `X.Y.Z`, then the version number on `develop` should be `X.Y.Z-D`, where `D`
-    is a "development" component that begins at 9000. This will indicate that
-    the version is for unreleased developments that have occurred since the
+    is a "development" component that begins at 0. This will indicate that the
+    version contains unreleased developments that have occurred since the
     release of version `X.Y.Z`. The fourth component can be incremented as
     necessary if a feature branch introduces an important change.
 
