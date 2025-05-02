@@ -1,4 +1,5 @@
 template:
+  math-rendering: mathjax
   bootstrap: 5
   bootswatch: flatly
   theme: arrow-light
