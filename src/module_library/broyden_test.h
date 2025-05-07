@@ -43,27 +43,11 @@ class broyden_test : public direct_module
         : direct_module{},
 
           // Get pointers to input quantities
-          ecc{get_input(input_quantities, "ecc")},
-          answer{get_input(input_quantities, "answer")},
           max_iterations{get_input(input_quantities, "max_iterations")},
           abs_tol{get_input(input_quantities, "abs_tol")},
           rel_tol{get_input(input_quantities, "rel_tol")},
-          lower_bracket{get_input(input_quantities, "lower_bracket")},
-          upper_bracket{get_input(input_quantities, "upper_bracket")},
-          single_guess{get_input(input_quantities, "single_guess")},
 
-          // Get pointers to output quantities
-          secant_result{output_quantities, "secant"},
-          fixed_point_result{output_quantities, "fixed_point"},
-          newton_result{output_quantities, "newton"},
-          halley_result{output_quantities, "halley"},
-          steffensen_result{output_quantities, "steffensen"},
-          bisection_result{output_quantities, "bisection"},
-          regula_falsi_result{output_quantities, "regula_falsi"},
-          ridder_result{output_quantities, "ridder"},
-          illinois_result{output_quantities, "illinois"},
-          pegasus_result{output_quantities, "pegasus"},
-          anderson_bjorck_result{output_quantities, "anderson_bjorck"}
+    // Get pointers to output quantities
 
     {
     }
@@ -73,27 +57,11 @@ class broyden_test : public direct_module
 
    private:
     // Pointers to input quantities
-    const double& ecc;
-    const double& answer;
     const double& max_iterations;
     const double& abs_tol;
     const double& rel_tol;
-    const double& lower_bracket;
-    const double& upper_bracket;
-    const double& single_guess;
 
     // Pointers to output quantities
-    result secant_result;
-    result fixed_point_result;
-    result newton_result;
-    result halley_result;
-    result steffensen_result;
-    result bisection_result;
-    result regula_falsi_result;
-    result ridder_result;
-    result illinois_result;
-    result pegasus_result;
-    result anderson_bjorck_result;
 
     // Main operation
     void do_operation() const;

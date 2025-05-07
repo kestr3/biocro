@@ -14,6 +14,11 @@ struct broyden {
         size_t iteration;
         root_algorithm::Flag flag;
     };
+
+    template <typename F>
+    result_t solve(F&& fun, vec_t x0)
+    {
+    }
 };
 
 #endif
