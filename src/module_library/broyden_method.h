@@ -45,7 +45,7 @@ struct broyden {
     }
 
    private:
-    void set_identity(mat_t& A)
+    void inline set_identity(mat_t& A)
     {
         for (size_t i = 0; i < dim; ++i) {
             for (size_t j = 0; j < dim; ++j) {
@@ -56,7 +56,7 @@ struct broyden {
         }
     }
 
-    void update_delta_x(
+    void inline update_delta_x(
         vec_t& delta_x, const vec_t& y, const mat_t& inv_jac)
     {
         // delta_x = - inv_jac * y
@@ -68,7 +68,7 @@ struct broyden {
         }
     }
 
-    void update_x(
+    void inline update_x(
         vec_t& x, const vec_t& delta_x)
     {
         // x += delta_x
@@ -77,7 +77,7 @@ struct broyden {
         }
     }
 
-    void update_delta_y(vec_t& delta_y, vec_t& y)
+    void inline update_delta_y(vec_t& delta_y, vec_t& y)
     {
         for (size_t i = 0; i < dim; ++i) {
             std::swap(delta_y[i], y[i]);
@@ -85,7 +85,7 @@ struct broyden {
         }
     }
 
-    void update_inv_jac(mat_t& inv_jac, const vec_t& delta_y, const vec_t& delta_x)
+    void inline update_inv_jac(mat_t& inv_jac, const vec_t& delta_y, const vec_t& delta_x)
     {
         // out = inv_jac + (delta_x - inv_jac * delta_y) / ( t(delta_x) * inv_jac * delta_y ) * t(delta_x) * inv_jac
         vec_t a;
@@ -108,7 +108,7 @@ struct broyden {
         }
     }
 
-    bool is_zero(const vec_t& y)
+    bool inline is_zero(const vec_t& y)
     {
         T sq = 0;
         for (size_t i = 0; i < dim; ++i) {
