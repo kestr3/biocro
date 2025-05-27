@@ -10,33 +10,14 @@
 namespace standardBML
 {
 
-std::array<double, 2> test_function(std::array<double, 2> x)
+void test_function(std::array<double, 2>& y, const std::array<double, 2>& x)
 {
-    std::array<double, 2> y;
     y[0] = x[0] / (x[0] * x[0] + 1) - x[1] + 0.5;
     y[1] = 2 - x[0] - x[1];
-    return y;
 }
 
 class broyden_test : public direct_module
 {
-    struct result {
-        double* root_op;
-        double* residual_op;
-        double* iteration_op;
-        double* flag_op;
-
-        result(
-            state_map* output_quantities,
-            std::string&& name)
-            : root_op{get_op(output_quantities, name + "_root")},
-              residual_op{get_op(output_quantities, name + "_residual")},
-              iteration_op{get_op(output_quantities, name + "_iteration")},
-              flag_op{get_op(output_quantities, name + "_flag")}
-        {
-        }
-    };
-
    public:
     broyden_test(
         state_map const& input_quantities, state_map* output_quantities)
@@ -46,6 +27,13 @@ class broyden_test : public direct_module
           max_iterations{get_input(input_quantities, "max_iterations")},
           abs_tol{get_input(input_quantities, "abs_tol")},
           rel_tol{get_input(input_quantities, "rel_tol")},
+          guess_1{get_input(input_quantities, "guess_1")},
+          guess_2{get_input(input_quantities, "guess_2")},
+          x1{get_op(output_quantities, "x1")},
+          x2{get_op(output_quantities, "x2")},
+          y1{get_op(output_quantities, "y1")},
+          y2{get_op(output_quantities, "y2")},
+          iter{get_op(output_quantities, "iter")}
 
     // Get pointers to output quantities
 
@@ -60,61 +48,53 @@ class broyden_test : public direct_module
     const double& max_iterations;
     const double& abs_tol;
     const double& rel_tol;
+    const double& guess_1;
+    const double& guess_2;
 
     // Pointers to output quantities
+    double* x1;
+    double* x2;
+    double* y1;
+    double* y2;
+    double* iter;
 
     // Main operation
     void do_operation() const;
-
-    static string_vector make_qname(std::string& name)
-    {
-        return {
-            name + "_root",
-            name + "_residual",
-            name + "_iteration",
-            name + "_flag"};
-    }
-
-    void inline update_result(
-        const result& r, root_algorithm::result_t& result) const
-    {
-        update(r.root_op, result.root);
-        update(r.residual_op, result.residual);
-        update(r.iteration_op, result.iteration);
-        update(r.flag_op, static_cast<int>(result.flag));
-    }
 };
 
 string_vector broyden_test::get_inputs()
 {
     return {
-        "ecc",
-        "answer",
         "max_iterations",
         "abs_tol",
         "rel_tol",
-        "lower_bracket",
-        "upper_bracket",
-        "single_guess"};
+        "guess_1",
+        "guess_2"};
 }
 
 string_vector broyden_test::get_outputs()
 {
-    string_vector out;
-    const string_vector methods = {
-        "secant", "fixed_point", "newton", "halley", "steffensen",
-        "bisection", "regula_falsi", "ridder",
-        "illinois", "pegasus", "anderson_bjorck"};
-    for (auto name : methods) {
-        string_vector sv = make_qname(name);
-        out.insert(out.end(), sv.begin(), sv.end());
-    }
-
-    return out;
+    return {
+        "x1",
+        "x2",
+        "y1",
+        "y2",
+        "iter"};
 }
 
 void broyden_test::do_operation() const
 {
+    broyden<double, 2> solver{static_cast<size_t>(max_iterations), abs_tol, rel_tol};
+    std::array<double, 2> guess = {guess_1, guess_2};
+    auto res = solver.solve(test_function, guess);
+
+    update(x1, res.zero[0]);
+    update(x2, res.zero[1]);
+
+    update(y1, res.residual[0]);
+    update(y2, res.residual[1]);
+
+    update(iter, res.iteration);
 }
 
 }  // namespace standardBML
