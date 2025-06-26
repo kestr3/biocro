@@ -87,25 +87,18 @@ photosynthesis_outputs c4photoC(
     // Here we make an initial guess that Ci = 0.4 * Ca.
     stomata_outputs BB_res;
     double an_conductance{};    // mol / m^2 / s
-    double Ci_pa{0.4 * Ca_pa};  // Pa            (initial guess)
+    double Assim{0};
     double Gs{1e3};             // mol / m^2 / s (initial guess)
 
     // This lambda function equals zero
-    // only if assim satisfies both collatz assim and Ball Berry model
-    auto check_assim_rate = [=, &BB_res, &an_conductance, &Ci_pa, &Gs](double const assim) {
-        // The net CO2 assimilation is the smaller of the biochemistry-limited
-        // and conductance-limited rates. This will prevent the calculated Ci
-        // value from ever being < 0. This is an important restriction to
-        // prevent numerical errors during the convergence loop, but does not
-        // seem to ever limit the net assimilation rate if the loop converges.
-        an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
+    // only if Ci satisfies its balance equation
+    auto check_assim_rate = [=, &BB_res, &an_conductance, &Assim, &Gs](double Ci_pa) {
 
-        double const assim_adj = std::min(assim, an_conductance);  // micromol / m^2 / s
-
+        Assim = collatz_assim(Ci_pa);
         // If assim is correct, then Ball Berry gives the correct
         // CO2 at leaf surface (Cs) and correct stomatal conductance
         BB_res = ball_berry_gs(
-            assim_adj * 1e-6,
+            Assim * 1e-6,
             Ca * 1e-6,
             relative_humidity,
             bb0_adj,
@@ -117,40 +110,36 @@ photosynthesis_outputs c4photoC(
         Gs = BB_res.gsw;  // mol / m^2 / s
 
         // Using the value of stomatal conductance,
-        // Calculate Ci using the total conductance across the boundary
+        // Calculate Assim using the total conductance across the boundary
         // layer and stomata
-        Ci_pa =
-            Ca_pa - atmospheric_pressure * (assim_adj * 1e-6) *
-                        (dr_boundary / gbw + dr_stomata / Gs);  // Pa
 
-        double check = collatz_assim(Ci_pa) - assim;
+        double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // Pa
+
+        double check = Gt * (Ca_pa - Ci_pa)/atmospheric_pressure  - Assim * 1e-6 ;
         return check;  // equals zero if correct
     };
 
-    // Find starting guesses for the net CO2 assimilation rate. One is the
-    // predicted rate at Ci = 0.4 * Ca, and the other is the predicted rate at
-    // Ci = Ca.
-    double const assim_guess_0 = collatz_assim(0.4 * Ca_pa);
-    double const assim_guess_1 = collatz_assim(Ca_pa);
+    // Max possible Ci value
+    //double const Ci_max = std::abs() (Ca - M * (dr_boundary / gbw)) * 1e-6 * atmospheric_pressure;  // Pa
 
-    // Run the secant method
-
-    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    // Run the illinois method
+    root_algorithm::root_finder<root_algorithm::illinois> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
-        assim_guess_0,
-        assim_guess_1);
+        0,
+        2 * Ca_pa);
 
     // Convert Ci units
-    double const Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromol / mol
+    double const Ci = result.root / atmospheric_pressure * 1e6;  // micromol / mol
 
+    an_conductance = conductance_limited_assim(Ca, gbw, Gs);
     return photosynthesis_outputs{
-        /* .Assim = */ result.root,                 // micromol / m^2 /s
+        /* .Assim = */ Assim,                 // micromol / m^2 /s
         /* .Assim_check = */ result.residual,       // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
         /* .Ci = */ Ci,                             // micromol / mol
         /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
-        /* .GrossAssim = */ result.root + RT,       // micromol / m^2 / s
+        /* .GrossAssim = */ Assim + RT,       // micromol / m^2 / s
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .RL = */ RT,                             // micromol / m^2 / s
