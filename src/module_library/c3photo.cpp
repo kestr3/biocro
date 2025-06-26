@@ -136,10 +136,15 @@ photosynthesis_outputs c3photoC(
     root_algorithm::root_finder<root_algorithm::illinois> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
-
         0,
         Ci_max
     );
+
+    if (!successful_termination(result.flag)) {
+        throw std::runtime_error(flag_message(result.flag));
+    }
+
+
     double Ci = result.root;
     an_conductance = conductance_limited_assim(Ca, gbw, Gs);
 
