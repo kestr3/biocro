@@ -130,16 +130,20 @@ photosynthesis_outputs c3photoC(
     double const Ci_max = Ca + (std::min(Gstar * Vcmax / (Kc * (1 + Oi / Ko)), J / (2.0 * electrons_per_oxygenation)) + RL) * (dr_boundary / gbw + dr_stomata / b0_adj);  // micromol / mol
 
     // Run the secant method
-    root_algorithm::root_finder<root_algorithm::illinois> solver{500, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
+        0.718 * Ca,
         0,
-        Ci_max);
+        Ci_max * 1.01);
 
     if (!successful_termination(result.flag)) {
+        std::cout << "C3 ";
         std::cout << flag_message(result.flag) << '\n';
         std::cout << "   ";
         std::cout << Ci_max << ", " << Ca << ", " << absorbed_ppfd << ", " << Tambient << ", " << b0_adj << '\n';
+        std::cout << check_assim_rate(0) << ", " << check_assim_rate(0.718 * Ca) << ", " << check_assim_rate(Ci_max * 1.01) << '\n';
+        throw std::out_of_range("Unsuccessful Termination");
     }
 
     double Ci = result.root;

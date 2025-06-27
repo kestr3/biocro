@@ -125,16 +125,20 @@ photosynthesis_outputs c4photoC(
     double const Ci_max = Ca_pa + 1e-6 * atmospheric_pressure * RT * (dr_boundary / gbw + dr_stomata / bb0_adj);
 
     // Run the illinois method
-    root_algorithm::root_finder<root_algorithm::illinois> solver{500, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
+        0.5 * Ca_pa,
         0,
-        Ci_max);
+        Ci_max *1.01);
 
     if (!successful_termination(result.flag)) {
+        std::cout << "C4 ";
         std::cout << flag_message(result.flag) << '\n';
         std::cout << "   ";
         std::cout << Ci_max << ", " << Ca_pa << ", " << Qp << ", " << leaf_temperature << ", " << bb0_adj << '\n';
+        std::cout << check_assim_rate(0) << ", " << check_assim_rate(Ci_max) << ", " << check_assim_rate(Ci_max * 1.01) << '\n';
+        throw std::out_of_range("Unsuccessful Termination");
     }
 
     // Convert Ci units

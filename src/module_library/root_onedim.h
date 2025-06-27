@@ -28,6 +28,8 @@ inline bool same_signs(double x, double y);     // true if sign(x) == sign(y)
 inline bool opposite_signs(double x, double y); // true if sign(x) != sign(y)
 inline bool smaller(double x, double y);        // true if |x| < |y|
 inline bool is_between(double x, double a, double b); // true if `x` is `[a,b]`
+inline double get_midpoint(const graph_t& a, const graph_t& b);
+inline double get_secant_update(const graph_t& a, const graph_t& b);
 
 // For error handling. These flags indicate the reason for termination.
 enum class Flag {
@@ -126,6 +128,9 @@ struct result_t {
  * + regula_falsi (bracketing)
  * + ridder (bracketing)
  * + illinois (bracketing)
+ * + pegasus (bracketing)
+ * + anderson_bjorck (bracketing)
+ * + dekekr (contrapoint)
  *
  * Methods range in their typical robustness and speed. Speed and robustness
  * also depend on the problem. Root-bracketing methods are typically more
@@ -654,7 +659,7 @@ struct bracket_method {
     inline state& midpoint_proposal(F&& fun, state& s)
     {
         // division is safe if bracket is valid
-        s.proposal.x = 0.5 * (s.left.x + s.right.x);
+        s.proposal.x = get_midpoint(s.left, s.right);
         s.proposal.y = fun(s.proposal.x);
         return s;
     }
@@ -663,8 +668,7 @@ struct bracket_method {
     inline state& secant_proposal(F&& fun, state& s)
     {
         // division is safe if bracket is valid
-        s.proposal.x = (s.right.y * s.left.x - s.left.y * s.right.x) /
-                       (s.right.y - s.left.y);
+        s.proposal.x = get_secant_update(s.left, s.right);
         s.proposal.y = fun(s.proposal.x);
         return s;
     }
@@ -949,6 +953,146 @@ struct anderson_bjorck : public illinois_type {
     }
 };
 
+
+struct dekker {
+
+    struct state {
+        Flag flag;
+        graph_t contrapoint;
+        graph_t last;
+        graph_t best;
+
+        double midpoint;
+        double secant_proposal;
+    };
+
+    template <typename F>
+    state initialize(F&& fun, double a, double b, double abs_tol, double rel_tol)
+    {
+        state s;
+        s.contrapoint.x = a;
+        s.best.x = b;
+        s.contrapoint.y = fun(a);
+        s.best.y = fun(b);
+        if (smaller(s.contrapoint.y, s.best.y)){
+            std::swap(s.best, s.contrapoint);
+        }
+
+        s.last = s.best;
+        s.flag = Flag::valid;
+
+        if (is_zero(s.best.y, abs_tol)) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
+
+        if (same_signs(s.best.y, s.contrapoint.y)) {
+            s.flag = Flag::invalid_bracket;
+            return s;
+        }
+
+        return s;
+    }
+
+    template <typename F>
+    state initialize(F&& fun, double best, double last, double contrapoint, double abs_tol, double rel_tol)
+    {
+        state s;
+
+        s.best.x = best;
+        s.best.y = fun(best);
+
+        s.last.x = last;
+        s.last.y = fun(last);
+
+        s.contrapoint.x = contrapoint;
+        s.contrapoint.y = fun(contrapoint);
+
+        if (same_signs(s.best.y, s.contrapoint.y))
+        {
+            if (same_signs(s.best.y, s.last.y)){
+                s.flag = Flag::invalid_bracket;
+                return s;
+            }
+
+            std::swap(s.last, s.contrapoint);
+        }
+
+        if (smaller(s.contrapoint.y, s.best.y)){
+            std::swap(s.best, s.contrapoint);
+        }
+
+        s.flag = Flag::valid;
+
+        if (is_zero(s.best.y, abs_tol)) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
+
+        return s;
+    }
+
+    inline state& check_convergence(state& s, double abs_tol, double rel_tol)
+    {
+        bool zero_found = is_zero(s.best.y, abs_tol);
+        if (zero_found) {
+            s.flag = Flag::residual_zero;
+            return s;
+        }
+
+        if (is_close(s.contrapoint.x, s.best.x, abs_tol, abs_tol)) {
+            double delta_y = std::abs(s.contrapoint.y - s.best.y);
+            double delta_x = std::abs(s.contrapoint.x - s.best.x);
+            if (delta_y < (delta_x / rel_tol))
+                s.flag = Flag::bracket_width_zero;
+            else
+                s.flag = Flag::discontinuity;
+            return s;
+        }
+
+        return s;
+    }
+
+    inline double root(const state& s)
+    {
+        return s.best.x;
+    }
+
+    inline double residual(const state& s)
+    {
+        return s.best.y;
+    }
+
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        s.secant_proposal = get_secant_update(s.last, s.best);
+        s.midpoint = get_midpoint(s.contrapoint, s.best);
+
+        // s.last not needed now;
+        std::swap(s.best, s.last);
+
+        if (is_between(s.secant_proposal, s.last.x, s.midpoint)){
+            s.best.x = s.secant_proposal;
+        } else {
+            s.best.x = s.midpoint;
+        }
+        s.best.y = fun(s.best.x);
+
+        if (opposite_signs(s.last.y, s.best.y)){
+            s.contrapoint = s.last;
+        }
+
+        if (smaller(s.contrapoint.y, s.best.y)) {
+            std::swap(s.contrapoint, s.best);
+        }
+
+        return s;
+    }
+
+};
+
+
 // Helper function definitions.
 
 inline bool is_close(double x, double y, double tol, double rtol)
@@ -982,6 +1126,14 @@ inline bool smaller(double x, double y)
 inline bool is_between(double x, double a, double b)
 {
     return ((x >= a) && (x <= b)) || ((x <= a) && (x >= b));
+}
+
+inline double get_midpoint(const graph_t& a, const graph_t& b){
+    return 0.5 * (a.x + b.x);
+}
+
+inline double get_secant_update(const graph_t& a, const graph_t& b){
+    return (b.y * a.x - a.y * b.x) / (b.y - a.y);
 }
 
 bool successful_termination(Flag flag)
