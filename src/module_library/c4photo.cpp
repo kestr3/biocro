@@ -5,6 +5,7 @@
 #include "conductance_limited_assim.h"    // for conductance_limited_assim
 #include "root_onedim.h"
 #include "c4photo.h"
+#include <iostream>
 
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;
@@ -121,14 +122,20 @@ photosynthesis_outputs c4photoC(
     };
 
     // Max possible Ci value
-    // double const Ci_max = std::abs() (Ca - M * (dr_boundary / gbw)) * 1e-6 * atmospheric_pressure;  // Pa
+    double const Ci_max = Ca_pa + 1e-6 * atmospheric_pressure * RT * (dr_boundary / gbw + dr_stomata / bb0_adj);
 
     // Run the illinois method
-    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::illinois> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
-        Ca_pa * 0.4,
-        Ca_pa * 1.2 + 1);
+        0,
+        Ci_max);
+
+    if (!successful_termination(result.flag)) {
+        std::cout << flag_message(result.flag) << '\n';
+        std::cout << "   ";
+        std::cout << Ci_max << ", " << Ca_pa << ", " << Qp << ", " << leaf_temperature << ", " << bb0_adj << '\n';
+    }
 
     // Convert Ci units
     double const Ci = result.root / atmospheric_pressure * 1e6;  // micromol / mol
