@@ -18,7 +18,7 @@ using physical_constants::dr_stomata;
 
 */
 photosynthesis_outputs c4photoC(
-    double const Qp,                    // micromol / m^2 / s
+    double Qp,                          // micromol / m^2 / s
     double const leaf_temperature,      // degrees C
     double const ambient_temperature,   // degrees C
     double const relative_humidity,     // dimensionless from Pa / Pa
@@ -39,6 +39,8 @@ photosynthesis_outputs c4photoC(
     double const gbw                    // mol / m^2 / s
 )
 {
+    if (Qp < 0) Qp = 0;
+
     constexpr double k_Q10 = 2;  // dimensionless. Increase in a reaction rate per temperature increase of 10 degrees Celsius.
 
     double const Ca_pa = Ca * 1e-6 * atmospheric_pressure;  // Pa
@@ -86,14 +88,13 @@ photosynthesis_outputs c4photoC(
     // during the secant method's iterations.
     // Here we make an initial guess that Ci = 0.4 * Ca.
     stomata_outputs BB_res;
-    double an_conductance{};    // mol / m^2 / s
+    double an_conductance{};  // mol / m^2 / s
     double Assim{0};
-    double Gs{1e3};             // mol / m^2 / s (initial guess)
+    double Gs{1e3};  // mol / m^2 / s (initial guess)
 
     // This lambda function equals zero
     // only if Ci satisfies its balance equation
     auto check_assim_rate = [=, &BB_res, &an_conductance, &Assim, &Gs](double Ci_pa) {
-
         Assim = collatz_assim(Ci_pa);
         // If assim is correct, then Ball Berry gives the correct
         // CO2 at leaf surface (Cs) and correct stomatal conductance
@@ -115,31 +116,31 @@ photosynthesis_outputs c4photoC(
 
         double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // Pa
 
-        double check = Gt * (Ca_pa - Ci_pa)/atmospheric_pressure  - Assim * 1e-6 ;
+        double check = Gt * (Ca_pa - Ci_pa) / atmospheric_pressure - Assim * 1e-6;
         return check;  // equals zero if correct
     };
 
     // Max possible Ci value
-    //double const Ci_max = std::abs() (Ca - M * (dr_boundary / gbw)) * 1e-6 * atmospheric_pressure;  // Pa
+    // double const Ci_max = std::abs() (Ca - M * (dr_boundary / gbw)) * 1e-6 * atmospheric_pressure;  // Pa
 
     // Run the illinois method
-    root_algorithm::root_finder<root_algorithm::illinois> solver{500, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
-        0,
-        2 * Ca_pa);
+        Ca_pa * 0.4,
+        Ca_pa * 1.2 + 1);
 
     // Convert Ci units
     double const Ci = result.root / atmospheric_pressure * 1e6;  // micromol / mol
 
     an_conductance = conductance_limited_assim(Ca, gbw, Gs);
     return photosynthesis_outputs{
-        /* .Assim = */ Assim,                 // micromol / m^2 /s
+        /* .Assim = */ Assim,                       // micromol / m^2 /s
         /* .Assim_check = */ result.residual,       // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
         /* .Ci = */ Ci,                             // micromol / mol
         /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
-        /* .GrossAssim = */ Assim + RT,       // micromol / m^2 / s
+        /* .GrossAssim = */ Assim + RT,             // micromol / m^2 / s
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .RL = */ RT,                             // micromol / m^2 / s
