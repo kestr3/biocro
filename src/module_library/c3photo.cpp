@@ -21,8 +21,6 @@ using physical_constants::dr_stomata;
 
 */
 
-inline double get_max_ci(double V, double RL, double K, double Gamma);
-
 photosynthesis_outputs c3photoC(
     c3_temperature_response_parameters const tr_param,
     double const absorbed_ppfd,                // micromol / m^2 / s
@@ -69,8 +67,8 @@ photosynthesis_outputs c3photoC(
     // meaning of the `Q * alpha_leaf` factor. See also Equation 8 from the
     // original FvCB paper, where `J` (equivalent to our `I2`) is proportional
     // to the absorbed PPFD rather than the incident PPFD.
+    if (absorbed_ppfd < 0) throw std::out_of_range("Input `absorbed_ppfd` cannot be negative. Check `solar` is not negative.");
     double I2 = absorbed_ppfd * dark_adapted_phi_PSII * beta_PSII;  // micromol / m^2 / s
-    if (I2 < 0) I2 = 0;                                             // clamp to zero
 
     double const J =
         (Jmax + I2 - sqrt(pow(Jmax + I2, 2) - 4.0 * theta * I2 * Jmax)) /
