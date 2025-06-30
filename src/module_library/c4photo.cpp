@@ -39,7 +39,8 @@ photosynthesis_outputs c4photoC(
     double const gbw                    // mol / m^2 / s
 )
 {
-    if (Qp < 0) Qp = 0;
+
+    if (Qp < 0) throw std::out_of_range("Input `absorbed_ppfd` cannot be negative. Check `solar` is not negative.");
 
     constexpr double k_Q10 = 2;  // dimensionless. Increase in a reaction rate per temperature increase of 10 degrees Celsius.
 
