@@ -137,6 +137,14 @@ photosynthesis_outputs c3photoC(
         0,
         Ci_max * 1.01);
 
+    // throw exception if not converged
+    if ( ! root_algorithm::is_successful(result.flag) ) {
+        throw std::runtime_error(
+            "Ci solver reports failed convergence with termination flag:\n    " +
+            root_algorithm::flag_message(result.flag)
+        );
+    }
+
     double Ci = result.root;
     an_conductance = conductance_limited_assim(Ca, gbw, Gs);
 

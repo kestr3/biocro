@@ -50,7 +50,7 @@ inline bool is_valid(T x)
 {
     return x.flag == Flag::valid;
 }
-inline bool successful_termination(Flag flag);
+inline bool is_successful(Flag flag);
 inline std::string flag_message(Flag flag);
 
 /**
@@ -1171,7 +1171,7 @@ inline double get_secant_update(const graph_t& a, const graph_t& b){
     return (b.y * a.x - a.y * b.x) / (b.y - a.y);
 }
 
-bool successful_termination(Flag flag)
+bool is_successful(Flag flag)
 {
     switch (flag) {
         case Flag::residual_zero:
