@@ -10,7 +10,29 @@
 namespace standardBML
 {
 
-// kepler function
+/**
+ * @brief Function object for Kepler's equation. Kepler's equation relates
+ * the mean anomaly \f$y\f$ to the eccentric anomaly \f$x\f$ of an elliptical orbit of
+ * eccentricity \f$\varepsilon\f$.
+ *
+ * \f[ y = x - \varepsilon \sin x \f]
+ *
+ * To calculate the position of an object at a certain time, one easily computes
+ * the mean anomaly, then one must invert the above equation to find the eccentric
+ * anomaly. Iterative numerical methods for root finding are ideal.
+ *
+ * We use this as a test example, because it is simple to compute the derivatives,
+ * and because higher eccentricity orbits can cause problems for newton/secant
+ * like updates. The function is almost the identity function at low eccentricity,
+ * while at high eccentricity, the function can have cubic-roots at y=0 and ecc=1.
+ *
+ * Although Kepler's equation is only valid for orbits of eccentricity < 1, the
+ * above equation can be extended to eccentricity > 1; however, there can be
+ * three simple roots rather than a unique answer.
+ *
+ * For test purposes, we compute `y` from `x` so that correct root is known.
+ *
+ */
 struct root_test_function {
     double epsilon;
     double answer;
@@ -37,6 +59,44 @@ struct root_test_function {
     }
 };
 
+/**
+ * @brief Function object for Kepler's equation. Kepler's equation relates
+ * the mean anomaly \f$y\f$ to the eccentric anomaly \f$x\f$ of an elliptical orbit of
+ * eccentricity \f$\varepsilon\f$.
+ *
+ * \f[ y = x - \varepsilon \sin x \f]
+ *
+ * To calculate the position of an object at a certain time, one easily computes
+ * the mean anomaly, then one must invert the above equation to find the eccentric
+ * anomaly. Iterative numerical methods for root finding are ideal.
+ *
+ * We use this as a test example, because it is simple to compute the derivatives,
+ * and because higher eccentricity orbits can cause problems for newton/secant
+ * like updates. The function is almost the identity function at low eccentricity,
+ * while at high eccentricity, the function can have cubic-roots at y=0 and ecc=1.
+ *
+ * Although Kepler's equation is only valid for orbits of eccentricity < 1, the
+ * above equation can be extended to eccentricity > 1; however, there can be
+ * three simple roots rather than a unique answer.
+ *
+ * For test purposes, we compute `y` from `x=1` so that correct root is known. If
+ * any root solving method returns something other than `x=1`, then it has failed
+ * to find a root, or it has converged to a different root.
+ *
+ * Every method returns the `root`, `residual`, and `iteration` as well as a `flag`
+ * indicating the reason for termination. If a method is functioning correctly,
+ * then:
+ *
+ *  1. `root` = `answer`
+ *  2. `residual` = 0  (residual is the value of the function).
+ *  3. `iteration` < `max_iterations`; the number of iterations is proportional to
+ *      the number of function evaluations. So fewer means faster.
+ *  4. `flag` is 1, 2, or 3. `flag` = 0 should not occur. It indicates that
+ *      the state is valid and iteration should continue. All other flags
+ *      indicate failures.
+ *
+ *
+ */
 class root_onedim_test : public direct_module
 {
     struct result {
@@ -83,7 +143,8 @@ class root_onedim_test : public direct_module
           illinois_result{output_quantities, "illinois"},
           pegasus_result{output_quantities, "pegasus"},
           anderson_bjorck_result{output_quantities, "anderson_bjorck"},
-          dekker_result{output_quantities, "dekker"}
+          dekker_result{output_quantities, "dekker"},
+          dekker_newton_result{output_quantities, "dekker_newton"}
 
     {
     }
@@ -115,6 +176,7 @@ class root_onedim_test : public direct_module
     result pegasus_result;
     result anderson_bjorck_result;
     result dekker_result;
+    result dekker_newton_result;
 
     // Main operation
     void do_operation() const;
@@ -157,7 +219,8 @@ string_vector root_onedim_test::get_outputs()
     const string_vector methods = {
         "secant", "fixed_point", "newton", "halley", "steffensen",
         "bisection", "regula_falsi", "ridder",
-        "illinois", "pegasus", "anderson_bjorck", "dekker"};
+        "illinois", "pegasus", "anderson_bjorck", "dekker",
+        "dekker_newton"};
     for (auto name : methods) {
         string_vector sv = make_qname(name);
         out.insert(out.end(), sv.begin(), sv.end());
@@ -221,6 +284,10 @@ void root_onedim_test::do_operation() const
     result = root_finder<dekker>(iter, abs_tol, rel_tol)
                  .solve(test, lower_bracket, upper_bracket);
     update_result(dekker_result, result);
+
+    result = root_finder<dekker_newton>(iter, abs_tol, rel_tol)
+                 .solve(test, lower_bracket, upper_bracket);
+    update_result(dekker_newton_result, result);
 }
 
 }  // namespace standardBML
