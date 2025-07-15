@@ -118,16 +118,23 @@ photosynthesis_outputs c3photoC(
         // Using the value of stomatal conductance,
         // Calculate Ci using the total conductance across the boundary layer
         // and stomata
-        double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // micromol / mircromol / m^2 / s
+        double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // micromol / micromol / m^2 / s
 
         return Assim - Gt * (Ca - Ci);  // equals zero if correct
     };
 
-    // Maximum possible Ci value
-    double const Ci_max = Ca + (std::min(
-        Gstar * Vcmax / (Kc * (1 + Oi / Ko)),
-        J / (2.0 * electrons_per_oxygenation)) + RL
-    ) * (dr_boundary / gbw + dr_stomata / b0_adj);  // micromol / mol
+    // Get an upper bound for Ci by finding the most negative value of An (which
+    // occurs when Ci = 0), the smallest total conductance to CO2 (which occurs
+    // when gsw takes its minimum value b0), and then using Ci = Ca - An / gtc.
+    double const A_min =
+        FvCB_assim(
+            0.0, Gstar, J, Kc, Ko, Oi, RL, TPU, Vcmax, alpha_TPU,
+            electrons_per_carboxylation,
+            electrons_per_oxygenation)
+            .An; // micromol / m^2 / s
+
+    double const Ci_max =
+        Ca - A_min * (dr_boundary / gbw + dr_stomata / b0_adj);  // micromol / mol
 
     // Run the secant method
     root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
@@ -137,12 +144,11 @@ photosynthesis_outputs c3photoC(
         0,
         Ci_max * 1.01);
 
-    // throw exception if not converged
-    if ( ! root_algorithm::is_successful(result.flag) ) {
+    // Throw exception if not converged
+    if (!root_algorithm::is_successful(result.flag)) {
         throw std::runtime_error(
             "Ci solver reports failed convergence with termination flag:\n    " +
-            root_algorithm::flag_message(result.flag)
-        );
+            root_algorithm::flag_message(result.flag));
     }
 
     double Ci = result.root;

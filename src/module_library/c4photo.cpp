@@ -39,7 +39,6 @@ photosynthesis_outputs c4photoC(
     double const gbw                    // mol / m^2 / s
 )
 {
-
     if (Qp < 0) throw std::out_of_range("Input `absorbed_ppfd` cannot be negative. Check `solar` is not negative.");
 
     constexpr double k_Q10 = 2;  // dimensionless. Increase in a reaction rate per temperature increase of 10 degrees Celsius.
@@ -122,8 +121,9 @@ photosynthesis_outputs c4photoC(
     };
 
     // Max possible Ci value
-    double const Ci_max = Ca_pa + 1e-6 * atmospheric_pressure * RT
-        * (dr_boundary / gbw + dr_stomata / bb0_adj);
+    double const Ci_max =
+        Ca_pa + 1e-6 * atmospheric_pressure * RT *
+                    (dr_boundary / gbw + dr_stomata / bb0_adj);  // Pa
 
     // Run the illinois method
     root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
@@ -131,14 +131,13 @@ photosynthesis_outputs c4photoC(
         check_assim_rate,
         0.5 * Ca_pa,
         0,
-        Ci_max *1.01);
+        Ci_max * 1.01);
 
     // throw exception if not converged
-    if ( ! root_algorithm::is_successful(result.flag) ) {
+    if (!root_algorithm::is_successful(result.flag)) {
         throw std::runtime_error(
             "Ci solver reports failed convergence with termination flag:\n    " +
-            root_algorithm::flag_message(result.flag)
-        );
+            root_algorithm::flag_message(result.flag));
     }
 
     // Convert Ci units
