@@ -5,8 +5,6 @@
 
 using calculation_constants::eps_zero;
 
-double inf = std::numeric_limits<double>::infinity();
-
 /**
  *  @brief Computes the net CO2 assimilation rate (and other values) using the
  *         Farquhar-von-Caemmerer-Berry model for C3 photosynthesis.
@@ -131,6 +129,9 @@ FvCB_outputs FvCB_assim(
     double electrons_per_oxygenation     // self-explanatory units
 )
 {
+    // Define infinity
+    double const inf = std::numeric_limits<double>::infinity();
+    
     // Initialize
     FvCB_outputs result;
 
