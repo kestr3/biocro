@@ -18,7 +18,7 @@ using physical_constants::dr_stomata;
 
 */
 photosynthesis_outputs c4photoC(
-    double Qp,                          // micromol / m^2 / s
+    double const Qp,                    // micromol / m^2 / s
     double const leaf_temperature,      // degrees C
     double const ambient_temperature,   // degrees C
     double const relative_humidity,     // dimensionless from Pa / Pa
