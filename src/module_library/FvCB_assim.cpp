@@ -131,12 +131,12 @@ FvCB_outputs FvCB_assim(
 {
     // Define infinity
     double const inf = std::numeric_limits<double>::infinity();
-    
+
     // Initialize
     FvCB_outputs result;
 
     // Calculate rates
-    if (Ci < 0.0) {
+    if (Ci < -eps_zero) {
         throw std::range_error("Thrown in FvCB_assim: Ci is negative.");
     } else if (Ci <= eps_zero) {
         // RuBP-saturated net assimilation rate when Ci is 0
