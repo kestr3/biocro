@@ -41,7 +41,6 @@ enum class Flag {
     invalid_bracket,
     division_by_zero,
     halley_no_cross,
-    discontinuity,
     bracket_fixed_point
 };
 
@@ -623,13 +622,8 @@ struct bracket_method {
             return s;
         }
 
-        if (is_close(s.left.x, s.right.x, abs_tol, abs_tol)) {
-            double delta_y = std::abs(s.left.y - s.right.y);
-            double delta_x = std::abs(s.left.x - s.right.x);
-            if (delta_y < (delta_x / rel_tol))
-                s.flag = Flag::bracket_width_zero;
-            else
-                s.flag = Flag::discontinuity;
+        if (is_close(s.left.x, s.right.x, abs_tol, rel_tol)) {
+            s.flag = Flag::bracket_width_zero;
             return s;
         }
 
@@ -1038,13 +1032,8 @@ struct contrapoint {
             return s;
         }
 
-        if (is_close(s.contrapoint.x, s.best.x, abs_tol, abs_tol)) {
-            double delta_y = std::abs(s.contrapoint.y - s.best.y);
-            double delta_x = std::abs(s.contrapoint.x - s.best.x);
-            if (delta_y < (delta_x / rel_tol))
-                s.flag = Flag::bracket_width_zero;
-            else
-                s.flag = Flag::discontinuity;
+        if (is_close(s.contrapoint.x, s.best.x, abs_tol, rel_tol)) {
+            s.flag = Flag::bracket_width_zero;
             return s;
         }
 
@@ -1233,16 +1222,9 @@ inline double get_secant_update(const graph_t& a, const graph_t& b)
     return (b.y * a.x - a.y * b.x) / (b.y - a.y);
 }
 
-bool is_successful(Flag flag)
+inline bool is_successful(Flag flag)
 {
-    switch (flag) {
-        case Flag::residual_zero:
-            return true;
-        case Flag::bracket_width_zero:
-            return true;
-        default:
-            return false;
-    }
+    return (flag == Flag::residual_zero);
 }
 
 std::string flag_message(Flag flag)
@@ -1251,9 +1233,9 @@ std::string flag_message(Flag flag)
         case Flag::residual_zero:
             return "Residual is zero.";
         case Flag::delta_root_zero:
-            return "Change in guess is zero.";
+            return "Change in guess is zero. Slow improvement";
         case Flag::bracket_width_zero:
-            return "Bracket width is zero.";
+            return "Bracket width is zero. Could be singularity";
         case Flag::invalid_bracket:
             return "Bracket is invalid; Function has same signs at both endpoints.";
         case Flag::max_iterations:
@@ -1262,8 +1244,6 @@ std::string flag_message(Flag flag)
             return "Division by zero occurred.";
         case Flag::halley_no_cross:
             return "Halley update failed; local quadratic does not cross zero.";
-        case Flag::discontinuity:
-            return "Found a probable discontinuity or singularity.";
         case Flag::bracket_fixed_point:
             return "Bracket stopped shrinking.";
         case Flag::valid:
