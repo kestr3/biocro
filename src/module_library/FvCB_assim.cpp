@@ -1,8 +1,9 @@
-#include <algorithm>  // for std::min, std::max
-#include <limits>     // for std::numeric_limits
+#include <algorithm>                 // for std::min, std::max
+#include <limits>                    // for std::numeric_limits
+#include "../framework/constants.h"  // for eps_zero
 #include "FvCB_assim.h"
 
-double inf = std::numeric_limits<double>::infinity();
+using calculation_constants::eps_zero;
 
 /**
  *  @brief Computes the net CO2 assimilation rate (and other values) using the
@@ -128,16 +129,21 @@ FvCB_outputs FvCB_assim(
     double electrons_per_oxygenation     // self-explanatory units
 )
 {
+    // Define infinity
+    double const inf = std::numeric_limits<double>::infinity();
+
     // Initialize
     FvCB_outputs result;
 
     // Calculate rates
-    if (Ci <= 0.0) {
+    if (Ci < -eps_zero) {
+        throw std::range_error("Thrown in FvCB_assim: Ci is negative.");
+    } else if (Ci <= eps_zero) {
         // RuBP-saturated net assimilation rate when Ci is 0
         double Ac0 =
             -Gstar * Vcmax / (Kc * (1 + Oi / Ko)) - RL;  // micromol / m^2 / s
 
-        // RuBP-regeneration-limited net assimilation when C is 0
+        // RuBP-regeneration-limited net assimilation when Ci is 0
         double Aj0 =
             -J / (2.0 * electrons_per_oxygenation) - RL;  // micromol / m^2 / s
 
