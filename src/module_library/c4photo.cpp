@@ -1,4 +1,5 @@
 #include <cmath>                          // for pow, exp
+#include <limits>                         // for std::numeric_limits
 #include "../framework/constants.h"       // for dr_stomata, dr_boundary
 #include "../framework/quadratic_root.h"  // for quadratic_root_min
 #include "ball_berry_gs.h"                // for ball_berry_gs
@@ -39,11 +40,19 @@ photosynthesis_outputs c4photoC(
     double const gbw                    // mol / m^2 / s
 )
 {
+    // Define infinity
+    double const inf = std::numeric_limits<double>::infinity();
+
+    // Check inputs
+    if (Qp < 0) {
+        throw std::out_of_range("Input `absorbed_ppfd` cannot be negative. Check `solar` is not negative.");
+    }
+
     constexpr double k_Q10 = 2;  // dimensionless. Increase in a reaction rate per temperature increase of 10 degrees Celsius.
 
     double const Ca_pa = Ca * 1e-6 * atmospheric_pressure;  // Pa
 
-    double const kT = kparm * pow(k_Q10, (leaf_temperature - 25.0) / 10.0);  // dimensionless
+    double const kT = kparm * pow(k_Q10, (leaf_temperature - 25.0) / 10.0);  // mol / m^2 / s
 
     // Collatz 1992. Appendix B. Equation set 5B.
     double const Vtn = Vcmax_at_25 * pow(2, (leaf_temperature - 25.0) / 10.0);                                       // micromol / m^2 / s
@@ -68,7 +77,8 @@ photosynthesis_outputs c4photoC(
     double const bb0_adj = StomaWS * bb0 + Gs_min * (1.0 - StomaWS);
     double const bb1_adj = StomaWS * bb1;
 
-    // Function to compute the biochemical assimilation rate.
+    // Function to compute the biochemical assimilation rate according to the
+    // Collatz model. Here, InterCellularCO2 should be expressed in Pa.
     auto collatz_assim = [=](double const InterCellularCO2) {
         // Collatz 1992. Appendix B. Quadratic coefficients from Equation 3B.
         double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromol / m^2 / s
@@ -79,33 +89,29 @@ photosynthesis_outputs c4photoC(
         // Calculate the smaller of the two quadratic roots, as mentioned
         // following Equation 3B in Collatz 1992.
         double gross_assim = quadratic_root_min(a, b, c);  // micromol / m^2 / s
-        return gross_assim - RT;
+        return gross_assim - RT;                           // micromol / m^2 / s
     };
 
-    // Initialize loop variables. These will be updated as a side effect
-    // during the secant method's iterations.
-    // Here we make an initial guess that Ci = 0.4 * Ca.
+    // Initialize loop variables. These will be updated as a side effect during
+    // the secant method's iterations.
     stomata_outputs BB_res;
-    double an_conductance{};    // mol / m^2 / s
-    double Ci_pa{0.4 * Ca_pa};  // Pa            (initial guess)
-    double Gs{1e3};             // mol / m^2 / s (initial guess)
+    double Assim{0};  // micromol / mol (initial guess)
+    double Gs{1e3};   // mol / m^2 / s (initial guess)
 
-    // This lambda function equals zero
-    // only if assim satisfies both collatz assim and Ball Berry model
-    auto check_assim_rate = [=, &BB_res, &an_conductance, &Ci_pa, &Gs](double const assim) {
-        // The net CO2 assimilation is the smaller of the biochemistry-limited
-        // and conductance-limited rates. This will prevent the calculated Ci
-        // value from ever being < 0. This is an important restriction to
-        // prevent numerical errors during the convergence loop, but does not
-        // seem to ever limit the net assimilation rate if the loop converges.
-        an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
+    // This lambda function equals zero only if Ci satisfies both the Collatz
+    // and Ball-Berry models. Here, Ci_pa should be expressed in Pa.
+    auto check_assim_rate = [=, &BB_res, &Assim, &Gs](double Ci_pa) {
+        // Use Ci to compute the assimilation rate according to the Collatz
+        // model.
+        Assim = collatz_assim(Ci_pa);
 
-        double const assim_adj = std::min(assim, an_conductance);  // micromol / m^2 / s
-
-        // If assim is correct, then Ball Berry gives the correct
-        // CO2 at leaf surface (Cs) and correct stomatal conductance
+        // Use Assim to compute the stomatal conductance according to the
+        // Ball-Berry model. If Assim is too high, Cs will take a negative
+        // value, which is not allowed by the Ball-Berry model. To avoid this,
+        // we clamp Assim to the value that produces Cs = 0; this will result
+        // in Gs = infinity.
         BB_res = ball_berry_gs(
-            assim_adj * 1e-6,
+            std::min(Assim, conductance_limited_assim(Ca, gbw, inf)) * 1e-6,
             Ca * 1e-6,
             relative_humidity,
             bb0_adj,
@@ -116,41 +122,45 @@ photosynthesis_outputs c4photoC(
 
         Gs = BB_res.gsw;  // mol / m^2 / s
 
-        // Using the value of stomatal conductance,
-        // Calculate Ci using the total conductance across the boundary
-        // layer and stomata
-        Ci_pa =
-            Ca_pa - atmospheric_pressure * (assim_adj * 1e-6) *
-                        (dr_boundary / gbw + dr_stomata / Gs);  // Pa
+        // Using Ci and Gs, make a new estimate of the assimilation rate. If
+        // the initial value of Ci was correct, this should be identical to
+        // Assim.
+        double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // mol / m^2 / s
 
-        double check = collatz_assim(Ci_pa) - assim;
-        return check;  // equals zero if correct
+        return Gt * (Ca_pa - Ci_pa) / atmospheric_pressure * 1e6 - Assim;  // micromol / m^2 / s
     };
 
-    // Find starting guesses for the net CO2 assimilation rate. One is the
-    // predicted rate at Ci = 0.4 * Ca, and the other is the predicted rate at
-    // Ci = Ca.
-    double const assim_guess_0 = collatz_assim(0.4 * Ca_pa);
-    double const assim_guess_1 = collatz_assim(Ca_pa);
+    // Max possible Ci value
+    double const Ci_max =
+        Ca_pa + 1e-6 * atmospheric_pressure * RT *
+                    (dr_boundary / gbw + dr_stomata / bb0_adj);  // Pa
 
-    // Run the secant method
-
-    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    // Run the Dekker method
+    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
-        assim_guess_0,
-        assim_guess_1);
+        0.5 * Ca_pa,
+        0,
+        Ci_max * 1.01);
 
-    // Convert Ci units
-    double const Ci = Ci_pa / atmospheric_pressure * 1e6;  // micromol / mol
+    // throw exception if not converged
+    if (!root_algorithm::is_successful(result.flag)) {
+        throw std::runtime_error(
+            "Ci solver reports failed convergence with termination flag:\n    " +
+            root_algorithm::flag_message(result.flag));
+    }
+
+    // Get final values
+    double const Ci = result.root / atmospheric_pressure * 1e6;            // micromol / mol
+    double const an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
 
     return photosynthesis_outputs{
-        /* .Assim = */ result.root,                 // micromol / m^2 /s
+        /* .Assim = */ Assim,                       // micromol / m^2 /s
         /* .Assim_check = */ result.residual,       // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
         /* .Ci = */ Ci,                             // micromol / mol
         /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
-        /* .GrossAssim = */ result.root + RT,       // micromol / m^2 / s
+        /* .GrossAssim = */ Assim + RT,             // micromol / m^2 / s
         /* .Gs = */ Gs,                             // mol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .RL = */ RT,                             // micromol / m^2 / s

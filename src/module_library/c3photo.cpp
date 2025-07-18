@@ -1,5 +1,6 @@
 #include <algorithm>                    // for std::min
 #include <cmath>                        // for pow, sqrt
+#include <limits>                       // for std::numeric_limits
 #include "../framework/constants.h"     // for dr_stomata, dr_boundary
 #include "ball_berry_gs.h"              // for ball_berry_gs
 #include "c3_temperature_response.h"    // for c3_temperature_response
@@ -44,6 +45,14 @@ photosynthesis_outputs c3photoC(
     double const gbw                           // mol / m^2 / s
 )
 {
+    // Define infinity
+    double const inf = std::numeric_limits<double>::infinity();
+
+    // Check inputs
+    if (absorbed_ppfd < 0) {
+        throw std::out_of_range("Input `absorbed_ppfd` cannot be negative. Check `solar` is not negative.");
+    }
+
     // Calculate values of key parameters at leaf temperature
     c3_param_at_tleaf c3_param = c3_temperature_response(tr_param, Tleaf);
 
@@ -67,8 +76,7 @@ photosynthesis_outputs c3photoC(
     // meaning of the `Q * alpha_leaf` factor. See also Equation 8 from the
     // original FvCB paper, where `J` (equivalent to our `I2`) is proportional
     // to the absorbed PPFD rather than the incident PPFD.
-    double const I2 =
-        absorbed_ppfd * dark_adapted_phi_PSII * beta_PSII;  // micromol / m^2 / s
+    double I2 = absorbed_ppfd * dark_adapted_phi_PSII * beta_PSII;  // micromol / m^2 / s
 
     double const J =
         (Jmax + I2 - sqrt(pow(Jmax + I2, 2) - 4.0 * theta * I2 * Jmax)) /
@@ -88,27 +96,27 @@ photosynthesis_outputs c3photoC(
     // these are updated as a side effect in the secant method iterations
     FvCB_outputs FvCB_res;
     stomata_outputs BB_res;
-    double an_conductance{};  // mol / m^2 / s
-    double Gs{1e3};           // mol / m^2 / s  (initial guess)
-    double Ci{0.0};           // micromol / mol (initial guess)
+    double Gs{1e3};     // mol / m^2 / s  (initial guess)
+    double Assim{0.0};  // micromol / mol (initial guess)
 
-    // this lambda function equals zero
-    // only if assim satisfies both FvCB and Ball Berry model
-    auto check_assim_rate = [=, &FvCB_res, &BB_res, &an_conductance, &Gs, &Ci](double const assim) {
-        // The net CO2 assimilation is the smaller of the biochemistry-limited
-        // and conductance-limited rates. This will prevent the calculated Ci
-        // value from ever being < 0. This is an important restriction to
-        // prevent numerical errors during the convergence loop, but does not
-        // seem to ever limit the net assimilation rate if the loop converges.
-        an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
+    // This lambda function equals zero only if Ci satisfies both the FvCB and
+    // Ball-Berry models. Here, Ci should be expressed in micromol / mol.
+    auto check_assim_rate = [=, &FvCB_res, &BB_res, &Gs, &Assim](double Ci) {
+        // Use Ci to compute the assimilation rate according to the FvCB model.
+        FvCB_res = FvCB_assim(
+            Ci, Gstar, J, Kc, Ko, Oi, RL, TPU, Vcmax, alpha_TPU,
+            electrons_per_carboxylation,
+            electrons_per_oxygenation);
 
-        double const assim_adj =
-            std::min(assim, an_conductance);  // micromol / m^2 / s
+        Assim = FvCB_res.An;  // micromol / m^2 / s
 
-        // If assim is correct, then Ball Berry gives the correct
-        // CO2 at leaf surface (Cs) and correct stomatal conductance
+        // Use Assim to compute the stomatal conductance according to the
+        // Ball-Berry model. If Assim is too high, Cs will take a negative
+        // value, which is not allowed by the Ball-Berry model. To avoid this,
+        // we clamp Assim to the value that produces Cs = 0; this will result
+        // in Gs = infinity.
         BB_res = ball_berry_gs(
-            assim_adj * 1e-6,
+            std::min(Assim, conductance_limited_assim(Ca, gbw, inf)) * 1e-6,
             Ca * 1e-6,
             RH,
             b0_adj,
@@ -119,45 +127,48 @@ photosynthesis_outputs c3photoC(
 
         Gs = BB_res.gsw;  // mol / m^2 / s
 
-        // Using the value of stomatal conductance,
-        // Calculate Ci using the total conductance across the boundary layer
-        // and stomata
-        Ci = Ca - assim_adj *
-                      (dr_boundary / gbw + dr_stomata / Gs);  // micromol / mol
+        // Using Ci and Gs, make a new estimate of the assimilation rate. If
+        // the initial value of Ci was correct, this should be identical to
+        // Assim.
+        double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // micromol / micromol / m^2 / s
 
-        // Using Ci compute the assim under the FvCB
-        FvCB_res = FvCB_assim(
-            Ci, Gstar, J, Kc, Ko, Oi, RL, TPU, Vcmax, alpha_TPU,
-            electrons_per_carboxylation,
-            electrons_per_oxygenation);
-
-        return FvCB_res.An - assim;  // equals zero if correct
+        return Assim - Gt * (Ca - Ci);  // micromol / m^2 / s
     };
 
-    // Find starting guesses for the net CO2 assimilation rate. One is the
-    // predicted rate at Ci = 0, and the other is the predicted rate at
-    // Ci = infinity (neglecting TPU). The real rate is almost always between
-    // these two guesses.
-    double const assim_guess_0 = std::max(
-        -Gstar * Vcmax / (Kc * (1 + Oi / Ko)) - RL,  // The value of Ac when Ci = 0
-        -J / (2.0 * electrons_per_oxygenation) - RL  // The value of Aj when Ci = 0
-    );                                               // micromol / m^2 / s
+    // Get an upper bound for Ci by finding the most negative value of An (which
+    // occurs when Ci = 0), the smallest total conductance to CO2 (which occurs
+    // when gsw takes its minimum value b0), and then using Ci = Ca - An / gtc.
+    double const A_min =
+        FvCB_assim(
+            0.0, Gstar, J, Kc, Ko, Oi, RL, TPU, Vcmax, alpha_TPU,
+            electrons_per_carboxylation,
+            electrons_per_oxygenation)
+            .An;  // micromol / m^2 / s
 
-    double const assim_guess_1 = std::min({
-        Vcmax - RL,                            // The maximum value of Ac, which occurs at Ci = infinity
-        J / electrons_per_carboxylation - RL,  // The maximum value of Aj, which occurs at Ci = infinity
-        Ca * gbw / dr_boundary                 // The maximum conductance-limited An, which occurs for gsw = infinity
-    });                                        // micromol / m^2 / s
+    double const Ci_max =
+        Ca - A_min * (dr_boundary / gbw + dr_stomata / b0_adj);  // micromol / mol
 
-    // Run the secant method
-    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    // Run the Dekker method
+    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
     root_algorithm::result_t result = solver.solve(
         check_assim_rate,
-        assim_guess_0,
-        assim_guess_1);
+        0.718 * Ca,
+        0,
+        Ci_max * 1.01);
+
+    // Throw exception if not converged
+    if (!root_algorithm::is_successful(result.flag)) {
+        throw std::runtime_error(
+            "Ci solver reports failed convergence with termination flag:\n    " +
+            root_algorithm::flag_message(result.flag));
+    }
+
+    // Get final values
+    double const Ci = result.root;                                         // micromol / mol
+    double const an_conductance = conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
 
     return photosynthesis_outputs{
-        /* .Assim = */ result.root,                 // micromol / m^2 / s
+        /* .Assim = */ Assim,                       // micromol / m^2 / s
         /* .Assim_check = */ result.residual,       // micromol / m^2 / s
         /* .Assim_conductance = */ an_conductance,  // micromol / m^2 / s
         /* .Ci = */ Ci,                             // micromol / mol
