@@ -127,7 +127,7 @@ photosynthesis_outputs c4photoC(
         // Assim.
         double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // mol / m^2 / s
 
-        return Gt * (Ca_pa - Ci_pa) / atmospheric_pressure - Assim * 1e-6;  // mol / m^2 / s
+        return Gt * (Ca_pa - Ci_pa) / atmospheric_pressure * 1e6 - Assim;  // micromol / m^2 / s
     };
 
     // Max possible Ci value
