@@ -1,9 +1,11 @@
-#include <cmath>  // for pow, std::abs
+#include <cmath>                         // for pow, std::abs
+#include "../framework/constants.h"      // for stefan_boltzmann,
+                                         // celsius_to_kelvin, molar_mass_of_water
+#include "boundary_layer_conductance.h"  // for leaf_boundary_layer_conductance_nikolov
+#include "conductance_helpers.h"         // for g_to_mass, g_to_molecular, sequential_conductance
+#include "root_onedim.h"                 // for root_finder
+#include "water_and_air_properties.h"    // for TempToCp, dry_air_density, etc
 #include "leaf_energy_balance.h"
-#include "boundary_layer_conductance.h"
-#include "water_and_air_properties.h"  // for TempToCp, dry_air_density, etc
-#include "../framework/constants.h"    // for stefan_boltzmann,
-                                       // celsius_to_kelvin, molar_mass_of_water
 
 /**
  *  @brief Use Equation 14.5a from Thornley & Johnson (1990) to calculate water
@@ -119,43 +121,21 @@ energy_balance_outputs leaf_energy_balance(
     // Get total absorbed light energy (longwave and shortwave)
     const double J_a = absorbed_shortwave_energy + absorbed_longwave_energy;  // J / m^2 / s
 
-    // Make an initial guess for the leaf temperature
-    double leaf_temperature{air_temperature + 0.1};  // degrees C
-
-    // Initialize other loop variables; their values will be set during the loop
-    double gbw_leaf{};   // m / s
-    double gbw{};        // m / s
-    double gsw{};        // m / s
-    double gw{};         // m / s
-    double mv_tl{};      // m^3 / mol
-    double Phi_N{};      // J / m^2 / s
-    double pm_bottom{};  // J / m^3 / K
-    double pm_top{};     // J / m^3
-    double R_l{};        // J / m^2 / s
-
-    // Run loop to find the leaf temperature
-    double constexpr max_delta{10};  // degrees C
-    double old_leaf_temperature{};   // degrees C
-    double change_in_tl{};           // degrees C
-    int counter{0};
-
-    do {
-        // Store leaf temperature from previous loop iteration
-        old_leaf_temperature = leaf_temperature;  // degrees C
-
+    // This lambda function calculates Phi_N. Here, leaf_temperature should be
+    // expressed in degrees C.
+    auto calculate_Phi_N = [=](double leaf_temperature) {
         // Get longwave energy losses
-        R_l = epsilon_s * physical_constants::stefan_boltzmann *
-              pow(conversion_constants::celsius_to_kelvin + leaf_temperature, 4);  // J / m^2 / s
+        double const R_l = epsilon_s * physical_constants::stefan_boltzmann *
+                           pow(conversion_constants::celsius_to_kelvin + leaf_temperature, 4);  // J / m^2 / s
 
         // Get the energy available for transpiration and heat loss
-        Phi_N = J_a - R_l;  // J / m^2 / s
+        return J_a - R_l;  // J / m^2 / s
+    };
 
-        // Get stomatal conductance to water vapor as a mass conductance
-        mv_tl = molar_volume(leaf_temperature, air_pressure);  // m^3 / mol
-        gsw = stomatal_conductance * mv_tl;                    // m / s
-
-        // Get leaf boundary layer conductance to water vapor
-        gbw_leaf = leaf_boundary_layer_conductance_nikolov(
+    // This lambda function calculates gbw_leaf. Here, leaf_temperature should
+    // be expressed in degrees C.
+    auto calculate_gbw_leaf = [=](double const leaf_temperature, double const gsw) {
+        return leaf_boundary_layer_conductance_nikolov(
             air_temperature,
             leaf_temperature - air_temperature,
             p_w_air,
@@ -163,29 +143,65 @@ energy_balance_outputs leaf_energy_balance(
             leaf_width,
             wind_speed,
             air_pressure);  // m / s
+    };
+
+    // This lambda function equals zero only if leaf_temperature satisfies the
+    // Penman-Monteith expression of leaf energy balance, and the Nikolov
+    // boundary layer conductance. Here, leaf_temperature should be expressed in
+    // degrees C.
+    auto check_leaf_temp = [=](double const leaf_temperature) {
+        // Get stomatal conductance to water vapor as a mass conductance
+        double const gsw = g_to_mass(air_pressure, stomatal_conductance, leaf_temperature);  // m / s
+
+        // Get leaf boundary layer conductance to water vapor
+        double const gbw_leaf = calculate_gbw_leaf(leaf_temperature, gsw);  // m / s
 
         // Get the boundary layer conductance and total conductance to water
         // vapor
-        gbw = 1.0 / (1.0 / gbw_leaf + 1.0 / gbw_canopy);  // m / s
-        gw = 1.0 / (1.0 / gsw + 1.0 / gbw);               // m / s
+        double const gbw = sequential_conductance(gbw_leaf, gbw_canopy);  // m / s
+        double const gw = sequential_conductance(gsw, gbw);               // m / s
 
         // Get the new leaf temperature using the Penman-Monteith equation
-        pm_top = Phi_N / gw - lambda * Delta_rho;              // J / m^3
-        pm_bottom = lambda * (s + gamma * (1.0 + gbw / gsw));  // J / m^3 / K
+        double const pm_top = calculate_Phi_N(leaf_temperature) / gw - lambda * Delta_rho;  // J / m^3
+        double const pm_bottom = lambda * (s + gamma * (1.0 + gbw / gsw));                  // J / m^3 / K
 
-        leaf_temperature = air_temperature +
-                           std::min(std::max(pm_top / pm_bottom, -max_delta), max_delta);  // degrees C
+        double const leaf_temperature_new = air_temperature + pm_top / pm_bottom;  // degrees C
 
-        // Get the change in leaf temperature relative to the previous iteration
-        change_in_tl = std::abs(leaf_temperature - old_leaf_temperature);  // degrees C
+        return leaf_temperature - leaf_temperature_new;  // degrees C
+    };
 
-    } while ((++counter <= 50) && (change_in_tl > 0.25));
+    // Run the secant method, with starting guesses of air_temperature +/- an
+    // offset
+    double constexpr delta_temp = 0.5;  // degrees C
+
+    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+
+    root_algorithm::result_t result = solver.solve(
+        check_leaf_temp,
+        air_temperature - delta_temp,
+        air_temperature + delta_temp);
+
+    // Throw exception if not converged
+    if (!root_algorithm::is_successful(result.flag)) {
+        throw std::runtime_error(
+            "leaf_temperature solver reports failed convergence with termination flag:\n    " +
+            root_algorithm::flag_message(result.flag));
+    }
+
+    // Get final value
+    double const leaf_temperature = result.root;  // degrees C
 
     // Calculate additional outputs
-    double const Delta_T = leaf_temperature - air_temperature;  // degrees C
-    double const E = (Delta_rho + s * Delta_T) * gw;            // kg / m^2 / s
-    double const H = rho_ta * c_p * Delta_T * gbw;              // J / m^2 / s
-    double const storage = Phi_N - H - lambda * E;              // J / m^2 / s
+    double const gsw = g_to_mass(air_pressure, stomatal_conductance, leaf_temperature);  // m / s
+    double const gbw_leaf = calculate_gbw_leaf(leaf_temperature, gsw);                   // m / s
+    double const gbw = sequential_conductance(gbw_leaf, gbw_canopy);                     // m / s
+    double const gbw_molecular = g_to_molecular(air_pressure, gbw, leaf_temperature);    // mol / m^2 / s
+    double const gw = sequential_conductance(gsw, gbw);                                  // m / s
+    double const Phi_N = calculate_Phi_N(leaf_temperature);                              // degrees C
+    double const Delta_T = leaf_temperature - air_temperature;                           // degrees C
+    double const E = (Delta_rho + s * Delta_T) * gw;                                     // kg / m^2 / s
+    double const H = rho_ta * c_p * Delta_T * gbw;                                       // J / m^2 / s
+    double const storage = Phi_N - H - lambda * E;                                       // J / m^2 / s
 
     // Relative humidity just outside the leaf boundary layer
     double const RH_canopy = (rho_w_air + E / gbw_canopy) / rho_w_sat;  // dimensionless
@@ -206,20 +222,21 @@ energy_balance_outputs leaf_energy_balance(
     double constexpr cf = 1e3 / physical_constants::molar_mass_of_water;  // mmol / kg for water
 
     return energy_balance_outputs{
-        /* Deltat = */ Delta_T,             // degrees C
-        /* E_loss = */ lambda * E,          // J / m^2 / s
-        /* EPenman = */ EPen * cf,          // mmol / m^2 / s
-        /* EPriestly = */ EPries * cf,      // mmol / m^2 / s
-        /* gbw = */ gbw,                    // m / s
-        /* gbw_canopy = */ gbw_canopy,      // m / s
-        /* gbw_leaf = */ gbw_leaf,          // m / s
-        /* gbw_molecular = */ gbw / mv_tl,  // mol / m^2 / s
-        /* gsw = */ gsw,                    // m / s
-        /* H = */ H,                        // J / m^2 / s
-        /* PhiN = */ Phi_N,                 // J / m^2 / s
-        /* RH_canopy = */ RH_canopy,        // dimensionless
-        /* storage = */ storage,            // J / m^2 / s
-        /* TransR = */ E * cf,              // mmol / m^2 / s
-        /* iterations = */ counter          // not a physical quantity
+        /* Deltat = */ Delta_T,                   // degrees C
+        /* E_loss = */ lambda * E,                // J / m^2 / s
+        /* EPenman = */ EPen * cf,                // mmol / m^2 / s
+        /* EPriestly = */ EPries * cf,            // mmol / m^2 / s
+        /* gbw = */ gbw,                          // m / s
+        /* gbw_canopy = */ gbw_canopy,            // m / s
+        /* gbw_leaf = */ gbw_leaf,                // m / s
+        /* gbw_molecular = */ gbw_molecular,      // mol / m^2 / s
+        /* gsw = */ gsw,                          // m / s
+        /* H = */ H,                              // J / m^2 / s
+        /* leaf_temp_check = */ result.residual,  // degrees C
+        /* PhiN = */ Phi_N,                       // J / m^2 / s
+        /* RH_canopy = */ RH_canopy,              // dimensionless
+        /* storage = */ storage,                  // J / m^2 / s
+        /* TransR = */ E * cf,                    // mmol / m^2 / s
+        /* iterations = */ result.iteration       // not a physical quantity
     };
 }

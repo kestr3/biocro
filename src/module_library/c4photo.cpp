@@ -3,8 +3,9 @@
 #include "../framework/constants.h"       // for dr_stomata, dr_boundary
 #include "../framework/quadratic_root.h"  // for quadratic_root_min
 #include "ball_berry_gs.h"                // for ball_berry_gs
+#include "conductance_helpers.h"          // for sequential_conductance
 #include "conductance_limited_assim.h"    // for conductance_limited_assim
-#include "root_onedim.h"
+#include "root_onedim.h"                  // for root_finder
 #include "c4photo.h"
 
 using physical_constants::dr_boundary;
@@ -125,7 +126,7 @@ photosynthesis_outputs c4photoC(
         // Using Ci and Gs, make a new estimate of the assimilation rate. If
         // the initial value of Ci was correct, this should be identical to
         // Assim.
-        double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // mol / m^2 / s
+        double Gt = sequential_conductance(gbw / dr_boundary, Gs / dr_stomata);  // mol / m^2 / s
 
         return Gt * (Ca_pa - Ci_pa) / atmospheric_pressure * 1e6 - Assim;  // micromol / m^2 / s
     };
