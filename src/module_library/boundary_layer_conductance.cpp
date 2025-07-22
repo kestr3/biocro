@@ -1,5 +1,6 @@
 #include <cmath>                       // for std::max, std::min, pow, log
 #include "../framework/constants.h"    // for celsius_to_kelvin
+#include "root_onedim.h"               // for root_finder
 #include "water_and_air_properties.h"  // for saturation_vapor_pressure
 #include "boundary_layer_conductance.h"
 
@@ -22,6 +23,10 @@
  *  In this function, we use equations 29, 33, 34, and 35 to calculate boundary
  *  layer conductance. This is the same approach taken in the `MLcan` model of
  *  Drewry et al. (2010).
+ *
+ *  Nikolov et al. (1995) solve the coupled equations for free boundary layer
+ *  conductance using the fixed-point iteration method. Here we use the Dekker
+ *  method for better stability.
  *
  *  References:
  *
@@ -76,37 +81,47 @@ double leaf_boundary_layer_conductance_nikolov(
     double const gbv_forced = cf * pow(Tak, 0.56) *
                               sqrt((Tak + 120) * windspeed / (lw * p));  // m / s
 
-    // The equations for free convection must be solved iteratively. First make
-    // a starting guess for gbv_free.
-    double gbv_free{gbv_forced};  // m / s
-
-    // Initialize other loop variables; their values will be set during the loop
-    double eb{};      // Pa
-    double Tvdiff{};  // K
-
-    // Run loop to find gbv_free. See code on page 229.
-    double old_gbv_free{};   // m / s
-    double change_in_gbv{};  // m / s
-    int counter{0};
-
-    do {
-        // Store gbv_free from previous loop iteration
-        old_gbv_free = gbv_free;  // m / s
-
+    // This lambda function equals zero only if gbv_free satisfies the Nikolov
+    // model equations for free boundary layer conductance. Here, gbv_free
+    // should be expressed in m / s.
+    auto check_leaf_gbv_free = [=](double const gbv_free) {
         // Equation 35
-        eb = (gsv * esTl + gbv_free * ea) / (gsv + gbv_free);  // Pa
+        double const eb = (gsv * esTl + gbv_free * ea) / (gsv + gbv_free);  // Pa
 
         // Equation 34
-        Tvdiff = (Tlk / (1.0 - ct * eb / p)) - (Tak / (1.0 - ct * ea / p));  // K
+        double const Tvdiff = Tlk / (1.0 - ct * eb / p) -
+                              Tak / (1.0 - ct * ea / p);  // K
 
         // Equation 33
-        gbv_free = ce * pow(Tlk, 0.56) * sqrt((Tlk + 120) / p) *
-                   pow(std::abs(Tvdiff) / lw, 0.25);  // m / s
+        double const new_gbv_free =
+            ce * pow(Tlk, 0.56) * sqrt((Tlk + 120) / p) *
+            pow(std::abs(Tvdiff) / lw, 0.25);  // m / s
 
-        // Get the change in gbv_free relative to the previous iteration
-        change_in_gbv = std::abs(gbv_free - old_gbv_free);  // m / s
+        return gbv_free - new_gbv_free;  // m / s
+    };
 
-    } while ((++counter <= 12) && (change_in_gbv > 0.01));
+    // Run the Dekker method; check_leaf_gbv_free is always positive for
+    // gbv_free = 0, but it is difficult to find a finite value where
+    // check_leaf_gbv_free is guaranteed to be negative; here we just use a
+    // very large value and hope for the best.
+    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
+
+    root_algorithm::result_t result = solver.solve(
+        check_leaf_gbv_free,
+        0,   // first guess
+        0,   // lower bound of initial bracket
+        0.5  // upper bound of initial bracket
+    );
+
+    // Throw exception if not converged
+    if (!root_algorithm::is_successful(result.flag)) {
+        throw std::runtime_error(
+            "gbv_free solver reports failed convergence with termination flag:\n    " +
+            root_algorithm::flag_message(result.flag));
+    }
+
+    // Get final value
+    double const gbv_free = result.root;  // m / s
 
     // The overall conductance is the larger one
     return std::max(gbv_forced, gbv_free);  // m / s

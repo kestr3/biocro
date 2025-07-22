@@ -65,7 +65,7 @@ string_vector leaf_gbw_nikolov::get_inputs()
         "leaf_temperature",  // degrees C
         "Gs",                // mol / m^2 / s
         "rh",                // dimensionless
-        "air_pressure"       // mol / m^2 / s
+        "air_pressure"       // Pa
     };
 }
 
