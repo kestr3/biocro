@@ -50,6 +50,7 @@ inline bool is_valid(T x)
     return x.flag == Flag::valid;
 }
 inline bool is_successful(Flag flag);
+inline bool is_successful_relaxed(Flag flag);
 inline std::string flag_message(Flag flag);
 
 /**
@@ -1225,6 +1226,13 @@ inline double get_secant_update(const graph_t& a, const graph_t& b)
 inline bool is_successful(Flag flag)
 {
     return (flag == Flag::residual_zero);
+}
+
+// A more relaxed version of `is_successful` that does not consider some flags
+// to be convergence failures
+inline bool is_successful_relaxed(Flag flag)
+{
+    return (flag == Flag::residual_zero || flag == Flag::bracket_width_zero);
 }
 
 std::string flag_message(Flag flag)

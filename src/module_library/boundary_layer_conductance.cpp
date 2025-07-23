@@ -108,13 +108,13 @@ double leaf_boundary_layer_conductance_nikolov(
 
     root_algorithm::result_t result = solver.solve(
         check_leaf_gbv_free,
-        0,   // first guess
-        0,   // lower bound of initial bracket
-        0.5  // upper bound of initial bracket
+        1e-4,  // first guess
+        0,     // lower bound of initial bracket
+        0.5    // upper bound of initial bracket
     );
 
     // Throw exception if not converged
-    if (!root_algorithm::is_successful(result.flag)) {
+    if (!root_algorithm::is_successful_relaxed(result.flag)) {
         throw std::runtime_error(
             "gbv_free solver reports failed convergence with termination flag:\n    " +
             root_algorithm::flag_message(result.flag));
