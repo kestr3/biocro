@@ -39,7 +39,7 @@ be directly added to this file to describe the related changes.
   valued 1D functions. See the header file `roots_onedim.h` for example usage,
   and list of available methods.
 
-- Swapped fixed point iteration for the secant method in Ci calculation. To
+- Swapped fixed point iteration for the Dekker method in Ci calculation. To
   incorporate the effect of stomatal conductance, the Ball-Berry and FvCB model
   require solving for the correct intercellular CO2 concentrations by
   identifying the root of an equation. BioCro previously used fixed point
@@ -49,6 +49,12 @@ be directly added to this file to describe the related changes.
   *Journal of Geophysical Research* https://dx.doi.org/10.1029/2012JD018059.
   This change only affects the solution at low Ci, and does not modify the
   interface of any module.
+
+- Swapped fixed point iteration for the secant method in energy balance
+  calculations that are used to determine the leaf temperature.
+
+- Swapped fixed point iteration for the Dekker method in the implementation of
+  the Nikolov leaf boundary layer conductance model.
 
 - Changed how growth respiration is calculated (so the rate of growth
   respiration is zero whenever the base rate of carbon available for growth is
