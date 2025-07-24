@@ -51,6 +51,9 @@ vignettes/web_only/*.out
 vignettes/web_only/*.html
 vignettes/web_only/figure/
 vignettes/web_only/*synctex.gz
+vignettes/web_only/*.fdb_latexmk
+vignettes/web_only/*.fls
+
 cache/
 figure/
 BioCro-II_Paper--Section-1.1-example_cache/
