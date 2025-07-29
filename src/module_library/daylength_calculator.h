@@ -86,8 +86,8 @@ class daylength_calculator : public direct_module
 string_vector daylength_calculator::get_inputs()
 {
     return {
-        "lat",      // degrees
-        "solar_dec", // degrees
+        "lat",                     // degrees
+        "solar_dec",               // degrees
         "sunrise_sunset_elevation" // degrees
     };
 }
@@ -102,15 +102,15 @@ string_vector daylength_calculator::get_outputs()
 void daylength_calculator::do_operation() const
 {
     using math_constants::pi;
-    constexpr double to_rad = pi/180; // radian / degree
-    double offset = std::sin(p * to_rad); // dimensionless
-    double lam = lat * to_rad; // radians
-    double phi = solar_dec  * to_rad; // radians
-    double num  = offset  + std::sin(lam) * std::sin(phi); // dimensionaless
-    double denom = std::cos(lam) * std::cos(phi); // dimensionless
-    double u = std::max(std::min(num/denom, 1.0), -1.0); // dimensionless
-    double D = 24 - 24/pi * std::acos(u); // hours
-    update(daylength, D); // hours
+    constexpr double to_rad = pi / 180;                   // radian / degree
+    double offset = std::sin(p * to_rad);                 // dimensionless
+    double lam = lat * to_rad;                            // radians
+    double phi = solar_dec * to_rad;                      // radians
+    double num  = offset + std::sin(lam) * std::sin(phi); // dimensionaless
+    double denom = std::cos(lam) * std::cos(phi);         // dimensionless
+    double u = std::max(std::min(num/denom, 1.0), -1.0);  // dimensionless
+    double D = 24 - 24 / pi * std::acos(u);               // hours
+    update(daylength, D);                                 // hours
 }
 
 }
