@@ -1,9 +1,11 @@
 #ifndef DAYLENGTH_CALCULATOR_H
 #define DAYLENGTH_CALCULATOR_H
 
-#include <cmath>
+#include <cmath>     // cos, sin
+#include <algorithm> // min, max
 #include "../framework/module.h"
 #include "../framework/state_map.h"
+#include "../framework/constants.h" //pi
 
 namespace standardBML
 {
@@ -98,16 +100,16 @@ string_vector daylength_calculator::get_outputs()
 
 void daylength_calculator::do_operation() const
 {
-    constexpr double pi = 3.14159265359;
-    constexpr double to_rad = pi/180;
-    double offset = std::sin(p * to_rad);
-    double lam = lat * to_rad;
-    double phi = solar_dec  * to_rad;
-    double num  = offset  + std::sin(lam) * std::sin(phi);
-    double denom = std::cos(lam) * std::cos(phi);
-    double u = std::max(std::min(num/denom, 1.0), -1.0);
-    double D = 24 - 24/pi * std::acos(u);
-    update(daylength, D);
+    using math_constants::pi;
+    constexpr double to_rad = pi/180; // radian / degree
+    double offset = std::sin(p * to_rad); // dimensionless
+    double lam = lat * to_rad; // radians
+    double phi = solar_dec  * to_rad; // radians
+    double num  = offset  + std::sin(lam) * std::sin(phi); // dimensionaless
+    double denom = std::cos(lam) * std::cos(phi); // dimensionless
+    double u = std::max(std::min(num/denom, 1.0), -1.0); // dimensionless
+    double D = 24 - 24/pi * std::acos(u); // hours
+    update(daylength, D); // hours
 }
 
 }
