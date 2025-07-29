@@ -9,7 +9,7 @@ test_module <- function(module_name, case_to_test, verbose = TRUE) {
             evaluate_module(
                 module_name,
                 case_to_test[["inputs"]],
-                stop_on_error = TRUE
+                stop_on_exception = TRUE
             )
         },
         error = function(cond) {
@@ -345,7 +345,7 @@ initialize_csv <- function(
     inputs[names(nonstandard_inputs)] <- nonstandard_inputs
 
     # Run the module using the inputs
-    outputs <- evaluate_module(module_name, inputs, stop_on_error = TRUE)
+    outputs <- evaluate_module(module_name, inputs, stop_on_exception = TRUE)
 
     # Make a case list with one element
     case_list <- list(case(inputs, outputs, description))
@@ -369,7 +369,7 @@ add_csv_row <- function(module_name, directory, inputs, description) {
     case_list <- cases_from_csv(module_name, directory)
 
     # Run the module using the inputs
-    outputs <- evaluate_module(module_name, inputs, stop_on_error = TRUE)
+    outputs <- evaluate_module(module_name, inputs, stop_on_exception = TRUE)
 
     # Add a new case to the list
     case_list <- append(
@@ -392,7 +392,7 @@ update_csv_cases <- function(module_name, directory) {
         one_case[["expected_outputs"]] <- evaluate_module(
             module_name,
             one_case[["inputs"]],
-            stop_on_error = TRUE
+            stop_on_exception = TRUE
         )
 
         return(one_case)

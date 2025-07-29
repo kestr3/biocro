@@ -60,7 +60,7 @@ test_that('Errors can be ignored when evaluating modules', {
         evaluate_module(
             fvcb_module,
             within(basic_fvcb_inputs, {Ci = -1}),
-            stop_on_error = TRUE
+            stop_on_exception = TRUE
         ),
         neg_ci_error_msg
     )
@@ -69,7 +69,7 @@ test_that('Errors can be ignored when evaluating modules', {
         evaluate_module(
             fvcb_module,
             within(basic_fvcb_inputs, {Ci = -1}),
-            stop_on_error = FALSE
+            stop_on_exception = FALSE
         )
     )
 
@@ -83,7 +83,7 @@ test_that('Errors can be ignored when evaluating modules', {
             fvcb_module,
             basic_fvcb_inputs,
             data.frame(Ci = c(380, -1)),
-            stop_on_error = TRUE
+            stop_on_exception = TRUE
         ),
         neg_ci_error_msg
     )
@@ -93,7 +93,7 @@ test_that('Errors can be ignored when evaluating modules', {
             fvcb_module,
             basic_fvcb_inputs,
             data.frame(Ci = c(380, -1)),
-            stop_on_error = FALSE
+            stop_on_exception = FALSE
         )
     )
 

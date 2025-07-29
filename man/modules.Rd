@@ -33,13 +33,13 @@
 
   quantity_list_from_names(quantity_names)
 
-  evaluate_module(module_name, input_quantities, stop_on_error = FALSE)
+  evaluate_module(module_name, input_quantities, stop_on_exception = FALSE)
 
   module_response_curve(
     module_name,
     fixed_quantities,
     varying_quantities,
-    stop_on_error = FALSE
+    stop_on_exception = FALSE
   )
 }
 
@@ -76,8 +76,8 @@
     module whose value varies across the response curve.
   }
 
-  \item{stop_on_error}{
-    A boolean indicating whether to stop when a module throws an error; see
+  \item{stop_on_exception}{
+    A boolean indicating whether to stop when a module throws an exception; see
     below for more details.
   }
 }
@@ -127,23 +127,23 @@
   \item{evaluate_module}{
     A list of named numeric elements representing the values of the module's
     outputs as calculated from the \code{input_quantities} according to the
-    module's equations. If the module threw an error during evaluation and
-    \code{stop_on_error} is \code{FALSE}, the return value will instead be a
+    module's equations. If the module threw an exception during evaluation and
+    \code{stop_on_exception} is \code{FALSE}, the return value will instead be a
     list with a single element named \code{error_msg} that contains the content
-    of the error message; otherwise, if \code{stop_on_error} is \code{TRUE}, an
-    R error will be thrown.
+    of the error message; otherwise, if \code{stop_on_exception} is \code{TRUE},
+    an R error will be thrown.
   }
 
   \item{module_response_curve}{
     A data frame where the first column is the fully-qualified name of the
     module that produced the response curve and the remaining columns are the
     module's input and output quantities. Each row corresponds to a row in the
-    \code{varying_quantities}. If the module throws an error during evaluation
-    for one set of inputs and \code{stop_on_error} is \code{FALSE}, the outputs
-    of the corresponding row will be set to \code{NA} and the error message will
-    be recorded in the \code{error_msg} column; otherwise, if
-    \code{stop_on_error} is \code{TRUE}, an R error will be thrown and the
-    response curve calculations will cease.
+    \code{varying_quantities}. If the module throws an exception during
+    evaluation for one set of inputs and \code{stop_on_exception} is
+    \code{FALSE}, the outputs of the corresponding row will be set to \code{NA}
+    and the error message will be recorded in the \code{error_msg} column;
+    otherwise, if \code{stop_on_exception} is \code{TRUE}, an R error will be
+    thrown and the response curve calculations will cease.
   }
 }
 

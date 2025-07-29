@@ -24,7 +24,7 @@ partial_evaluate_module(
   module_name,
   input_quantities,
   arg_names,
-  stop_on_error = FALSE
+  stop_on_exception = FALSE
 )
 }
 
@@ -72,7 +72,7 @@ partial_evaluate_module(
     quantities will be ignored by the module.
   }
 
-  \item{stop_on_error}{
+  \item{stop_on_exception}{
     Identical to the corresponding argument from \code{\link{evaluate_module}}.
   }
 }

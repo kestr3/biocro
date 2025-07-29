@@ -199,7 +199,11 @@ check_module_input_quantities <- function(
     return(error_messages)
 }
 
-evaluate_module <- function(module_name, input_quantities, stop_on_error = FALSE)
+evaluate_module <- function(
+    module_name,
+    input_quantities,
+    stop_on_exception = FALSE
+)
 {
     # Type checks for `module_name` and `input_quantities` will be
     # performed by the `check_module_input_quantities` function
@@ -220,7 +224,7 @@ evaluate_module <- function(module_name, input_quantities, stop_on_error = FALSE
     result <- tryCatch(
         .Call(R_evaluate_module, module_creator, input_quantities),
         error = function(e) {
-            if (stop_on_error) {
+            if (stop_on_exception) {
                 stop(e)
             } else {
                 list(error_msg = conditionMessage(e))
@@ -237,7 +241,7 @@ partial_evaluate_module <- function(
     module_name,
     input_quantities,
     arg_names,
-    stop_on_error = FALSE
+    stop_on_exception = FALSE
 )
 {
     # Check that the following type conditions are met:
@@ -322,8 +326,11 @@ partial_evaluate_module <- function(
             temp_input_quantities[[arg_names[i]]] <- x[i]
         }
 
-        output_quantities <-
-            evaluate_module(module_name, temp_input_quantities, stop_on_error)
+        output_quantities <- evaluate_module(
+            module_name,
+            temp_input_quantities,
+            stop_on_exception
+        )
 
         list(inputs = temp_input_quantities, outputs = output_quantities)
     }
@@ -333,7 +340,7 @@ module_response_curve <- function(
     module_name,
     fixed_quantities,
     varying_quantities,
-    stop_on_error = FALSE
+    stop_on_exception = FALSE
 )
 {
     # Check that the following type conditions are met:
@@ -367,7 +374,7 @@ module_response_curve <- function(
         module_name,
         fixed_quantities,
         names(varying_quantities),
-        stop_on_error
+        stop_on_exception
     )
 
     # Apply the function to each row in the data frame of inputs, producing a
