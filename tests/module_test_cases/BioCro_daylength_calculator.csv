@@ -1,0 +1,3 @@
+input,input,input,output,"description"
+lat,solar_dec,sunrise_sunset_elevation,day_length,NA
+40,1,0.8333,12.2569962155787,"automatically-generated test case"
