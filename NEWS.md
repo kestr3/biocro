@@ -135,6 +135,12 @@ be directly added to this file to describe the related changes.
 - Altered `test_module` (and hence `test_module_library`) so that new module
   outputs produce a warning but don't cause an error on their own.
 
+- Altered `evaluate_module`, `partial_evaluate_module`, and
+  `module_response_curve` so that by default, module errors do not prevent
+  response curve calculations from completing. The original behavior of these
+  functions can be reproduced by setting `stop_on_error` to `TRUE` when calling
+  them.
+
 - Following changes to the behavior of some modules, the soybean model was
   re-parameterized; see the help file for `soybean` for complete details.
 
