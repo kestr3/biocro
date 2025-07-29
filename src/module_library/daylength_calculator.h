@@ -20,7 +20,8 @@ namespace standardBML
  *
  * \f[ D = 24 - \frac{24}{\pi} \cos^{-1} \left( \frac{\sin \rho + \sin \lambda \sin \phi}{ \cos \lambda \cos \phi} \right) \f]
  *
- * where \f$\phi = \delta \pi / 180\f$ is the solar declination in radians (computed elsewhere)
+ * where \f$\phi = \delta \pi / 180\f$ is the solar declination in radians (computed elsewhere
+ * such as the `solar_position_michalsky` module )
  * and \f$\lambda = \delta \pi / 180\f$ is the latitude on Earth in radians. As
  * described in the paper, sunrise and sunset have different definitions yielding
  * different day lengths. The parameter `sunrise_sunset_elevation` denoted \f$p\f$
