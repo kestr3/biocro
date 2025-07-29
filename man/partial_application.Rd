@@ -24,7 +24,7 @@ partial_evaluate_module(
   module_name,
   input_quantities,
   arg_names,
-  stop_on_error = TRUE
+  stop_on_error = FALSE
 )
 }
 

@@ -199,7 +199,7 @@ check_module_input_quantities <- function(
     return(error_messages)
 }
 
-evaluate_module <- function(module_name, input_quantities, stop_on_error = TRUE)
+evaluate_module <- function(module_name, input_quantities, stop_on_error = FALSE)
 {
     # Type checks for `module_name` and `input_quantities` will be
     # performed by the `check_module_input_quantities` function
@@ -237,7 +237,7 @@ partial_evaluate_module <- function(
     module_name,
     input_quantities,
     arg_names,
-    stop_on_error = TRUE
+    stop_on_error = FALSE
 )
 {
     # Check that the following type conditions are met:
@@ -333,7 +333,7 @@ module_response_curve <- function(
     module_name,
     fixed_quantities,
     varying_quantities,
-    stop_on_error = TRUE
+    stop_on_error = FALSE
 )
 {
     # Check that the following type conditions are met:

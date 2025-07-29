@@ -33,13 +33,13 @@
 
   quantity_list_from_names(quantity_names)
 
-  evaluate_module(module_name, input_quantities, stop_on_error = TRUE)
+  evaluate_module(module_name, input_quantities, stop_on_error = FALSE)
 
   module_response_curve(
     module_name,
     fixed_quantities,
     varying_quantities,
-    stop_on_error = TRUE
+    stop_on_error = FALSE
   )
 }
 
