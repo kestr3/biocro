@@ -56,8 +56,8 @@ class leaf_evapotranspiration_check : public direct_module
     double const& min_gbw_canopy;
     double const& rh;
     double const& temp;
-    double const& windspeed;
     double const& wind_speed_height;
+    double const& windspeed;
 
     // Pointers to output quantities
     double* leaf_temp_check_op;
