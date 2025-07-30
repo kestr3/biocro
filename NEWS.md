@@ -56,6 +56,11 @@ be directly added to this file to describe the related changes.
 - Swapped fixed point iteration for the Dekker method in the implementation of
   the Nikolov leaf boundary layer conductance model.
 
+- Added a new model for leaf boundary layer conductance (from Campbell & Norman
+  1998). This model is now used in place of the Nikolov model for energy balance
+  calculations, since it can be solved more easily, and does not have multiple
+  solutions.
+
 - Changed how growth respiration is calculated (so the rate of growth
   respiration is zero whenever the base rate of carbon available for growth is
   negative) and made sure it is calculated consistently across different
