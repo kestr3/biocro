@@ -20,6 +20,23 @@ struct energy_balance_outputs {
     size_t iterations;       //!< Number of iterations used by convergence loop
 };
 
+double check_leaf_temp(
+    double const air_pressure,          // Pa
+    double const air_temperature,       // degrees C
+    double const Delta_rho,             // kg / m^3
+    double const epsilon_s,             // dimensionless
+    double const gamma,                 // kg / m^3 / K
+    double const gbw_canopy,            // m / s
+    double const J_a,                   // J / m^2 / s
+    double const lambda,                // J / kg
+    double const leaf_temperature,      // degrees C
+    double const leaf_width,            // m
+    double const p_w_air,               // Pa
+    double const s,                     // kg / m^3 / K
+    double const stomatal_conductance,  // mol / m^2 / s
+    double const wind_speed             // m / s
+);
+
 energy_balance_outputs leaf_energy_balance(
     double absorbed_longwave_energy,   // J / m^2 / s
     double absorbed_shortwave_energy,  // J / m^2 / s
