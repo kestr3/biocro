@@ -205,16 +205,17 @@ energy_balance_outputs leaf_energy_balance(
         );
     };
 
-    // Run the secant method, with starting guesses of air_temperature +/- an
-    // offset
-    double constexpr delta_temp = 0.5;  // degrees C
+    // Run Dekker's method
+    double constexpr delta_temp = 50;  // degrees C
 
-    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
 
     root_algorithm::result_t result = solver.solve(
         check_leaf_temp_partial,
-        air_temperature - delta_temp,
-        air_temperature + delta_temp);
+        air_temperature + 0.9 * delta_temp,  // guess
+        air_temperature - delta_temp,        // lower
+        air_temperature + delta_temp         // upper
+    );
 
     // Throw exception if not converged
     if (!root_algorithm::is_successful(result.flag)) {
