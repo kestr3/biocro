@@ -1,8 +1,76 @@
 #include <cmath>                       // for std::max, std::min, pow, log
 #include "../framework/constants.h"    // for celsius_to_kelvin
+#include "conductance_helpers.h"       // for g_to_mass
 #include "root_onedim.h"               // for root_finder
 #include "water_and_air_properties.h"  // for saturation_vapor_pressure
 #include "boundary_layer_conductance.h"
+
+/**
+ *  @brief Calculates the conductance for water vapor flow from the leaf across
+ *  its boundary layer using a model described in Campbell & Norman (1998).
+ *
+ *  Note that for an isolated leaf, this conductance characterizes the entire
+ *  path from the leaf surface to the ambient air. For a leaf within a canopy,
+ *  there is an additional boundary layer separating the canopy from the
+ *  atmosphere; this canopy boundary layer conductance must be calculated using
+ *  a separate model.
+ *
+ *  In this model, two types of gas flow are considered: "forced" flow driven
+ *  by wind-created eddy currents and "free" flow driven by temperature-related
+ *  buoyancy effects. The overall conductance is determined to be the larger of
+ *  the free and forced conductances.
+ *
+ *  In this function, we use the "forced convection" and "free convection"
+ *  equations for vapor transfer as shown in Table 7.6. The equations as
+ *  presented in the table return "molecular" conductances in units of
+ *  mol / m^2 / s. Here we convert these to "mass" conductances for consistency
+ *  with `leaf_boundary_layer_conductance_nikolov()`.
+ *
+ *  These form a simpler alterative to the model presented in
+ *  `leaf_boundary_layer_conductance_nikolov()`. Specifically, the Campbell &
+ *  Norman equations do not require an iterative method to solve.
+ *
+ *  References:
+ *
+ *  - Campbell, G. S. & Norman, J. "An Introduction to Environmental
+ *    Biophysics," Springer-Verlag, New York, 1998
+ *
+ *  @param [in] air_temperature The air temperature in degrees C
+ *
+ *  @param [in] delta_t The temperature difference between the leaf and air in
+ *              degrees C
+ *
+ *  @param [in] lw The characteristic leaf dimension in m
+ *
+ *  @param [in] windspeed The wind speed just outside the leaf boundary layer in
+ *              m / s
+ *
+ *  @param [in] p The atmospheric pressure in Pa
+ *
+ *  @return The leaf boundary layer conductance in m / s
+ */
+double leaf_boundary_layer_conductance_campbell(
+    double air_temperature,  // degrees C
+    double delta_t,          // degrees C
+    double lw,               // m
+    double windspeed,        // m / s
+    double p                 // Pa
+)
+{
+    // Set constants
+    double constexpr coef_forced = 0.147;
+    double constexpr coef_free = 0.055;
+
+    // Calculate conductances
+    double const gbv_forced = coef_forced * sqrt(windspeed / lw);           // mol / m^2 / s
+    double const gbv_free = coef_free * pow(std::abs(delta_t) / lw, 0.25);  // mol / m^2 / s
+
+    // The overall conductance is the larger one
+    double const gbv_leaf = std::max(gbv_forced, gbv_free);  // mol / m^2 / s
+
+    // Convert to a mass conductance and return
+    return g_to_mass(p, gbv_leaf, air_temperature + delta_t);  // m / s
+}
 
 /**
  *  @brief Calculates the conductance for water vapor flow from the leaf across
@@ -27,6 +95,9 @@
  *  Nikolov et al. (1995) solve the coupled equations for free boundary layer
  *  conductance using the fixed-point iteration method. Here we use the Dekker
  *  method for better stability.
+ *
+ *  Use this model with caution; it is know to exhibit multiple solutions, which
+ *  can make its outputs discontinuous as inputs are varied.
  *
  *  References:
  *

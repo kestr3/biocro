@@ -48,18 +48,14 @@ double calculate_Phi_N(
 double calculate_gbw_leaf(
     double const air_pressure,      // Pa
     double const air_temperature,   // degrees C
-    double const gsw,               // m / s
     double const leaf_temperature,  // degrees C
     double const leaf_width,        // m
-    double const p_w_air,           // Pa
     double const wind_speed         // m / s
 )
 {
-    return leaf_boundary_layer_conductance_nikolov(
+    return leaf_boundary_layer_conductance_campbell(
         air_temperature,
         leaf_temperature - air_temperature,
-        p_w_air,
-        gsw,
         leaf_width,
         wind_speed,
         air_pressure);  // m / s
@@ -80,7 +76,6 @@ double check_leaf_temp(
     double const lambda,                // J / kg
     double const leaf_temperature,      // degrees C
     double const leaf_width,            // m
-    double const p_w_air,               // Pa
     double const s,                     // kg / m^3 / K
     double const stomatal_conductance,  // mol / m^2 / s
     double const wind_speed             // m / s
@@ -93,10 +88,8 @@ double check_leaf_temp(
     double const gbw_leaf = calculate_gbw_leaf(
         air_pressure,
         air_temperature,
-        gsw,
         leaf_temperature,
         leaf_width,
-        p_w_air,
         wind_speed);  // m / s
 
     // Get the boundary layer conductance and total conductance to water
@@ -206,7 +199,6 @@ energy_balance_outputs leaf_energy_balance(
             lambda,                // J / kg
             leaf_temperature,      // degrees C
             leaf_width,            // m
-            p_w_air,               // Pa
             s,                     // kg / m^3 / K
             stomatal_conductance,  // mol / m^2 / s
             wind_speed             // m / s
@@ -240,10 +232,8 @@ energy_balance_outputs leaf_energy_balance(
     double const gbw_leaf = calculate_gbw_leaf(
         air_pressure,
         air_temperature,
-        gsw,
         leaf_temperature,
         leaf_width,
-        p_w_air,
         wind_speed);  // m / s
 
     double const gbw = sequential_conductance(gbw_leaf, gbw_canopy);                   // m / s
