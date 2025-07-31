@@ -1,15 +1,14 @@
 #ifndef DAYLENGTH_CALCULATOR_H
 #define DAYLENGTH_CALCULATOR_H
 
-#include <cmath>     // cos, sin
-#include <algorithm> // min, max
+#include <cmath>      // cos, sin
+#include <algorithm>  // min, max
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "../framework/constants.h" //pi
+#include "../framework/constants.h"  //pi
 
 namespace standardBML
 {
-
 
 /**
  * @class daylength_calculator
@@ -20,8 +19,8 @@ namespace standardBML
  *
  * \f[ D = 24 - \frac{24}{\pi} \cos^{-1} \left( \frac{\sin \rho + \sin \lambda \sin \phi}{ \cos \lambda \cos \phi} \right) \f]
  *
- * where \f$\phi = \delta \pi / 180\f$ is the solar declination in radians (computed elsewhere
- * such as the `solar_position_michalsky` module )
+ * where \f$\phi = \delta \pi / 180\f$ is the solar declination in radians (
+ * typically computed elsewhere such as by the `solar_position_michalsky` module)
  * and \f$\lambda = \delta \pi / 180\f$ is the latitude on Earth in radians. As
  * described in the paper, sunrise and sunset have different definitions yielding
  * different day lengths. The parameter `sunrise_sunset_elevation` denoted \f$p\f$
@@ -78,7 +77,7 @@ class daylength_calculator : public direct_module
     const double& p;
 
     // Pointers to output quantities
-    double * daylength;
+    double* daylength;
     // Main operation
     void do_operation() const;
 };
@@ -86,35 +85,33 @@ class daylength_calculator : public direct_module
 string_vector daylength_calculator::get_inputs()
 {
     return {
-        "lat",                     // degrees
-        "solar_dec",               // degrees
-        "sunrise_sunset_elevation" // degrees
+        "lat",                      // degrees
+        "solar_dec",                // degrees
+        "sunrise_sunset_elevation"  // degrees
     };
 }
 
 string_vector daylength_calculator::get_outputs()
 {
     return {
-        "day_length" // hr
-       };
+        "day_length"  // hr
+    };
 }
 
 void daylength_calculator::do_operation() const
 {
     using math_constants::pi;
-    constexpr double to_rad = pi / 180;                   // radian / degree
-    double offset = std::sin(p * to_rad);                 // dimensionless
-    double lam = lat * to_rad;                            // radians
-    double phi = solar_dec * to_rad;                      // radians
-    double num  = offset + std::sin(lam) * std::sin(phi); // dimensionaless
-    double denom = std::cos(lam) * std::cos(phi);         // dimensionless
-    double u = std::max(std::min(num/denom, 1.0), -1.0);  // dimensionless
-    double D = 24 - 24 / pi * std::acos(u);               // hours
-    update(daylength, D);                                 // hours
+    constexpr double to_rad = pi / 180;                     // radian / degree
+    double offset = std::sin(p * to_rad);                   // dimensionless
+    double lam = lat * to_rad;                              // radians
+    double phi = solar_dec * to_rad;                        // radians
+    double num = offset + std::sin(lam) * std::sin(phi);    // dimensionaless
+    double denom = std::cos(lam) * std::cos(phi);           // dimensionless
+    double u = std::max(std::min(num / denom, 1.0), -1.0);  // dimensionless
+    double D = 24 - 24 / pi * std::acos(u);                 // hours
+    update(daylength, D);                                   // hours
 }
 
-}
-
-
+}  // namespace standardBML
 
 #endif
