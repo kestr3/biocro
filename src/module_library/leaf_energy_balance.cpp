@@ -48,18 +48,14 @@ double calculate_Phi_N(
 double calculate_gbw_leaf(
     double const air_pressure,      // Pa
     double const air_temperature,   // degrees C
-    double const gsw,               // m / s
     double const leaf_temperature,  // degrees C
     double const leaf_width,        // m
-    double const p_w_air,           // Pa
     double const wind_speed         // m / s
 )
 {
-    return leaf_boundary_layer_conductance_nikolov(
+    return leaf_boundary_layer_conductance_campbell(
         air_temperature,
         leaf_temperature - air_temperature,
-        p_w_air,
-        gsw,
         leaf_width,
         wind_speed,
         air_pressure);  // m / s
@@ -80,7 +76,6 @@ double check_leaf_temp(
     double const lambda,                // J / kg
     double const leaf_temperature,      // degrees C
     double const leaf_width,            // m
-    double const p_w_air,               // Pa
     double const s,                     // kg / m^3 / K
     double const stomatal_conductance,  // mol / m^2 / s
     double const wind_speed             // m / s
@@ -93,10 +88,8 @@ double check_leaf_temp(
     double const gbw_leaf = calculate_gbw_leaf(
         air_pressure,
         air_temperature,
-        gsw,
         leaf_temperature,
         leaf_width,
-        p_w_air,
         wind_speed);  // m / s
 
     // Get the boundary layer conductance and total conductance to water
@@ -206,26 +199,26 @@ energy_balance_outputs leaf_energy_balance(
             lambda,                // J / kg
             leaf_temperature,      // degrees C
             leaf_width,            // m
-            p_w_air,               // Pa
             s,                     // kg / m^3 / K
             stomatal_conductance,  // mol / m^2 / s
             wind_speed             // m / s
         );
     };
 
-    // Run the secant method, with starting guesses of air_temperature +/- an
-    // offset
-    double constexpr delta_temp = 0.5;  // degrees C
+    // Run Dekker's method
+    double constexpr delta_temp = 50;  // degrees C
 
-    root_algorithm::root_finder<root_algorithm::secant> solver{500, 1e-12, 1e-12};
+    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
 
     root_algorithm::result_t result = solver.solve(
         check_leaf_temp_partial,
-        air_temperature - delta_temp,
-        air_temperature + delta_temp);
+        air_temperature + 0.9 * delta_temp,  // guess
+        air_temperature - delta_temp,        // lower
+        air_temperature + delta_temp         // upper
+    );
 
     // Throw exception if not converged
-    if (!root_algorithm::is_successful(result.flag)) {
+    if (!root_algorithm::is_successful_relaxed(result.flag)) {
         throw std::runtime_error(
             "leaf_temperature solver reports failed convergence with termination flag:\n    " +
             root_algorithm::flag_message(result.flag));
@@ -240,10 +233,8 @@ energy_balance_outputs leaf_energy_balance(
     double const gbw_leaf = calculate_gbw_leaf(
         air_pressure,
         air_temperature,
-        gsw,
         leaf_temperature,
         leaf_width,
-        p_w_air,
         wind_speed);  // m / s
 
     double const gbw = sequential_conductance(gbw_leaf, gbw_canopy);                   // m / s

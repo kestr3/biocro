@@ -144,7 +144,6 @@ void leaf_evapotranspiration_check::do_operation() const
         lambda,
         leaf_temperature,
         leafwidth,
-        p_w_air,
         s,
         Gs,
         windspeed);

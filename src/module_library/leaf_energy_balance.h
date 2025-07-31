@@ -31,7 +31,6 @@ double check_leaf_temp(
     double const lambda,                // J / kg
     double const leaf_temperature,      // degrees C
     double const leaf_width,            // m
-    double const p_w_air,               // Pa
     double const s,                     // kg / m^3 / K
     double const stomatal_conductance,  // mol / m^2 / s
     double const wind_speed             // m / s
