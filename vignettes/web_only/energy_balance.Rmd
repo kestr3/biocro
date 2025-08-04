@@ -458,13 +458,6 @@ minimum conductance is a parameter that can be varied by the user.
 $g_{b,canopy}$ is the same for sunlit and shaded leaves at all depths within the
 canopy.
 
-The numeric technique used to solve for $T_l$ in BioCro (fixed-point iteration)
-does not always converge to a reasonable solution. To prevent extremely high or
-low leaf temperatures, $\Delta T$ is restricted to lie between -30$^{\circ}$C
-and 30$^{\circ}$C. This restriction tends to be enforced only in unusual
-situations where stomatal conductance is very low (and hence assimilation is low
-as well), and thus has little impact on the overall result of a simulation.
-
 ## BioCro Examples
 
 ```{r}

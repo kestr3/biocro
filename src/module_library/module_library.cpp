@@ -38,6 +38,8 @@
 #include "hyperbolas.h"
 #include "incident_shortwave_from_ground_par.h"
 #include "leaf_evapotranspiration.h"
+#include "leaf_evapotranspiration_check.h"
+#include "leaf_gbw_campbell.h"
 #include "leaf_gbw_nikolov.h"
 #include "leaf_shape_factor.h"
 #include "leaf_water_stress_exponential.h"
@@ -136,6 +138,8 @@ creator_map standardBML::module_library::library_entries =
      {"hyperbola_2d",                                          &create_mc<hyperbola_2d>},
      {"incident_shortwave_from_ground_par",                    &create_mc<incident_shortwave_from_ground_par>},
      {"leaf_evapotranspiration",                               &create_mc<leaf_evapotranspiration>},
+     {"leaf_evapotranspiration_check",                         &create_mc<leaf_evapotranspiration_check>},
+     {"leaf_gbw_campbell",                                     &create_mc<leaf_gbw_campbell>},
      {"leaf_gbw_nikolov",                                      &create_mc<leaf_gbw_nikolov>},
      {"leaf_shape_factor",                                     &create_mc<leaf_shape_factor>},
      {"leaf_water_stress_exponential",                         &create_mc<leaf_water_stress_exponential>},

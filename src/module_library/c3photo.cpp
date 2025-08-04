@@ -4,6 +4,7 @@
 #include "../framework/constants.h"     // for dr_stomata, dr_boundary
 #include "ball_berry_gs.h"              // for ball_berry_gs
 #include "c3_temperature_response.h"    // for c3_temperature_response
+#include "conductance_helpers.h"        // for sequential_conductance
 #include "conductance_limited_assim.h"  // for conductance_limited_assim
 #include "FvCB_assim.h"                 // for FvCB_assim
 #include "root_onedim.h"                // for root_finder
@@ -130,7 +131,7 @@ photosynthesis_outputs c3photoC(
         // Using Ci and Gs, make a new estimate of the assimilation rate. If
         // the initial value of Ci was correct, this should be identical to
         // Assim.
-        double Gt = 1 / (dr_boundary / gbw + dr_stomata / Gs);  // micromol / micromol / m^2 / s
+        double Gt = sequential_conductance(gbw / dr_boundary, Gs / dr_stomata);  // mol / m^2 / s
 
         return Assim - Gt * (Ca - Ci);  // micromol / m^2 / s
     };
