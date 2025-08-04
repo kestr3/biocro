@@ -35,6 +35,8 @@ be directly added to this file to describe the related changes.
 
 ## Minor User-Facing Changes
 
+- Added a module `daylength_calculator` which compute day length from solar position.
+
 - Added custom C++ library for the numerical approximation of the zeros of real
   valued 1D functions. See the header file `roots_onedim.h` for example usage,
   and list of available methods.
