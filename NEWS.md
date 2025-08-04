@@ -50,7 +50,7 @@ be directly added to this file to describe the related changes.
   This change only affects the solution at low Ci, and does not modify the
   interface of any module.
 
-- Swapped fixed point iteration for the secant method in energy balance
+- Swapped fixed point iteration for the Dekker method in energy balance
   calculations that are used to determine the leaf temperature.
 
 - Swapped fixed point iteration for the Dekker method in the implementation of
