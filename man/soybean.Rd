@@ -245,7 +245,7 @@
           to Environmental Biophysics, 2nd Edition, Pg 173.
 
     \item \code{par_energy_content}: Set to 1 / 4.57, as in Plant Growth Chamber
-          Handbook. CHAPTER 1 – RADIATION– John C. Sager and J. Craig McFarlane.
+          Handbook. CHAPTER 1 - RADIATION - John C. Sager and J. Craig McFarlane.
           Table 2, Pg 3
           \href{https://www.controlledenvironments.org/wp-content/uploads/sites/6/2017/06/Ch01.pdf}
 
