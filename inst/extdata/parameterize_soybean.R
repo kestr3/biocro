@@ -27,6 +27,10 @@ ERROR_LOG_FILE <- 'error_log.md'            # a record of any BioCro errors
 TRACE_LOG_FILE <- 'trace_log.md'            # a trace of the optimizer
 COMPARE_FILE   <- 'parameter_comparison.md' # a comparison of parameter values
 
+# Get Catm values for 2002 and 2005
+Catm_2002 <- with(BioCro::catm_data, {Catm[year == '2002']})
+Catm_2005 <- with(BioCro::catm_data, {Catm[year == '2005']})
+
 ###
 ### Prepare inputs for `objective_function`
 ###
@@ -84,12 +88,14 @@ data_driver_pairs <- list(
     data       = process_table(soyface_biomass[['ambient_2002']],     'biomass'),
     data_stdev = process_table(soyface_biomass[['ambient_2002_std']], 'stdev'),
     drivers    = BioCro::soybean_weather[['2002']],
+    parameters = list(Catm = Catm_2002),
     weight     = 1
   ),
   ambient_2005 = list(
     data       = process_table(soyface_biomass[['ambient_2005']],     'biomass'),
     data_stdev = process_table(soyface_biomass[['ambient_2005_std']], 'stdev'),
     drivers    = BioCro::soybean_weather[['2005']],
+    parameters = list(Catm = Catm_2005),
     weight     = 1
   )
 )
@@ -297,10 +303,10 @@ soybean_reparam <- update_model(
 )
 
 # Define a helper function that runs a single model for a single year
-run_soybean <- function(model_definition, year) {
+run_soybean <- function(model_definition, year, Catm_year) {
   with(model_definition, {run_biocro(
     initial_values,
-    parameters,
+    within(parameters, {Catm = Catm_year}),
     soybean_weather[[year]],
     direct_modules,
     differential_modules,
@@ -310,13 +316,13 @@ run_soybean <- function(model_definition, year) {
 
 # Run each model for 2002 and 2005 and combine the results by year
 full_res_2002 <- rbind(
-  within(run_soybean(BioCro::soybean, '2002'), {model = 'Default Soybean-BioCro'}),
-  within(run_soybean(soybean_reparam, '2002'), {model = 'Re-parameterized Soybean-BioCro'})
+  within(run_soybean(BioCro::soybean, '2002', Catm_2002), {model = 'Default Soybean-BioCro'}),
+  within(run_soybean(soybean_reparam, '2002', Catm_2002), {model = 'Re-parameterized Soybean-BioCro'})
 )
 
 full_res_2005 <- rbind(
-  within(run_soybean(BioCro::soybean, '2005'), {model = 'Default Soybean-BioCro'}),
-  within(run_soybean(soybean_reparam, '2005'), {model = 'Re-parameterized Soybean-BioCro'})
+  within(run_soybean(BioCro::soybean, '2005', Catm_2005), {model = 'Default Soybean-BioCro'}),
+  within(run_soybean(soybean_reparam, '2005', Catm_2005), {model = 'Re-parameterized Soybean-BioCro'})
 )
 
 # Add a total litter column
