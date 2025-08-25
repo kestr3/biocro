@@ -158,7 +158,8 @@ be directly added to this file to describe the related changes.
   calling them.
 
 - Following changes to the behavior of some modules, the soybean model was
-  re-parameterized; see the help file for `soybean` for complete details.
+  re-parameterized. The parameterization script is now included in the BioCro
+  repository and package. See the help file for `soybean` for complete details.
 
 ## Internal changes
 
