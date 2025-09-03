@@ -1,3 +1,24 @@
+# This script is used to parameterize a particular BioCro model called
+# "Soybean-BioCro," which was originally published in Matthews et al. (2022)
+# (https://doi.org/10.1093/insilicoplants/diab032). The model is included with
+# the main BioCro R package and can be found in `data/soybean.R`.
+#
+# In the original paper, the model was parameterized and tested using biomass
+# data collected at the SoyFACE facility during the years 2002 - 2006. The
+# parameterization procedure only used biomass from the ambient CO2 rings
+# collected during 2002 and 2005. See the original publication for more details,
+# including the cultivars that were used during those years.
+#
+# Over time, some of the modules that form Soybean-BioCro have changed their
+# behavior, necessitating re-parameterizations. This script can be used to
+# re-parameterize Soybean-BioCro with the same data that was used in the
+# original paper.
+#
+# To be extra clear, this is not a general-purpose script for optimizing *any*
+# BioCro model of soybean growth. It is specialized to Soybean-BioCro, as
+# described above. It would need to be altered in order to use it with another
+# data set.
+#
 # To use this script, run it using `source`. Several output files will be
 # created in the current working directory. If the results are satisfactory,
 # copy the resulting `soybean.R` file to the `data` directory of the BioCro
@@ -19,8 +40,8 @@ library(parallel)
 library(PhotoGEA)
 
 # Specify some settings
-NCORES  <- 64   # the number of cores to use will depend on your computer
-ITERMAX <- 2000 # number of optimizer iterations
+NCORES  <- detectCores() - 1 # number of cores to use for parallel operation
+ITERMAX <- 2000              # number of optimizer iterations
 
 # Specify log file names
 ERROR_LOG_FILE <- 'error_log.md'            # a record of any BioCro errors
