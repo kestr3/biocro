@@ -1165,7 +1165,7 @@ multiyear_biomass_plot <- xyplot(
   type = 'l',
   auto.key = list(space = 'top'),
   grid = TRUE,
-  ylim = c(5, 13),
+  ylim = c(8, 13),
   xlab = 'Year',
   ylab = 'Final biomass (Mg / ha)'
 )
@@ -1180,7 +1180,7 @@ multiyear_biomass_difference_plot <- xyplot(
   pch = 16,
   auto = TRUE,
   grid = TRUE,
-  ylim = c(-10, 90),
+  ylim = c(-20, 20),
   xlab = 'Atmospheric CO2 concentration (ppm)',
   ylab = '(M_RUE - M_FvCB) / M_FvCB (%)'
 )

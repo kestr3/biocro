@@ -42,10 +42,15 @@
 \details{
   As improvements are made to the BioCro modules, their behavior changes, and
   the soybean model parameters must be updated. Following significant module
-  updates, reparameterization is performed using the same method and data as
-  used in Matthews \emph{et al.} (2022). The following is a summary of
-  reparameterizations that have occurred since the original publication of the
-  Soybean-BioCro model:
+  updates, reparameterization is performed using a script that is included with
+  the BioCro package; its location can be found by typing
+  \code{system.file('extdata', 'parameterize_soybean.R', package = 'BioCro')} in
+  an R session. The parameterization script generally uses the same method and
+  data as used in Matthews \emph{et al.} (2022), with a few differences, such as
+  the separation of pod mass into separate seed and shell components.
+
+  The following is a summary of reparameterizations that have occurred since the
+  original publication of the Soybean-BioCro model:
 
   \itemize{
     \item \emph{2023-06-18}: Several modules have been updated, and the value of
@@ -122,6 +127,12 @@
     \code{mrc_stem}, \code{rateSeneLeaf}, \code{rateSeneStem},
     \code{alphaSeneLeaf}, \code{alphaSeneStem}, \code{betaSeneLeaf}, and
     \code{betaSeneStem}.
+
+    \item \emph{2025-08-25}: The leaf boundary layer conductance model has been
+    changed to a model described in Campbell & Norman (1998), causing small
+    differences in the simulated soybean biomass and requiring a
+    reparameterization. This update alters the values of the same parameters
+    that were changed in the previous update on 2025-04-23.
   }
 
   Whenever a reparameterization is made, this list should be updated, and any
@@ -153,7 +164,8 @@
 
     \item Some parameter values are specific to Champaign, Illinois (2002-2006)
           and may need to change for other years and locations: the soil type,
-          \code{Catm}, \code{maturity_group}, and \code{windspeed_height}.
+          \code{Catm}, \code{maturity_group}, \code{windspeed_height},
+          \code{lat}, and \code{longitude}.
   }
 
   \strong{ode_solver}
