@@ -8,6 +8,7 @@
 // entries in the `creator_map` table.
 
 // Include all the header files that define the modules.
+#include "partitioning_coefficient_logistic_miscanthus.h"
 #include "aba_decay.h"
 #include "ball_berry.h"
 #include "biomass_leaf_n_limitation.h"
@@ -99,6 +100,7 @@
 
 creator_map standardBML::module_library::library_entries =
 {
+     {"partitioning_coefficient_logistic_miscanthus",          &create_mc<partitioning_coefficient_logistic_miscanthus>},
      {"aba_decay",                                             &create_mc<aba_decay>},
      {"ball_berry",                                            &create_mc<ball_berry>},
      {"biomass_leaf_n_limitation",                             &create_mc<biomass_leaf_n_limitation>},
