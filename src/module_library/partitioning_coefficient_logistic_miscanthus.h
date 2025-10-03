@@ -163,24 +163,23 @@ void partitioning_coefficient_logistic_miscanthus::do_operation() const
     // double kStem = kcoeff(alphaStem, betaStem, DVI, kDenom);     // dimensionless
     // double kLeaf = kcoeff(alphaLeaf, betaLeaf, DVI, kDenom);     // dimensionless
     // double kGrain = 1.0 / kDenom;                                // dimensionless
-    const double DVI = DVI;
-        double kStem, kLeaf, kRoot, kRhizome, kGrain, kDenom;
+    double kStem, kLeaf, kRoot, kRhizome, kGrain, kDenom;
 
-        if (DVI<0) {
-            kRoot = kRoot_emr; //dimensionless
-            kStem = kStem_emr; //dimensionless
-            kLeaf = kLeaf_emr; //dimensionless
-            kGrain = kGrain_emr; //dimensionless
-            kRhizome = kRhizome_emr; //dimensionless
-        }
-         else {
-            kDenom = exp(alphaRoot + betaRoot * DVI) + exp(alphaLeaf + betaLeaf * DVI) + exp(alphaStem + betaStem * DVI) + exp(alphaRhizome + betaRhizome * DVI) + 1.0; // denominator term for kRoot, kStem, kLeaf, and kGrain, dimensionless
-            kRoot = exp(alphaRoot + betaRoot * DVI) / kDenom; // dimensionless
-            kStem = exp(alphaStem + betaStem * DVI) / kDenom; // dimensionless
-            kLeaf = exp(alphaLeaf + betaLeaf * DVI) / kDenom; // dimensionless
-            kRhizome = exp(alphaRhizome + betaRhizome * DVI) / kDenom; // dimensionless
-            kGrain = 1.0 / kDenom; // dimensionless
-         }
+    if (DVI<0) {
+        kRoot = kRoot_emr; //dimensionless
+        kStem = kStem_emr; //dimensionless
+        kLeaf = kLeaf_emr; //dimensionless
+        kGrain = kGrain_emr; //dimensionless
+        kRhizome = kRhizome_emr; //dimensionless
+    }
+    else {
+        kDenom = exp(alphaRoot + betaRoot * DVI) + exp(alphaLeaf + betaLeaf * DVI) + exp(alphaStem + betaStem * DVI) + exp(alphaRhizome + betaRhizome * DVI) + 1.0; // denominator term for kRoot, kStem, kLeaf, and kGrain, dimensionless
+        kRoot = exp(alphaRoot + betaRoot * DVI) / kDenom; // dimensionless
+        kStem = exp(alphaStem + betaStem * DVI) / kDenom; // dimensionless
+        kLeaf = exp(alphaLeaf + betaLeaf * DVI) / kDenom; // dimensionless
+        kRhizome = exp(alphaRhizome + betaRhizome * DVI) / kDenom; // dimensionless
+        kGrain = 1.0 / kDenom; // dimensionless
+    }
     
     // Give option for rhizome to contribute to growth during the emergence stage,
     // kRhizome_emr is an input parameter and should be non-positive.
