@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include <cmath>
+#include "../module_library/AuxBioCro.cpp" // include for resp()
 
 // This is the same as partitioning_growth_module/ no leaf_resp_partitioning_growth_calculator except that 
 // 1. CanopyA already includes losses from leaf respiration, so it should not be removed again from leaf.
@@ -12,6 +12,7 @@
 namespace standardBML 
 {
 // do i need to define any double here (10/2/25)
+
 class partitioning_growth_with_rhizome_as_reserved_c_storage : public direct_module
 {    
     public:
@@ -151,6 +152,15 @@ void partitioning_growth_with_rhizome_as_reserved_c_storage::do_operation() cons
     update(newRootcol_op, newRootcol);
     update(newRhizomecol_op, newRhizomecol);
 }
+
+// double resp(double base_rate, double grc, double temp)
+// {
+//     double ans = base_rate * (1 - (grc * Q10_temperature_response(temp, 0.0)));
+
+//     if (ans < 0) ans = 0;
+
+//     return ans;
+// }
 
 #endif
 }
