@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "../module_library/AuxBioCro.cpp" // include for resp()
+#include "BioCro.h" // include for resp()
 
 // This is the same as partitioning_growth_module/ no leaf_resp_partitioning_growth_calculator except that 
 // 1. CanopyA already includes losses from leaf respiration, so it should not be removed again from leaf.
