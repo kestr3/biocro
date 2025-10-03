@@ -40,7 +40,7 @@ class senescence_logistic : public differential_module
           kStem{get_input(input_quantities, "kStem")},
           kRoot{get_input(input_quantities, "kRoot")},
           kRhizome{get_input(input_quantities, "kRhizome")},
-          kGrain{get_input(input_quantities, "kGrain")},
+          //kGrain{get_input(input_quantities, "kGrain")},
           //kShell{get_input(input_quantities, "kShell")},
           remobilization_fraction{get_input(input_quantities, "remobilization_fraction")},
 
@@ -52,8 +52,8 @@ class senescence_logistic : public differential_module
           Root_op{get_op(output_quantities, "Root")},
           RootLitter_op{get_op(output_quantities, "RootLitter")},
           Rhizome_op{get_op(output_quantities, "Rhizome")},
-          RhizomeLitter_op{get_op(output_quantities, "RhizomeLitter")},
-          Grain_op{get_op(output_quantities, "Grain")}
+          RhizomeLitter_op{get_op(output_quantities, "RhizomeLitter")}
+          //Grain_op{get_op(output_quantities, "Grain")}
           //Shell_op{get_op(output_quantities, "Shell")}
     {
     }
@@ -75,7 +75,7 @@ class senescence_logistic : public differential_module
     const double& kStem;
     const double& kRoot;
     const double& kRhizome;
-    const double& kGrain;
+    //const double& kGrain;
     //const double& kShell;
     const double& remobilization_fraction;
 
@@ -88,7 +88,7 @@ class senescence_logistic : public differential_module
     double* RootLitter_op;
     double* Rhizome_op;
     double* RhizomeLitter_op;
-    double* Grain_op;
+    //double* Grain_op;
     //double* Shell_op;
 
     // Implement the pure virtual function do_operation():
@@ -110,7 +110,7 @@ string_vector senescence_logistic::get_inputs()
         "kStem",                   // dimensionless, fraction carbon allocated to Stem
         "kRoot",                   // dimensionless, fraction carbon allocated to Root
         "kRhizome",                // dimensionless, fraction carbon allocated to Rhizome
-        "kGrain",                  // dimensionless, fraction carbon allocated to Grain
+        //"kGrain",                  // dimensionless, fraction carbon allocated to Grain
        // "kShell",                  // dimensionless, fraction carbon allocated to Shell
         "remobilization_fraction"  // dimensionless, fraction of senesced leaf
                                    // tissue remobilized to other plant organs
@@ -127,9 +127,9 @@ string_vector senescence_logistic::get_outputs()
         "Root",           // Mg / ha
         "RootLitter",     // Mg / ha
         "Rhizome",        // Mg / ha
-        "RhizomeLitter",  // Mg / ha
+        "RhizomeLitter"  // Mg / ha
         //"Shell",          // Mg / ha
-        "Grain"           // Mg / ha
+        //"Grain"           // Mg / ha
     };
 }
 
@@ -167,7 +167,7 @@ void senescence_logistic::do_operation() const
 
     // change in grain biomass = new grain from remobilized leaf fraction.
     // currently do not include grain senescence.
-    double dGrain = kGrain * senescence_leaf * remobilization_fraction;  // Mg / ha
+    //double dGrain = kGrain * senescence_leaf * remobilization_fraction;  // Mg / ha
 
     // change in shell biomass = new shell from remobilized leaf fraction.
     // currently do not include shell senescence.
@@ -177,7 +177,7 @@ void senescence_logistic::do_operation() const
     update(Stem_op, dStem);                    // Mg / ha
     update(Root_op, dRoot);                    // Mg / ha
     update(Rhizome_op, dRhizome);              // Mg / ha
-    update(Grain_op, dGrain);                  // Mg / ha
+    //update(Grain_op, dGrain);                  // Mg / ha
     //update(Shell_op, dShell);                  // Mg / ha
     update(LeafLitter_op, dLeafLitter);        // Mg / ha
     update(StemLitter_op, dStemLitter);        // Mg / ha
