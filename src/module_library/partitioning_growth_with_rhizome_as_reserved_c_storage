@@ -1,0 +1,156 @@
+#ifndef PARTITIONING_GROWTH_WITH_RHIZOME_AS_RESERVED_C_STORAGE_H
+#define PARTITIONING_GROWTH_WITH_RHIZOME_AS_RESERVED_C_STORAGE_H
+
+#include "../framework/module.h"
+#include "../framework/state_map.h"
+#include <cmath>
+
+// This is the same as partitioning_growth_module/ no leaf_resp_partitioning_growth_calculator except that 
+// 1. CanopyA already includes losses from leaf respiration, so it should not be removed again from leaf.
+// 2. When canopy assimilation rate is below zero, R
+
+namespace standardBML 
+{
+// do i need to define any double here (10/2/25)
+class partitioning_growth_with_rhizome_as_reserved_c_storage : public direct_module
+{    
+    public:
+        partitioning_growth_with_rhizome_as_reserved_c_storage(
+            //const std::unordered_map<std::string, double>* input_parameters, std::unordered_map<std::string, double>* output_parameters) :
+            state_map const& input_quantities,
+            state_map* output_quantities)
+            : direct_module{},
+
+            // Get pointers to input parameters
+            kLeaf{get_input(input_quantities, "kLeaf")},
+            kStem{get_input(input_quantities, "kStem")},
+            kRoot{get_input(input_quantities, "kRoot")},
+            kRhizome{get_input(input_quantities, "kRhizome")},
+            canopy_assimilation_rate{get_input(input_quantities, "canopy_assimilation_rate")},
+            mrc1{get_input(input_quantities, "mrc1")},
+            mrc2{get_input(input_quantities, "mrc2")},
+            temp{get_input(input_quantities, "temp")},
+
+            // Get pointers to output parameters
+            newLeafcol_op{get_op(output_quantities, "newLeafcol")},
+            newStemcol_op{get_op(output_quantities, "newStemcol")},
+            newRootcol_op{get_op(output_quantities, "newRootcol")},
+            newRhizomecol_op{get_op(output_quantities, "newRhizomecol")}
+        {
+        }
+        static string_vector get_inputs();
+        static string_vector get_outputs();
+        static std::string get_name() {return "partitioning_coefficient_logistic"; }
+
+    private:
+        // Pointers to input parameters
+        const double& kLeaf;
+        const double& kStem;
+        const double& kRoot;
+        const double& kRhizome;
+        const double& canopy_assimilation_rate;
+        const double& mrc1;
+        const double& mrc2;
+        const double& temp;
+        // Pointers to output parameters
+        double* newLeafcol_op;
+        double* newStemcol_op;
+        double* newRootcol_op;
+        double* newRhizomecol_op;
+        // Main operation
+        void do_operation() const override final;
+};
+
+string_vector partitioning_growth_with_rhizome_as_reserved_c_storage::get_inputs()
+{   
+    return {
+        "kLeaf",
+        "kStem",
+        "kRoot",
+        "kRhizome",
+        "canopy_assimilation_rate",
+        "mrc1",
+        "mrc2",
+        "temp"
+    };
+}
+
+string_vector partitioning_growth_with_rhizome_as_reserved_c_storage::get_outputs()
+{
+    return {
+        "newLeafcol",
+        "newStemcol",
+        "newRootcol",
+        "newRhizomecol"
+    };
+}
+
+void partitioning_growth_with_rhizome_as_reserved_c_storage::do_operation() const 
+{
+    // Collect inputs and make calculations
+    
+    // double kLeaf = kLeaf_ip;
+    // double kStem = kStem_ip;
+    // double kRoot = kRoot_ip;
+    // double kRhizome = kRhizome_ip;
+    // double canopy_assimilation_rate = canopy_assimilation_rate_ip;
+    // double mrc1 = mrc1_ip;
+    // double mrc2 = mrc2_ip;
+    // double temp = temp_ip;
+    
+
+    // this is where im leaving off 10/2/25
+    double newLeafcol, newStemcol, newRootcol, newRhizomecol;
+    
+    double nonrhizome_carbon_flux; // nonleaf_carbon_flux;
+    if(canopy_assimilation_rate < 0) nonrhizome_carbon_flux = 0.0;
+    else nonrhizome_carbon_flux = canopy_assimilation_rate;
+    
+    // Calculate the amount of new leaf produced
+    if(kLeaf > 0) {
+        newLeafcol = nonrhizome_carbon_flux * kLeaf;
+ //     newLeafcol = resp(newLeafcol, mrc1, temp);// leaf respiration is also included in canopy assimlation, so no need to add it here again.
+    }
+
+    
+    // Calculate the amount of new stem produced
+    if(kStem >= 0) {
+        newStemcol = nonrhizome_carbon_flux * kStem;
+        newStemcol = resp(newStemcol, mrc1, temp);
+    }
+//    else throw std::range_error("Thrown in partitioning_growth_with_rhizome_as_reserved_c_storage: kStem should be positive"); MLM removed this error message 04/22/2020; can cause issues with integration
+    
+    // Calculate the amount of new root produced
+    if(kRoot > 0) {
+        newRootcol = nonrhizome_carbon_flux * kRoot;
+        newRootcol = resp(newRootcol, mrc2, temp);
+    }
+    else newRootcol = 0.0;
+    
+    // Calculate the amount of new rhizome produced
+    if(kRhizome > 0) {
+        if(canopy_assimilation_rate < 0) 
+         {
+          newRhizomecol = canopy_assimilation_rate;// Negative assimilation rate means reduction in rhizome biomass
+          newRhizomecol = resp(0.0, mrc2, temp); // when canopy assimilation is below zero, there is no growth in rhizome mass so respiration is calculated assuming newrhizomecol = 0
+         }
+         else 
+        {
+          newRhizomecol = canopy_assimilation_rate * kRhizome;
+          newRhizomecol = resp(newRhizomecol, mrc2, temp);
+         }
+    }
+    else newRhizomecol = 0.0;
+    
+    // Grain has no respiration or senescence at the moment, so we don't need to calculate
+    //  the amount of new grain here
+    
+    // Update the output parameter list
+    update(newLeafcol_op, newLeafcol);
+    update(newStemcol_op, newStemcol);
+    update(newRootcol_op, newRootcol);
+    update(newRhizomecol_op, newRhizomecol);
+}
+
+#endif
+}
