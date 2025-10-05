@@ -9,7 +9,7 @@
 
 // Include all the header files that define the modules.
 #include "partitioning_coefficient_logistic_miscanthus.h"
-#include "partitioning_growth_with_rhizome_as_reserved_c_storage"
+#include "partitioning_growth_with_rhizome_as_reserved_c_storage.h"
 #include "partitioning_growth_calculator_miscanthus.h"
 #include "partitioning_growth_miscanthus.h"
 #include "aba_decay.h"
