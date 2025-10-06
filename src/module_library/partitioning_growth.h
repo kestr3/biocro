@@ -85,13 +85,13 @@ class partitioning_growth : public differential_module
           Leaf{get_input(input_quantities, "Leaf")},
           Stem{get_input(input_quantities, "Stem")},
           Root{get_input(input_quantities, "Root")},
-          Rhizome{get_input(input_quantities, "Rhizome")}
+          Rhizome{get_input(input_quantities, "Rhizome")},
 
           // Get pointers to output quantities
           Leaf_op{get_op(output_quantities, "Leaf")},
           Stem_op{get_op(output_quantities, "Stem")},
           Root_op{get_op(output_quantities, "Root")},
-          Rhizome_op{get_op(output_quantities, "Rhizome")},
+          Rhizome_op{get_op(output_quantities, "Rhizome")}
           //Grain_op{get_op(output_quantities, "Grain")}
           //Shell_op{get_op(output_quantities, "Shell")}
     {
