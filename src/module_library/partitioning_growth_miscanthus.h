@@ -1,5 +1,5 @@
-#ifndef PARTITIONING_GROWTH_H
-#define PARTITIONING_GROWTH_H
+#ifndef PARTITIONING_GROWTH_MISCANTHUS_H
+#define PARTITIONING_GROWTH_MISCANTHUS_H
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
@@ -59,10 +59,10 @@ namespace standardBML
  *  [Penning de Vries, F. W. T. & Laar, H. H. van. "Simulation of plant growth
  *  and crop production" (Pudoc, 1982)](https://edepot.wur.nl/167315)
  */
-class partitioning_growth : public differential_module
+class partitioning_growth_miscanthus : public differential_module
 {
    public:
-    partitioning_growth(
+    partitioning_growth_miscanthus(
         state_map const& input_quantities,
         state_map* output_quantities)
         : differential_module{},
@@ -92,7 +92,7 @@ class partitioning_growth : public differential_module
     }
     static string_vector get_inputs();
     static string_vector get_outputs();
-    static std::string get_name() { return "partitioning_growth"; }
+    static std::string get_name() { return "partitioning_growth_miscanthus"; }
 
    private:
     // References to input quantities
@@ -123,7 +123,7 @@ class partitioning_growth : public differential_module
     void do_operation() const override final;
 };
 
-string_vector partitioning_growth::get_inputs()
+string_vector partitioning_growth_miscanthus::get_inputs()
 {
     return {
         "retrans",                        // dimensionless
@@ -143,7 +143,7 @@ string_vector partitioning_growth::get_inputs()
     };
 }
 
-string_vector partitioning_growth::get_outputs()
+string_vector partitioning_growth_miscanthus::get_outputs()
 {
     return {
         "Leaf",     // Mg / ha / hour
@@ -153,7 +153,7 @@ string_vector partitioning_growth::get_outputs()
     };
 }
 
-void partitioning_growth::do_operation() const
+void partitioning_growth_miscanthus::do_operation() const
 {
     // Initialize variables
     double dLeaf{0.0};

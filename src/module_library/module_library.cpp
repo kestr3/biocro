@@ -105,7 +105,7 @@ creator_map standardBML::module_library::library_entries =
 {
      {"partitioning_coefficient_logistic_miscanthus",          &create_mc<partitioning_coefficient_logistic_miscanthus>},
      {"partitioning_growth_with_rhizome_as_reserved_c_storage",&create_mc<partitioning_growth_with_rhizome_as_reserved_c_storage>},
-     {"partitioning_growth_calculator_miscanthus",             &create_mc<partitoning_growth_calculator_miscanthus>},
+     {"partitioning_growth_calculator_miscanthus",             &create_mc<partitioning_growth_calculator_miscanthus>},
      {"partitioning_growth_miscanthus",                        &create_mc<partitioning_growth_miscanthus>},
      {"aba_decay",                                             &create_mc<aba_decay>},
      {"ball_berry",                                            &create_mc<ball_berry>},
