@@ -1,5 +1,5 @@
-#ifndef PARTITIONING_GROWTH_CALCULATOR_H
-#define PARTITIONING_GROWTH_CALCULATOR_H
+#ifndef PARTITIONING_GROWTH_CALCULATOR_MISCANTHUS_H
+#define PARTITIONING_GROWTH_CALCULATOR_MISCANTHUS_H
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
@@ -62,10 +62,10 @@ namespace standardBML
  *  Sunflower at Various Leaf Water Potentials" Plant Physiology 46, 233–235 (1970)]
  *  (https://doi.org/10.1104/pp.46.2.233).
  */
-class partitioning_growth_calculator : public direct_module
+class partitioning_growth_calculator_miscanthus : public direct_module
 {
    public:
-    partitioning_growth_calculator(
+    partitioning_growth_calculator_miscanthus(
         state_map const& input_quantities,
         state_map* output_quantities)
         : direct_module{},
@@ -90,7 +90,7 @@ class partitioning_growth_calculator : public direct_module
     }
     static string_vector get_inputs();
     static string_vector get_outputs();
-    static std::string get_name() { return "partitioning_growth_calculator"; }
+    static std::string get_name() { return "partitioning_growth_calculator_miscanthus"; }
 
    private:
     // Pointers to input quantities
@@ -114,7 +114,7 @@ class partitioning_growth_calculator : public direct_module
     void do_operation() const;
 };
 
-string_vector partitioning_growth_calculator::get_inputs()
+string_vector partitioning_growth_calculator_miscanthus::get_inputs()
 {
     return {
         "kLeaf",                     // dimensionless
@@ -129,7 +129,7 @@ string_vector partitioning_growth_calculator::get_inputs()
     };
 }
 
-string_vector partitioning_growth_calculator::get_outputs()
+string_vector partitioning_growth_calculator_miscanthus::get_outputs()
 {
     return {
         "net_assimilation_rate_leaf",     // Mg / ha / hour
@@ -139,7 +139,7 @@ string_vector partitioning_growth_calculator::get_outputs()
     };
 }
 
-void partitioning_growth_calculator::do_operation() const
+void partitioning_growth_calculator_miscanthus::do_operation() const
 {
     double net_assimilation_rate_leaf{0.0};
     double net_assimilation_rate_stem{0.0};
