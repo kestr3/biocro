@@ -7,7 +7,7 @@
 namespace standardBML
 {
 /**
- *  @class partitioning_growth
+ *  @class partitioning_growth_miscanthus
  *
  *  @brief This module determines the growth rate for several plant organs from
  *  the net rate of carbon assimilation due to photosynthesis (determined by a
