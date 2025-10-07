@@ -75,7 +75,7 @@ class partitioning_coefficient_logistic : public direct_module
           kRoot_op{get_op(output_quantities, "kRoot")},
           kStem_op{get_op(output_quantities, "kStem")},
           kLeaf_op{get_op(output_quantities, "kLeaf")},
-          kGrain_op{get_op(output_quantities, "kGrain")},
+          //kGrain_op{get_op(output_quantities, "kGrain")},
           kRhizome_op{get_op(output_quantities, "kRhizome")}
     {
     }
@@ -98,7 +98,7 @@ class partitioning_coefficient_logistic : public direct_module
     double* kRoot_op;
     double* kStem_op;
     double* kLeaf_op;
-    double* kGrain_op;
+   //double* kGrain_op;
     double* kRhizome_op;
 
     // Implement the pure virtual function do_operation():
@@ -125,7 +125,7 @@ string_vector partitioning_coefficient_logistic::get_outputs()
         "kRoot",    // dimensionless
         "kStem",    // dimensionless
         "kLeaf",    // dimesnionless
-        "kGrain",   // dimensionless
+        //"kGrain",   // dimensionless
         "kRhizome"  // dimensionless
     };
 }
@@ -143,7 +143,7 @@ void partitioning_coefficient_logistic::do_operation() const
     double kRoot = kcoeff(alphaRoot, betaRoot, DVI, kDenom);     // dimensionless
     double kStem = kcoeff(alphaStem, betaStem, DVI, kDenom);     // dimensionless
     double kLeaf = kcoeff(alphaLeaf, betaLeaf, DVI, kDenom);     // dimensionless
-    double kGrain = 1.0 / kDenom;                                // dimensionless
+    //double kGrain = 1.0 / kDenom;                                // dimensionless
 
     // Give option for rhizome to contribute to growth during the emergence stage,
     // kRhizome_emr is an input parameter and should be non-positive.
@@ -155,7 +155,7 @@ void partitioning_coefficient_logistic::do_operation() const
     update(kRoot_op, kRoot);        // dimensionless
     update(kStem_op, kStem);        // dimensionless
     update(kLeaf_op, kLeaf);        // dimensionless
-    update(kGrain_op, kGrain);      // dimensionless
+    //update(kGrain_op, kGrain);      // dimensionless
     update(kRhizome_op, kRhizome);  // dimensionless
 }
 
