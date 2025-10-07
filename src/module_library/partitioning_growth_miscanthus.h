@@ -116,8 +116,6 @@ class partitioning_growth_miscanthus : public differential_module
     double* Stem_op;
     double* Root_op;
     double* Rhizome_op;
-    double* Grain_op;
-    double* Shell_op;
 
     // Implement the pure virtual function do_operation():
     void do_operation() const override final;
