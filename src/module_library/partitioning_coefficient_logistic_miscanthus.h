@@ -66,11 +66,9 @@ class partitioning_coefficient_logistic_miscanthus : public direct_module
           alphaRoot{get_input(input_quantities, "alphaRoot")},
           alphaStem{get_input(input_quantities, "alphaStem")},
           alphaLeaf{get_input(input_quantities, "alphaLeaf")},
-          alphaRhizome{get_input(input_quantities, "alphaRhizome")},
           betaRoot{get_input(input_quantities, "betaRoot")},
           betaStem{get_input(input_quantities, "betaStem")},
           betaLeaf{get_input(input_quantities, "betaLeaf")},
-          betaRhizome{get_input(input_quantities, "betaRhizome")},
           kRhizome_emr{get_input(input_quantities, "kRhizome_emr")},
           kStem_emr{get_input(input_quantities, "kStem_emr")},
           kLeaf_emr{get_input(input_quantities, "kLeaf_emr")},
@@ -93,11 +91,9 @@ class partitioning_coefficient_logistic_miscanthus : public direct_module
     const double& alphaRoot;
     const double& alphaStem;
     const double& alphaLeaf;
-    const double& alphaRhizome;
     const double& betaRoot;
     const double& betaStem;
     const double& betaLeaf;
-    const double& betaRhizome;
     const double& kRhizome_emr;
     const double& kStem_emr;
     const double& kLeaf_emr;
@@ -127,8 +123,6 @@ string_vector partitioning_coefficient_logistic_miscanthus::get_inputs()
         "kStem_emr",// dimensionless
         "kLeaf_emr",// dimensionless
         "kRoot_emr",// dimensionless
-        "alphaRhizome",// dimensionless
-        "betaRhizome"// dimensionless
     };
 }
 
@@ -144,53 +138,27 @@ string_vector partitioning_coefficient_logistic_miscanthus::get_outputs()
 
 void partitioning_coefficient_logistic_miscanthus::do_operation() const
 {
-    // Determine partitioning coefficients using multinomial logistic equations
-    // from Osborne et al., 2015 JULES-crop https://doi.org/10.5194/gmd-8-1139-2015
-
-    // IF DVI <0 then only root, stem,leaf, and grain coefficients are calculauted using logistic functions and an independent negative value parameters is assigned to rhizome
-    // IF DVI >0  then root, stem, leaf, grain, and rhizome ---all the partitioning coefficients are calculated using logistic function
-    // double kDenom = exp(alphaRoot + betaRoot * DVI) +
-    //                 exp(alphaStem + betaStem * DVI) +
-    //                 exp(alphaLeaf + betaLeaf * DVI) + 1.0; //dimensionless
-
-    // double kRoot = kcoeff(alphaRoot, betaRoot, DVI, kDenom);     // dimensionless
-    // double kStem = kcoeff(alphaStem, betaStem, DVI, kDenom);     // dimensionless
-    // double kLeaf = kcoeff(alphaLeaf, betaLeaf, DVI, kDenom);     // dimensionless
-    // double kGrain = 1.0 / kDenom;                                // dimensionless
-    double kStem, kLeaf, kRoot, kRhizome, kGrain, kDenom;
+     double kStem, kLeaf, kRoot, kRhizome, kDenom;
 
     if (DVI<0) {
-        kRoot = kRoot_emr; //dimensionless
         kStem = kStem_emr; //dimensionless
         kLeaf = kLeaf_emr; //dimensionless
         kRhizome = kRhizome_emr; //dimensionless
+        kRoot = 1.0 - kLeaf - kStem;
     }
     else {
-        kDenom = exp(alphaRoot + betaRoot * DVI) + exp(alphaLeaf + betaLeaf * DVI) + exp(alphaStem + betaStem * DVI) + exp(alphaRhizome + betaRhizome * DVI) + 1.0; // denominator term for kRoot, kStem, kLeaf, and kGrain, dimensionless
+        kDenom = exp(alphaRoot + betaRoot * DVI) + exp(alphaLeaf + betaLeaf * DVI) + exp(alphaStem + betaStem * DVI) + 1.0; // denominator term for kRoot, kStem, kLeaf, and kGrain, dimensionless
         kRoot = exp(alphaRoot + betaRoot * DVI) / kDenom; // dimensionless
         kStem = exp(alphaStem + betaStem * DVI) / kDenom; // dimensionless
         kLeaf = exp(alphaLeaf + betaLeaf * DVI) / kDenom; // dimensionless
-        kRhizome = exp(alphaRhizome + betaRhizome * DVI) / kDenom; // dimensionless
+        kRhizome = 1.0/ kDenom; // dimensionless
     }
-    
-    // Give option for rhizome to contribute to growth during the emergence stage,
-    // kRhizome_emr is an input parameter and should be non-positive.
-    // To ignore rhizome, set kRhizome_emr to 0 in input parameter file, and
-    // adjust initial leaf, stem, and root biomasses accordingly.
-   // double kRhizome{DVI < 0 ? kRhizome_emr : 0};  // dimensionless
 
     // Update the output quantities
     update(kRoot_op, kRoot);        // dimensionless
     update(kStem_op, kStem);        // dimensionless
     update(kLeaf_op, kLeaf);        // dimensionless
     update(kRhizome_op, kRhizome);  // dimensionless
-}
-
-// double kcoeff(double alpha, double beta, double DVI, double denom)
-// {
-//     return exp(alpha + beta * DVI) / denom;  // dimensionless
-// }
-
-// }  // namespace standardBML
 } 
+}
 #endif
