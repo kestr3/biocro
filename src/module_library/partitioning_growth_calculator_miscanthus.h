@@ -75,7 +75,7 @@ class partitioning_growth_calculator_miscanthus : public direct_module
           kStem{get_input(input_quantities, "kStem")},
           kRoot{get_input(input_quantities, "kRoot")},
           kRhizome{get_input(input_quantities, "kRhizome")},
-          canopy_assimilation_rate{get_input(input_quantities, "canopy_assimilation_rate")},
+          canopy_assimilation_rate_CO2{get_input(input_quantities, "canopy_assimilation_rate_CO2")},
           LeafWS{get_input(input_quantities, "LeafWS")},
           mrc1{get_input(input_quantities, "mrc1")},
           mrc2{get_input(input_quantities, "mrc2")},
@@ -98,7 +98,7 @@ class partitioning_growth_calculator_miscanthus : public direct_module
     const double& kStem;
     const double& kRoot;
     const double& kRhizome;
-    const double& canopy_assimilation_rate;
+    const double& canopy_assimilation_rate_CO2;
     const double& LeafWS;
     const double& mrc1;
     const double& mrc2;
@@ -121,7 +121,7 @@ string_vector partitioning_growth_calculator_miscanthus::get_inputs()
         "kStem",                     // dimensionless
         "kRoot",                     // dimensionless
         "kRhizome",                  // dimensionless
-        "canopy_assimilation_rate",  // Mg / ha / hour
+        "canopy_assimilation_rate_CO2",  // Mg / ha / hour
         "LeafWS",                    // dimensionless
         "mrc1",                      // dimensionless
         "mrc2",                      // dimensionless
@@ -149,7 +149,7 @@ void partitioning_growth_calculator_miscanthus::do_operation() const
 
     // Calculate the rate of new leaf production
     if (kLeaf > 0) {
-        net_assimilation_rate_leaf = canopy_assimilation_rate * kLeaf * LeafWS;
+        net_assimilation_rate_leaf = canopy_assimilation_rate_CO2 * kLeaf * LeafWS;
         net_assimilation_rate_leaf = resp(net_assimilation_rate_leaf, mrc1, temp);
     } else {
         net_assimilation_rate_leaf = 0.0;
@@ -157,7 +157,7 @@ void partitioning_growth_calculator_miscanthus::do_operation() const
 
     // Calculate the rate of new stem production
     if (kStem >= 0) {
-        net_assimilation_rate_stem = canopy_assimilation_rate * kStem;
+        net_assimilation_rate_stem = canopy_assimilation_rate_CO2 * kStem;
         net_assimilation_rate_stem = resp(net_assimilation_rate_stem, mrc1, temp);
     } else {
         net_assimilation_rate_stem = 0.0;
@@ -165,7 +165,7 @@ void partitioning_growth_calculator_miscanthus::do_operation() const
 
     // Calculate the rate of new root production
     if (kRoot > 0) {
-        net_assimilation_rate_root = canopy_assimilation_rate * kRoot;
+        net_assimilation_rate_root = canopy_assimilation_rate_CO2 * kRoot;
         net_assimilation_rate_root = resp(net_assimilation_rate_root, mrc2, temp);
     } else {
         net_assimilation_rate_root = 0.0;
@@ -173,7 +173,7 @@ void partitioning_growth_calculator_miscanthus::do_operation() const
 
     // Calculate the rate of new rhizome production
     if (kRhizome > 0) {
-        net_assimilation_rate_rhizome = canopy_assimilation_rate * kRhizome;
+        net_assimilation_rate_rhizome = canopy_assimilation_rate_CO2 * kRhizome;
         net_assimilation_rate_rhizome = resp(net_assimilation_rate_rhizome, mrc2, temp);
     } else {
         net_assimilation_rate_rhizome = 0.0;
