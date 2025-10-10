@@ -13,6 +13,7 @@
 #include "partitioning_growth_calculator_miscanthus.h"
 #include "partitioning_growth_miscanthus.h"
 #include "miscanthus_senescence.h"
+#include "delta_TT.h"
 #include "aba_decay.h"
 #include "ball_berry.h"
 #include "biomass_leaf_n_limitation.h"
@@ -109,6 +110,7 @@ creator_map standardBML::module_library::library_entries =
      {"partitioning_growth_calculator_miscanthus",             &create_mc<partitioning_growth_calculator_miscanthus>},
      {"partitioning_growth_miscanthus",                        &create_mc<partitioning_growth_miscanthus>},
      {"miscanthus_senescence",                                 &create_mc<miscanthus_senescence>},
+     {"delta_TT",                                              &create_mc<delta_TT>},
      {"aba_decay",                                             &create_mc<aba_decay>},
      {"ball_berry",                                            &create_mc<ball_berry>},
      {"biomass_leaf_n_limitation",                             &create_mc<biomass_leaf_n_limitation>},
