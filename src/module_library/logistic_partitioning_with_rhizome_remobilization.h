@@ -1,5 +1,5 @@
-#ifndef PARTITIONING_COEFFICIENT_LOGISTIC_MISCANTHUS_H
-#define PARTITIONING_COEFFICIENT_LOGISTIC_MISCANTHUS_H
+#ifndef LOGISTIC_PARTITIONING_WITH_RHIZOME_REMOBILIZATION_H
+#define LOGISTIC_PARTITIONING_WITH_RHIZOME_REMOBILIZATION_H
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
@@ -8,7 +8,7 @@
 namespace standardBML
 {
 /**
- * @class partitioning_coefficient_logistic_miscanthus
+ * @class  logistic_partitioning_with_rhizome_remobilization
  *
  * @brief Calculates carbon partitioning coefficients based on logistic-based
  * functions and development index using the logistic-based functions from
@@ -53,10 +53,10 @@ namespace standardBML
  */
 //double kcoeff(double alpha, double beta, double DVI, double denom);
 
-class partitioning_coefficient_logistic_miscanthus : public direct_module
+class logistic_partitioning_with_rhizome_remobilization : public direct_module
 {
    public:
-    partitioning_coefficient_logistic_miscanthus(
+    logistic_partitioning_with_rhizome_remobilization(
         state_map const& input_quantities,
         state_map* output_quantities)
         : direct_module{},
@@ -83,7 +83,7 @@ class partitioning_coefficient_logistic_miscanthus : public direct_module
     }
     static string_vector get_inputs();
     static string_vector get_outputs();
-    static std::string get_name() { return "partitioning_coefficient_logistic_miscanthus"; }
+    static std::string get_name() { return "logistic_partitioning_with_rhizome_remobilization"; }
 
    private:
     // Pointers to input quantities
@@ -109,7 +109,7 @@ class partitioning_coefficient_logistic_miscanthus : public direct_module
     void do_operation() const override final;
 };
 
-string_vector partitioning_coefficient_logistic_miscanthus::get_inputs()
+string_vector logistic_partitioning_with_rhizome_remobilization::get_inputs()
 {
     return {
         "DVI",          // dimensionless, development index
@@ -126,7 +126,7 @@ string_vector partitioning_coefficient_logistic_miscanthus::get_inputs()
     };
 }
 
-string_vector partitioning_coefficient_logistic_miscanthus::get_outputs()
+string_vector logistic_partitioning_with_rhizome_remobilization::get_outputs()
 {
     return {
         "kRoot",    // dimensionless
@@ -136,7 +136,7 @@ string_vector partitioning_coefficient_logistic_miscanthus::get_outputs()
     };
 }
 
-void partitioning_coefficient_logistic_miscanthus::do_operation() const
+void logistic_partitioning_with_rhizome_remobilization::do_operation() const
 {
      double kStem, kLeaf, kRoot, kRhizome, kDenom;
 

@@ -8,7 +8,7 @@
 // entries in the `creator_map` table.
 
 // Include all the header files that define the modules.
-#include "partitioning_coefficient_logistic_miscanthus.h"
+#include "logistic_partitioning_with_rhizome_remobilization.h"
 #include "partitioning_growth_with_rhizome_as_reserved_c_storage.h"
 #include "miscanthus_senescence.h"
 #include "delta_TT.h"
@@ -103,7 +103,7 @@
 
 creator_map standardBML::module_library::library_entries =
 {
-     {"partitioning_coefficient_logistic_miscanthus",          &create_mc<partitioning_coefficient_logistic_miscanthus>},
+     {"logistic_partitioning_with_rhizome_remobilization",     &create_mc<logistic_partitioning_with_rhizome_remobilization>},
      {"partitioning_growth_with_rhizome_as_reserved_c_storage",&create_mc<partitioning_growth_with_rhizome_as_reserved_c_storage>},
      {"miscanthus_senescence",                                 &create_mc<miscanthus_senescence>},
      {"delta_TT",                                              &create_mc<delta_TT>},
