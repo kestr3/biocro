@@ -104,7 +104,7 @@ void partitioning_growth_with_rhizome_as_reserved_c_storage::do_operation() cons
     double net_assimilation_rate_stem; 
     double net_assimilation_rate_root;
     double net_assimilation_rate_rhizome;
-    double net_assimilation_rate_grain;
+    //double net_assimilation_rate_grain;
     
     double nonrhizome_carbon_flux; // nonleaf_carbon_flux;
     if(canopy_assimilation_rate < 0) nonrhizome_carbon_flux = 0.0;
@@ -150,9 +150,9 @@ void partitioning_growth_with_rhizome_as_reserved_c_storage::do_operation() cons
     //  the amount of new grain here
     
     // Update the output parameter list
-    update(net_assimilation_rate_leaf_op, net_assimilation_rate_rhizome);
+    update(net_assimilation_rate_leaf_op, net_assimilation_rate_leaf);
     update(net_assimilation_rate_stem_op, net_assimilation_rate_stem);
-    update(net_assimilation_rate_root_op, net_assimilation_rate_rhizome);
+    update(net_assimilation_rate_root_op, net_assimilation_rate_root);
     update(net_assimilation_rate_rhizome_op, net_assimilation_rate_rhizome);
 }
 
