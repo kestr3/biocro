@@ -75,7 +75,7 @@ class partitioning_growth_calculator : public direct_module
           kStem{get_input(input_quantities, "kStem")},
           kRoot{get_input(input_quantities, "kRoot")},
           kRhizome{get_input(input_quantities, "kRhizome")},
-          kGrain{get_input(input_quantities, "kGrain")},
+          //kGrain{get_input(input_quantities, "kGrain")},
           canopy_assimilation_rate{get_input(input_quantities, "canopy_assimilation_rate")},
           LeafWS{get_input(input_quantities, "LeafWS")},
           mrc1{get_input(input_quantities, "mrc1")},
@@ -86,8 +86,8 @@ class partitioning_growth_calculator : public direct_module
           net_assimilation_rate_leaf_op{get_op(output_quantities, "net_assimilation_rate_leaf")},
           net_assimilation_rate_stem_op{get_op(output_quantities, "net_assimilation_rate_stem")},
           net_assimilation_rate_root_op{get_op(output_quantities, "net_assimilation_rate_root")},
-          net_assimilation_rate_rhizome_op{get_op(output_quantities, "net_assimilation_rate_rhizome")},
-          net_assimilation_rate_grain_op{get_op(output_quantities, "net_assimilation_rate_grain")}
+          net_assimilation_rate_rhizome_op{get_op(output_quantities, "net_assimilation_rate_rhizome")}
+         // net_assimilation_rate_grain_op{get_op(output_quantities, "net_assimilation_rate_grain")}
     {
     }
     static string_vector get_inputs();
@@ -100,7 +100,7 @@ class partitioning_growth_calculator : public direct_module
     const double& kStem;
     const double& kRoot;
     const double& kRhizome;
-    const double& kGrain;
+    //const double& kGrain;
     const double& canopy_assimilation_rate;
     const double& LeafWS;
     const double& mrc1;
@@ -112,7 +112,7 @@ class partitioning_growth_calculator : public direct_module
     double* net_assimilation_rate_stem_op;
     double* net_assimilation_rate_root_op;
     double* net_assimilation_rate_rhizome_op;
-    double* net_assimilation_rate_grain_op;
+   // double* net_assimilation_rate_grain_op;
 
     // Main operation
     void do_operation() const;
@@ -125,7 +125,7 @@ string_vector partitioning_growth_calculator::get_inputs()
         "kStem",                     // dimensionless
         "kRoot",                     // dimensionless
         "kRhizome",                  // dimensionless
-        "kGrain",                    // dimensionless
+        //"kGrain",                    // dimensionless
         "canopy_assimilation_rate",  // Mg / ha / hour
         "LeafWS",                    // dimensionless
         "mrc1",                      // dimensionless
@@ -141,7 +141,7 @@ string_vector partitioning_growth_calculator::get_outputs()
         "net_assimilation_rate_stem",     // Mg / ha / hour
         "net_assimilation_rate_root",     // Mg / ha / hour
         "net_assimilation_rate_rhizome",  // Mg / ha / hour
-        "net_assimilation_rate_grain"     // Mg / ha / hour
+        //"net_assimilation_rate_grain"     // Mg / ha / hour
     };
 }
 
@@ -151,7 +151,7 @@ void partitioning_growth_calculator::do_operation() const
     double net_assimilation_rate_stem{0.0};
     double net_assimilation_rate_root{0.0};
     double net_assimilation_rate_rhizome{0.0};
-    double net_assimilation_rate_grain{0.0};
+    //double net_assimilation_rate_grain{0.0};
 
     // Calculate the rate of new leaf production
     if (kLeaf > 0) {
@@ -186,18 +186,18 @@ void partitioning_growth_calculator::do_operation() const
     }
 
     // Calculate the rate of grain production
-    if (kGrain > 0 && canopy_assimilation_rate > 0) {
-        net_assimilation_rate_grain = canopy_assimilation_rate * kGrain;
-    } else {
-        net_assimilation_rate_grain = 0.0;
-    }
+    // if (kGrain > 0 && canopy_assimilation_rate > 0) {
+    //     net_assimilation_rate_grain = canopy_assimilation_rate * kGrain;
+    // } else {
+    //     net_assimilation_rate_grain = 0.0;
+    // }
 
     // Update the output quantity list
     update(net_assimilation_rate_leaf_op, net_assimilation_rate_leaf);
     update(net_assimilation_rate_stem_op, net_assimilation_rate_stem);
     update(net_assimilation_rate_root_op, net_assimilation_rate_root);
     update(net_assimilation_rate_rhizome_op, net_assimilation_rate_rhizome);
-    update(net_assimilation_rate_grain_op, net_assimilation_rate_grain);
+    //update(net_assimilation_rate_grain_op, net_assimilation_rate_grain);
 }
 
 }  // namespace standardBML
