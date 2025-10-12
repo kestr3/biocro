@@ -36,7 +36,7 @@ class maintenance_respiration : public differential_module
           mrc_leaf{get_input(input_quantities, "mrc_leaf")},
           mrc_stem{get_input(input_quantities, "mrc_stem")},
           mrc_root{get_input(input_quantities, "mrc_root")},
-          mrc_grain{get_input(input_quantities, "mrc_grain")},
+          //mrc_grain{get_input(input_quantities, "mrc_grain")},
 
           // Get pointers to output quantities
           Leaf_op{get_op(output_quantities, "Leaf")},
@@ -63,7 +63,7 @@ class maintenance_respiration : public differential_module
     const double& mrc_leaf;
     const double& mrc_stem;
     const double& mrc_root;
-    const double& mrc_grain;
+    //const double& mrc_grain;
 
     // Pointers to output quantities
     double* Leaf_op;
@@ -90,7 +90,7 @@ string_vector maintenance_respiration::get_inputs()
         "mrc_leaf",   // kg / kg / hr
         "mrc_stem",   // kg / kg / hr
         "mrc_root",   // kg / kg / hr
-        "mrc_grain"   // kg / kg / hr
+        //"mrc_grain"   // kg / kg / hr
     };
 }
 
