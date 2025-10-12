@@ -189,7 +189,7 @@ void multilayer_canopy_integrator::run() const
         growth_respiration_fraction * fabs(canopy_assimilation_rate);  // micromol / m^2 / s
 
     canopy_assimilation_rate =
-        canopy_assimilation_rate - growth_respiration;  // micromol / m^2 / s
+        fabs(canopy_assimilation_rate - growth_respiration) * 10;  // micromol / m^2 / s
 
     // For transpiration, we need to convert mmol / m^2 / s into Mg / ha / hr
     // using the molar mass of water in kg / mol, which can be accomplished by

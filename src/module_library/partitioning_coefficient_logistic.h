@@ -178,3 +178,5 @@ double kcoeff(double alpha, double beta, double DVI, double denom)
 
 }  // namespace standardBML
 #endif
+
+// Notes: module does not account for growth during emergence (kRhizome_emr, kStem_emr, etc.) Rhizome can only contribute during emergence stage if DVI <0, so kRhizome = kRhizome_emr = -0.0003
