@@ -30,8 +30,8 @@ class maintenance_respiration : public differential_module
           Stem{get_input(input_quantities, "Stem")},
           Root{get_input(input_quantities, "Root")},
           Rhizome{get_input(input_quantities, "Rhizome")},
-          Grain{get_input(input_quantities, "Grain")},
-          Shell{get_input(input_quantities, "Shell")},
+          //Grain{get_input(input_quantities, "Grain")},
+          //Shell{get_input(input_quantities, "Shell")},
           temp{get_input(input_quantities, "temp")},
           mrc_leaf{get_input(input_quantities, "mrc_leaf")},
           mrc_stem{get_input(input_quantities, "mrc_stem")},
@@ -42,9 +42,9 @@ class maintenance_respiration : public differential_module
           Leaf_op{get_op(output_quantities, "Leaf")},
           Stem_op{get_op(output_quantities, "Stem")},
           Root_op{get_op(output_quantities, "Root")},
-          Rhizome_op{get_op(output_quantities, "Rhizome")},
-          Grain_op{get_op(output_quantities, "Grain")},
-          Shell_op{get_op(output_quantities, "Shell")}
+          Rhizome_op{get_op(output_quantities, "Rhizome")}
+          //Grain_op{get_op(output_quantities, "Grain")},
+          //Shell_op{get_op(output_quantities, "Shell")}
     {
     }
     static string_vector get_inputs();
@@ -57,8 +57,8 @@ class maintenance_respiration : public differential_module
     const double& Stem;
     const double& Root;
     const double& Rhizome;
-    const double& Grain;
-    const double& Shell;
+    //const double& Grain;
+    //const double& Shell;
     const double& temp;
     const double& mrc_leaf;
     const double& mrc_stem;
@@ -70,8 +70,8 @@ class maintenance_respiration : public differential_module
     double* Stem_op;
     double* Root_op;
     double* Rhizome_op;
-    double* Grain_op;
-    double* Shell_op;
+    //double* Grain_op;
+    //double* Shell_op;
 
     // Implement the pure virtual function do_operation():
     void do_operation() const override final;
@@ -84,8 +84,8 @@ string_vector maintenance_respiration::get_inputs()
         "Stem",       // Mg / ha
         "Root",       // Mg / ha
         "Rhizome",    // Mg / ha
-        "Shell",      // Mg / ha
-        "Grain",      // Mg / ha
+        //"Shell",      // Mg / ha
+        //"Grain",      // Mg / ha
         "temp",       // degree C
         "mrc_leaf",   // kg / kg / hr
         "mrc_stem",   // kg / kg / hr
@@ -101,8 +101,8 @@ string_vector maintenance_respiration::get_outputs()
         "Stem",     // Mg / ha
         "Root",     // Mg / ha
         "Rhizome",  // Mg / ha
-        "Shell",    // Mg / ha
-        "Grain"     // Mg / ha
+        //"Shell",    // Mg / ha
+        //"Grain"     // Mg / ha
     };
 }
 
@@ -118,16 +118,16 @@ void maintenance_respiration::do_operation() const
     //assume rhizome has the same maintenance_respiration_coef as root
     double dRhizome = -Rhizome * mrc_root * Q10_temperature_response(temp, Tref);
 
-    double dGrain = -Grain * mrc_grain * Q10_temperature_response(temp, Tref);
+    //double dGrain = -Grain * mrc_grain * Q10_temperature_response(temp, Tref);
     //assume shell has the same maintenance_respiration_coef as grain
-    double dShell = -Shell * mrc_grain * Q10_temperature_response(temp, Tref);  // Mg / ha
+    //double dShell = -Shell * mrc_grain * Q10_temperature_response(temp, Tref);  // Mg / ha
 
     update(Leaf_op, dLeaf);        // Mg / ha
     update(Stem_op, dStem);        // Mg / ha
     update(Root_op, dRoot);        // Mg / ha
     update(Rhizome_op, dRhizome);  // Mg / ha
-    update(Grain_op, dGrain);      // Mg / ha
-    update(Shell_op, dShell);      // Mg / ha
+    //update(Grain_op, dGrain);      // Mg / ha
+    //update(Shell_op, dShell);      // Mg / ha
 }
 
 }  // namespace standardBML
