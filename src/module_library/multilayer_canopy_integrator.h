@@ -165,8 +165,8 @@ void multilayer_canopy_integrator::run() const
         double const sunlit_lai = *sunlit_fraction_ips[i] * LAIc;
         double const shaded_lai = *shaded_fraction_ips[i] * LAIc;
 
-        canopy_assimilation_rate += *sunlit_Assim_ips[i] * sunlit_lai +
-                                    *shaded_Assim_ips[i] * shaded_lai;
+        canopy_assimilation_rate += *sunlit_Assim_ips[i] * sunlit_lai; 
+        //+ *shaded_Assim_ips[i] * shaded_lai;
 
         canopy_transpiration_rate += *sunlit_TransR_ips[i] * sunlit_lai +
                                      *shaded_TransR_ips[i] * shaded_lai;
@@ -189,7 +189,7 @@ void multilayer_canopy_integrator::run() const
         growth_respiration_fraction * fabs(canopy_assimilation_rate);  // micromol / m^2 / s
 
     canopy_assimilation_rate =
-        fabs(canopy_assimilation_rate - growth_respiration);  // micromol / m^2 / s
+        canopy_assimilation_rate - growth_respiration;  // micromol / m^2 / s
 
     // For transpiration, we need to convert mmol / m^2 / s into Mg / ha / hr
     // using the molar mass of water in kg / mol, which can be accomplished by
