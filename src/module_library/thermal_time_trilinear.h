@@ -161,9 +161,11 @@ void thermal_time_trilinear::do_operation() const
 
     // Convert to an hourly rate
     rate_per_day /= 24.0;  // degrees C * day / hr
-
+    
+    double TTc;
+    TTc += rate_per_day;
     // Update the output quantity list
-    update(TTc_op, rate_per_day);
+    update(TTc_op, TTc);
 }
 }
  // namespace standardBML
