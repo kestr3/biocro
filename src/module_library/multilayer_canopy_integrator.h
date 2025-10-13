@@ -165,8 +165,8 @@ void multilayer_canopy_integrator::run() const
         double const sunlit_lai = *sunlit_fraction_ips[i] * LAIc;
         double const shaded_lai = *shaded_fraction_ips[i] * LAIc;
 
-        canopy_assimilation_rate += *sunlit_Assim_ips[i] * sunlit_lai; 
-        //+ *shaded_Assim_ips[i] * shaded_lai;
+        canopy_assimilation_rate += *sunlit_Assim_ips[i] * sunlit_lai + 
+                                    *shaded_Assim_ips[i] * shaded_lai;
 
         canopy_transpiration_rate += *sunlit_TransR_ips[i] * sunlit_lai +
                                      *shaded_TransR_ips[i] * shaded_lai;
