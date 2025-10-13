@@ -148,7 +148,7 @@ string_vector thermal_time_trilinear::get_outputs()
 void thermal_time_trilinear::do_operation() const
 {
     // Find the rate of change on a daily basis
-    double const rate_per_day =
+    double rate_per_day =
         fractional_doy < sowing_fractional_doy ? 0.0
         : temp <= tbase                        ? 0.0
         : temp <= topt_lower                   ? temp - tbase
@@ -160,10 +160,10 @@ void thermal_time_trilinear::do_operation() const
 
 
     // Convert to an hourly rate
-    double const rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
+    rate_per_day /= 24.0;  // degrees C * day / hr
 
     // Update the output quantity list
-    update(TTc_op, rate_per_hour);
+    update(TTc_op, rate_per_day);
 }
 }
  // namespace standardBML
