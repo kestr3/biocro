@@ -149,8 +149,8 @@ void thermal_time_trilinear::do_operation() const
 {
     // Find the rate of change on a daily basis
     double const rate_per_day =
-        fractional_doy < sowing_fractional_doy ? 0.0
-        : temp <= tbase                        ? 0.0
+        //fractional_doy < sowing_fractional_doy ? 0.0
+        temp <= tbase                        ? 0.0
         : temp <= topt_lower                   ? temp - tbase
         : temp <= topt_upper                   ? topt_lower - tbase
         : temp <= tmax                         ? (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper)
