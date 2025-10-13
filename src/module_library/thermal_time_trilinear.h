@@ -173,6 +173,7 @@ void thermal_time_trilinear::do_operation() const
     // Convert to an hourly rate
    // double const rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
     rate_per_day /= 24.0;
+
     // Update the output quantity list
     update(TTc_op, rate_per_day);
 }
