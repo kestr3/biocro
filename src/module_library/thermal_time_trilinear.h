@@ -87,7 +87,7 @@ class thermal_time_trilinear : public differential_module
 {
    public:
     thermal_time_trilinear(
-        state_map& input_quantities,
+        state_map const& input_quantities,
         state_map* output_quantities)
         : differential_module{},
 
