@@ -149,7 +149,7 @@ string_vector delta_TT::get_outputs()
 void delta_TT::do_operation() const
 {
     // Find the rate of change on a daily basis
-    double const rate_per_day =
+    double rate_per_day =
         fractional_doy < sowing_fractional_doy ? 0.0
         : temp <= tbase                        ? 0.0
         : temp <= topt_lower                   ? temp - tbase
@@ -158,7 +158,7 @@ void delta_TT::do_operation() const
                                                : 0.0;  // degrees C
 
     // Convert to an hourly rate
-    double const rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
+    double rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
 
     // Update the output quantity list
     update(delta_TT_op, rate_per_hour);
