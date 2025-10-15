@@ -168,40 +168,40 @@ void delta_TT::do_operation() const
     // const double topt_upper = *topt_upper_ip;
     // const double tmax = *tmax_ip;
 
-    // Find the rate of change of the growing degree days
-    double gdd_rate;
-    if (temp <= tbase) {
-        gdd_rate = 0.0;
-    } else if (temp <= topt_lower) {
-        gdd_rate = temp - tbase;
-    } else if (temp > topt_lower && temp < topt_upper)  {
-        gdd_rate = topt_lower-tbase;
-    } else if(temp >= topt_upper && temp < tmax)  {
-        gdd_rate = (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper);
-    } else {
-        gdd_rate = 0.0;
-    }
+    // // Find the rate of change of the growing degree days
+    // double gdd_rate;
+    // if (temp <= tbase) {
+    //     gdd_rate = 0.0;
+    // } else if (temp <= topt_lower) {
+    //     gdd_rate = temp - tbase;
+    // } else if (temp > topt_lower && temp < topt_upper)  {
+    //     gdd_rate = topt_lower-tbase;
+    // } else if(temp >= topt_upper && temp < tmax)  {
+    //     gdd_rate = (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper);
+    // } else {
+    //     gdd_rate = 0.0;
+    // }
 
-    // Normalize to a rate per hour
-    gdd_rate /= 24.0;
+    // // Normalize to a rate per hour
+    // gdd_rate /= 24.0;
 
-    // Update the output parameter list
-    update(delta_TT_op, gdd_rate);
+    // // Update the output parameter list
+    // update(delta_TT_op, gdd_rate);
 
     // Find the rate of change on a daily basis
-    // double rate_per_day =
-    //     fractional_doy < sowing_fractional_doy ? 0.0
-    //     : temp <= tbase                        ? 0.0
-    //     : temp <= topt_lower                   ? temp - tbase
-    //     : temp <= topt_upper                   ? topt_lower - tbase
-    //     : temp <= tmax                         ? (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper)
-    //                                            : 0.0;  // degrees C
+    double const rate_per_day =
+        fractional_doy < sowing_fractional_doy ? 0.0
+        : temp <= tbase                        ? 0.0
+        : temp <= topt_lower                   ? temp - tbase
+        : temp <= topt_upper                   ? topt_lower - tbase
+        : temp <= tmax                         ? (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper)
+                                               : 0.0;  // degrees C
 
-    // // Convert to an hourly rate
-    // double rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
+    // Convert to an hourly rate
+    double const rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
 
-    // // Update the output quantity list
-    // update(delta_TT_op, rate_per_hour);
+    // Update the output quantity list
+    update(delta_TT_op, rate_per_hour);
 }
 
 }  // namespace standardBML
