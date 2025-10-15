@@ -93,6 +93,13 @@ class delta_TT : public direct_module
         : direct_module{},
 
           // Get references to input quantities
+        //   fractional_doy_ip{get_ip(input_quantities, "fractional_doy")},
+        //   sowing_fractional_doy_ip{get_ip(input_quantities, "sowing_fractional_doy")},
+        //   temp_ip{get_ip(input_quantities, "temp")},
+        //   tbase_ip{get_ip(input_quantities, "tbase")},
+        //   topt_lower_ip{get_ip(input_quantities, "topt_lower")},
+        //   topt_upper_ip{get_ip(input_quantities, "topt_upper")},
+        //   tmax_ip{get_ip(input_quantities, "tmax")},
           fractional_doy{get_input(input_quantities, "fractional_doy")},
           sowing_fractional_doy{get_input(input_quantities, "sowing_fractional_doy")},
           temp{get_input(input_quantities, "temp")},
@@ -100,7 +107,6 @@ class delta_TT : public direct_module
           topt_lower{get_input(input_quantities, "topt_lower")},
           topt_upper{get_input(input_quantities, "topt_upper")},
           tmax{get_input(input_quantities, "tmax")},
-
           // Get pointers to output quantities
           delta_TT_op{get_op(output_quantities, "TTc")}
     {
@@ -111,6 +117,13 @@ class delta_TT : public direct_module
 
    private:
     // References to input quantities
+    // const double* fractional_doy_ip;
+    // const double* sowing_fractional_doy_ip;
+    // const double* temp_ip;
+    // const double* tbase_ip;
+    // const double* topt_lower_ip;
+    // const double* topt_upper_ip;
+    // const double* tmax_ip;
     double const& fractional_doy;
     double const& sowing_fractional_doy;
     double const& temp;
@@ -148,20 +161,47 @@ string_vector delta_TT::get_outputs()
 
 void delta_TT::do_operation() const
 {
+    // Collect inputs
+    // const double temp = *temp_ip;
+    // const double tbase = *tbase_ip;
+    // const double topt_lower = *topt_lower_ip;
+    // const double topt_upper = *topt_upper_ip;
+    // const double tmax = *tmax_ip;
+
+    // Find the rate of change of the growing degree days
+    double gdd_rate;
+    if (temp <= tbase) {
+        gdd_rate = 0.0;
+    } else if (temp <= topt_lower) {
+        gdd_rate = temp - tbase;
+    } else if (temp > topt_lower && temp < topt_upper)  {
+        gdd_rate = topt_lower-tbase;
+    } else if(temp >= topt_upper && temp < tmax)  {
+        gdd_rate = (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper);
+    } else {
+        gdd_rate = 0.0;
+    }
+
+    // Normalize to a rate per hour
+    gdd_rate /= 24.0;
+
+    // Update the output parameter list
+    update(delta_TT_op, gdd_rate);
+
     // Find the rate of change on a daily basis
-    double rate_per_day =
-        fractional_doy < sowing_fractional_doy ? 0.0
-        : temp <= tbase                        ? 0.0
-        : temp <= topt_lower                   ? temp - tbase
-        : temp <= topt_upper                   ? topt_lower - tbase
-        : temp <= tmax                         ? (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper)
-                                               : 0.0;  // degrees C
+    // double rate_per_day =
+    //     fractional_doy < sowing_fractional_doy ? 0.0
+    //     : temp <= tbase                        ? 0.0
+    //     : temp <= topt_lower                   ? temp - tbase
+    //     : temp <= topt_upper                   ? topt_lower - tbase
+    //     : temp <= tmax                         ? (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper)
+    //                                            : 0.0;  // degrees C
 
-    // Convert to an hourly rate
-    double rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
+    // // Convert to an hourly rate
+    // double rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
 
-    // Update the output quantity list
-    update(delta_TT_op, rate_per_hour);
+    // // Update the output quantity list
+    // update(delta_TT_op, rate_per_hour);
 }
 
 }  // namespace standardBML
