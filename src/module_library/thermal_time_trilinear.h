@@ -161,6 +161,12 @@ string_vector thermal_time_trilinear::get_outputs()
 
 void thermal_time_trilinear::do_operation() const
 {
+    //kc added
+    double const& sowing_fractional_doy = 0;
+    double const& tbase = 10;
+    double const& topt_lower = 28;
+    double const& topt_upper = 31;
+    double const& tmax = 40;
    // Find the rate of change on a daily basis
     double const rate_per_day =
         fractional_doy < sowing_fractional_doy ? 0.0
