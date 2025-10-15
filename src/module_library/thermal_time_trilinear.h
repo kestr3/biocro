@@ -92,13 +92,13 @@ class thermal_time_trilinear : public differential_module
         : differential_module{},
 
           // Get references to input quantities
-            fractional_doy{get_input(input_quantities, "fractional_doy")},
-            sowing_fractional_doy{get_input(input_quantities, "sowing_fractional_doy")},
-            temp{get_input(input_quantities, "temp")},
-            tbase{get_input(input_quantities, "tbase")},
-            topt_lower{get_input(input_quantities, "topt_lower")},
-            topt_upper{get_input(input_quantities, "topt_upper")},
-            tmax{get_input(input_quantities, "tmax")},
+            fractional_doy_ip{get_input(input_quantities, "fractional_doy")},
+            sowing_fractional_doy_ip{get_input(input_quantities, "sowing_fractional_doy")},
+            temp_ip{get_input(input_quantities, "temp")},
+            tbase_ip{get_input(input_quantities, "tbase")},
+            topt_lower_ip{get_input(input_quantities, "topt_lower")},
+            topt_upper_ip{get_input(input_quantities, "topt_upper")},
+            tmax_ip{get_input(input_quantities, "tmax")},
         //   fractional_doy_ip{get_ip(input_quantities, "fractional_doy")},
         //   sowing_fractional_doy_ip{get_ip(input_quantities, "sowing_fractional_doy")},
         //   temp_ip{get_ip(input_quantities, "temp")},
@@ -117,13 +117,13 @@ class thermal_time_trilinear : public differential_module
 
    private:
     // References to input quantities
-    double const& fractional_doy;
-    double const& sowing_fractional_doy;
-    double const& temp;
-    double const& tbase;
-    double const& topt_lower;
-    double const& topt_upper;
-    double const& tmax;
+    double const& fractional_doy_ip;
+    double const& sowing_fractional_doy_ip;
+    double const& temp_ip;
+    double const& tbase_ip;
+    double const& topt_lower_ip;
+    double const& topt_upper_ip;
+    double const& tmax_ip;
     // double const* fractional_doy_ip;
     // double const* sowing_fractional_doy_ip;
     // double const* temp_ip;
@@ -161,12 +161,15 @@ string_vector thermal_time_trilinear::get_outputs()
 
 void thermal_time_trilinear::do_operation() const
 {
-    //kc added
-    double const& sowing_fractional_doy = 0;
-    double const& tbase = 10;
-    double const& topt_lower = 28;
-    double const& topt_upper = 31;
-    double const& tmax = 40;
+    //kacey added
+    double const& fractional_doy = fractional_doy_ip;
+    double const& sowing_fractional_doy = sowing_fractional_doy_ip;
+    double const& temp = temp_ip;
+    double const& tbase = tbase_ip;
+    double const& topt_lower = topt_lower_ip;
+    double const& topt_upper = topt_upper_ip;
+    double const& tmax = tmax_ip;
+
    // Find the rate of change on a daily basis
     double const rate_per_day =
         fractional_doy < sowing_fractional_doy ? 0.0
