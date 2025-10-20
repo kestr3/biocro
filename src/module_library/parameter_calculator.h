@@ -40,7 +40,6 @@ class parameter_calculator : public direct_module
 
     // Pointers to output quantities
     double* lai_op;
-    double* vmax_op;
     double* alpha_op;
 
     // Main operation
