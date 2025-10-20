@@ -189,7 +189,7 @@ void delta_TT::do_operation() const
     // update(delta_TT_op, gdd_rate);
 
     // Find the rate of change on a daily basis
-    double const rate_per_day =
+    double const rate_per_day_delta =
         fractional_doy < sowing_fractional_doy ? 0.0
         : temp <= tbase                        ? 0.0
         : temp <= topt_lower                   ? temp - tbase
@@ -198,10 +198,10 @@ void delta_TT::do_operation() const
                                                : 0.0;  // degrees C
 
     // Convert to an hourly rate
-    double const rate_per_hour = rate_per_day / 24.0;  // degrees C * day / hr
+    double const rate_per_hour_delta = rate_per_day_delta / 24.0;  // degrees C * day / hr
 
     // Update the output quantity list
-    update(delta_TT_op, rate_per_hour);
+    update(delta_TT_op, rate_per_hour_delta);
 }
 
 }  // namespace standardBML
