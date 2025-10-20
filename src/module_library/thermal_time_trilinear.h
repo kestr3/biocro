@@ -92,20 +92,13 @@ class thermal_time_trilinear : public differential_module
         : differential_module{},
 
           // Get references to input quantities
-            fractional_doy{get_input(input_quantities, "fractional_doy")},
-            sowing_fractional_doy{get_input(input_quantities, "sowing_fractional_doy")},
-            temp{get_input(input_quantities, "temp")},
-            tbase{get_input(input_quantities, "tbase")},
-            topt_lower{get_input(input_quantities, "topt_lower")},
-            topt_upper{get_input(input_quantities, "topt_upper")},
-            tmax{get_input(input_quantities, "tmax")},
-        //   fractional_doy_ip{get_ip(input_quantities, "fractional_doy")},
-        //   sowing_fractional_doy_ip{get_ip(input_quantities, "sowing_fractional_doy")},
-        //   temp_ip{get_ip(input_quantities, "temp")},
-        //   tbase_ip{get_ip(input_quantities, "tbase")},
-        //   topt_lower_ip{get_ip(input_quantities, "topt_lower")},
-        //   topt_upper_ip{get_ip(input_quantities, "topt_upper")},
-        //   tmax_ip{get_ip(input_quantities, "tmax")},
+          fractional_doy{get_input(input_quantities, "fractional_doy")},
+          sowing_fractional_doy{get_input(input_quantities, "sowing_fractional_doy")},
+          temp{get_input(input_quantities, "temp")},
+          tbase{get_input(input_quantities, "tbase")},
+          topt_lower{get_input(input_quantities, "topt_lower")},
+          topt_upper{get_input(input_quantities, "topt_upper")},
+          tmax{get_input(input_quantities, "tmax")},
 
           // Get pointers to output quantities
           TTc_op{get_op(output_quantities, "TTc")}
@@ -124,13 +117,6 @@ class thermal_time_trilinear : public differential_module
     double const& topt_lower;
     double const& topt_upper;
     double const& tmax;
-    // double const* fractional_doy_ip;
-    // double const* sowing_fractional_doy_ip;
-    // double const* temp_ip;
-    // double const* tbase_ip;
-    // double const* topt_lower_ip;
-    // double const* topt_upper_ip;
-    // double const* tmax_ip;
 
     // Pointers to output quantities
     double* TTc_op;
@@ -161,7 +147,7 @@ string_vector thermal_time_trilinear::get_outputs()
 
 void thermal_time_trilinear::do_operation() const
 {
-   // Find the rate of change on a daily basis
+    // Find the rate of change on a daily basis
     double const rate_per_day =
         fractional_doy < sowing_fractional_doy ? 0.0
         : temp <= tbase                        ? 0.0
@@ -175,32 +161,7 @@ void thermal_time_trilinear::do_operation() const
 
     // Update the output quantity list
     update(TTc_op, rate_per_hour);
-
-    // const double temp = *temp_ip;
-    // const double tbase = *tbase_ip;
-    // const double topt_lower = *topt_lower_ip;
-    // const double topt_upper = *topt_upper_ip;
-    // const double tmax = *tmax_ip;
-
-    // double gdd_rate;
-    // if (temp <= tbase) {
-    //     gdd_rate = 0.0;
-    // } else if (temp <= topt_lower) {
-    //     gdd_rate = temp - tbase;
-    // } else if (temp > topt_lower && temp < topt_upper)  {
-    //     gdd_rate = topt_lower-tbase;
-    // } else if(temp >= topt_upper && temp < tmax)  {
-    //     gdd_rate = (tmax - temp) * (topt_lower - tbase) / (tmax - topt_upper);
-    // } else {
-    //     gdd_rate = 0.0;
-    // }
-
-    // // Normalize to a rate per hour
-    // gdd_rate /= 24.0;
-
-    // // Update the output parameter list
-    // update(TTc_op, gdd_rate);
 }
-}
- // namespace standardBML
+
+}  // namespace standardBML
 #endif
