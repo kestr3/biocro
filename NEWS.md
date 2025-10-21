@@ -161,6 +161,9 @@ be directly added to this file to describe the related changes.
   re-parameterized. The parameterization script is now included in the BioCro
   repository and package. See the help file for `soybean` for complete details.
 
+- `catm_data` was updated to include the global average atmospheric CO2
+  concentration in 2024.
+
 ## Internal changes
 
 - Renamed the `resp()` function to `growth_resp_Q10()` to better indicate its
