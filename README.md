@@ -99,12 +99,12 @@ install.packages('BioCro')
 
 Please see the contribution guidelines before submitting changes.
 These may be found in Chapter One of the _Developer's Manual_ on the
-[public BioCro Documentation web site](https://biocro.github.io).
+[public BioCro Documentation web site](https://biocro.org).
 
 ### Software Documentation
 
 See the [public BioCro Documentation web
-site](https://biocro.github.io).  There will be found not only the
+site](https://biocro.org).  There will be found not only the
 usual package documentation, but also documentation of the C++ code,
 including notes on the biological models used in BioCro and their
 implementation.  Also included is documentation for BioCro package
@@ -112,7 +112,7 @@ developers and maintainers.
 
 There is also a separate [page that documents all of the quantities
 used by the Standard BioCro Module
-Library](https://biocro.github.io/BioCro-documentation/quantity_docs/quantities.html).
+Library](https://biocro.org/BioCro-documentation/quantity_docs/quantities.html).
 
 ### License
 
