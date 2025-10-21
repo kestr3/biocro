@@ -80,7 +80,7 @@ photosynthesis_outputs c4photoC(
 
         // Calculate the smaller of the two quadratic roots, as mentioned
         // following Equation 3B in Collatz 1992.
-        double gross_assim = quadratic_root_minus(a, b, c);  // micromol / m^2 / s
+        double gross_assim = quadratic_root_min(a, b, c);  // micromol / m^2 / s
 
         Assim = gross_assim - RT;  // micromole / m^2 / s.
 
@@ -92,9 +92,9 @@ photosynthesis_outputs c4photoC(
         an_conductance =
             conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
 
-        Assim = std::min(
-            Assim,
-            an_conductance);  // micromol / m^2 / s
+        // Assim = std::min(
+        //     Assim,
+        //     an_conductance);  // micromol / m^2 / s
 
         BB_res = ball_berry_gs(
             Assim * 1e-6,
