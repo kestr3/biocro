@@ -74,9 +74,9 @@ photosynthesis_outputs c4photoC(
     do {
         // Collatz 1992. Appendix B. Quadratic coefficients from Equation 3B.
         double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / m^2 / s
-        double a = beta;
+        double a = M * kT_IC_P;
         double b = -(M + kT_IC_P);
-        double c = M * kT_IC_P;
+        double c = beta;
 
         // Calculate the smaller of the two quadratic roots, as mentioned
         // following Equation 3B in Collatz 1992.
@@ -130,7 +130,6 @@ photosynthesis_outputs c4photoC(
     //Rprintf("Counter %i; Ci %f; Assim %f; Gs %f; leaf_temperature %f\n", iterCounter, InterCellularCO2 / atmospheric_pressure * 1e6, Assim, Gs, leaf_temperature);
 
     double Ci = InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / mol
-    double GrossAssim = Assim + RT;
 
     return photosynthesis_outputs{
         /* .Assim = */ Assim,                       // micromol / m^2 /s
@@ -142,6 +141,5 @@ photosynthesis_outputs c4photoC(
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .Rp = */ 0,                              // micromol / m^2 / s
         /* .iterations = */ iterCounter,             // not a physical quantity
-        /* .GrossAssim = */ GrossAssim
     };
 }
