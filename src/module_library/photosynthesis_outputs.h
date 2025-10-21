@@ -15,6 +15,7 @@ struct photosynthesis_outputs {
     double RHs;                //!< Relative humidity at the leaf surface (dimensionless)
     double Rp;                 //!< Rate of photorespiration (micromol / m^2 / s)
     int iterations;            //!< Number of iterations used by convergence loop
+    double GrossAssim;         // Kacey added 
 };
 
 #endif

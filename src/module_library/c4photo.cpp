@@ -130,6 +130,7 @@ photosynthesis_outputs c4photoC(
     //Rprintf("Counter %i; Ci %f; Assim %f; Gs %f; leaf_temperature %f\n", iterCounter, InterCellularCO2 / atmospheric_pressure * 1e6, Assim, Gs, leaf_temperature);
 
     double Ci = InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / mol
+    double GrossAssim = Assim + RT;
 
     return photosynthesis_outputs{
         /* .Assim = */ Assim,                       // micromol / m^2 /s
@@ -140,6 +141,7 @@ photosynthesis_outputs c4photoC(
         /* .Cs = */ BB_res.cs,                      // micromol / m^2 / s
         /* .RHs = */ BB_res.hs,                     // dimensionless from Pa / Pa
         /* .Rp = */ 0,                              // micromol / m^2 / s
-        /* .iterations = */ iterCounter             // not a physical quantity
+        /* .iterations = */ iterCounter,             // not a physical quantity
+        /* .GrossAssim = */ GrossAssim
     };
 }
