@@ -47,9 +47,9 @@ photosynthesis_outputs c4photoC(
     double RT = Rtn / Rtd;                                   // micromole / m^2 / s
 
     // Collatz 1992. Appendix B. Quadratic coefficients from Equation 2B.
-    double b0 = theta;
+    double b0 = VT * alpha * Qp;
     double b1 = -(VT + alpha * Qp);
-    double b2 = VT * alpha * Qp;
+    double b2 = theta;
 
     // Calculate the smaller of the two quadratic roots, as mentioned following
     // Equation 3B in Collatz 1992.
@@ -80,7 +80,7 @@ photosynthesis_outputs c4photoC(
 
         // Calculate the smaller of the two quadratic roots, as mentioned
         // following Equation 3B in Collatz 1992.
-        double gross_assim = quadratic_root_min(a, b, c);  // micromol / m^2 / s
+        double gross_assim = quadratic_root_minus(a, b, c);  // micromol / m^2 / s
 
         Assim = gross_assim - RT;  // micromole / m^2 / s.
 
