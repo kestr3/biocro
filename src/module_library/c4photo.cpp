@@ -92,9 +92,10 @@ photosynthesis_outputs c4photoC(
         an_conductance =
             conductance_limited_assim(Ca, gbw, Gs);  // micromol / m^2 / s
 
-        // Assim = std::min(
-        //     Assim,
-        //     an_conductance);  // micromol / m^2 / s
+         Assim = an_conductance;
+         //std::min(
+           //  Assim,
+             //an_conductance);  // micromol / m^2 / s
 
         BB_res = ball_berry_gs(
             Assim * 1e-6,
