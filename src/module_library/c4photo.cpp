@@ -47,9 +47,9 @@ photosynthesis_outputs c4photoC(
     double RT = Rtn / Rtd;                                   // micromole / m^2 / s
 
     // Collatz 1992. Appendix B. Quadratic coefficients from Equation 2B.
-    double b0 = VT * alpha * Qp;
+    double b0 = theta;
     double b1 = -(VT + alpha * Qp);
-    double b2 = theta;
+    double b2 = VT * alpha * Qp;
 
     // Calculate the smaller of the two quadratic roots, as mentioned following
     // Equation 3B in Collatz 1992.
@@ -74,9 +74,9 @@ photosynthesis_outputs c4photoC(
     do {
         // Collatz 1992. Appendix B. Quadratic coefficients from Equation 3B.
         double kT_IC_P = kT * InterCellularCO2 / atmospheric_pressure * 1e6;  // micromole / m^2 / s
-        double a = M * kT_IC_P;
+        double a = beta;
         double b = -(M + kT_IC_P);
-        double c = beta;
+        double c = M * kT_IC_P;
 
         // Calculate the smaller of the two quadratic roots, as mentioned
         // following Equation 3B in Collatz 1992.
