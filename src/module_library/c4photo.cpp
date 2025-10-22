@@ -5,7 +5,7 @@
 #include "ball_berry_gs.h"                // for ball_berry_gs
 #include "conductance_helpers.h"          // for sequential_conductance
 #include "conductance_limited_assim.h"    // for conductance_limited_assim
-#include "../math/roots/root_onedim.h"    // for root_finder
+#include "../math/roots/onedim/dekker.h"  // for dekker
 #include "c4photo.h"
 
 using physical_constants::dr_boundary;
@@ -138,7 +138,7 @@ photosynthesis_outputs c4photoC(
                     (dr_boundary / gbw + dr_stomata / bb0_adj);  // Pa
     // Run the dekker method
     using namespace root_finding;
-    root_finder<dekker> solver{500, 1e-12, 1e-12};
+    dekker solver(500, 1e-12, 1e-12);
     result_t result = solver.solve(
 
         check_assim_rate,

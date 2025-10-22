@@ -5,15 +5,16 @@
 #include <cmath>    // std::sqrt, std::isnan
 #include <numeric>  // std::inner_product
 
-#include <iostream>
+// #include <iostream>
 
-namespace multidim_roots
+namespace root_multidim
 {
 
 template <size_t dim>
 using vec_t = std::array<double, dim>;
 
 template <size_t dim>
+
 using mat_t = std::array<vec_t<dim>, dim>;
 
 template <size_t dim>
@@ -27,6 +28,8 @@ struct broyden {
         vec_t residual;
         size_t iteration;
     };
+
+    broyden(size_t max_iter, double abs_tol, double rel_tol) : max_iterations{max_iter}, _abs_tol{abs_tol}, _rel_tol{rel_tol} {}
 
     size_t max_iterations = 100;
     double _abs_tol = 1e-12;
@@ -58,7 +61,7 @@ struct broyden {
                     b = inv_jac.tranpose(delta_x)
             */
             update_x(result.zero, delta_x, result.residual, inv_jac);
-            print(std::cout, result.zero);
+            // print(std::cout, result.zero);
             delta_y = fun(result.zero);
             update_y(result.residual, delta_y);
             if (is_zero(result.residual, result.zero) || is_nan(result.zero)) {
@@ -300,5 +303,5 @@ struct broyden {
 //     return out;
 // }
 
-}  // namespace multidim_roots
+}  // namespace root_multidim
 #endif

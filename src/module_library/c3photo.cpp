@@ -1,13 +1,13 @@
-#include <algorithm>                    // for std::min
-#include <cmath>                        // for pow, sqrt
-#include <limits>                       // for std::numeric_limits
-#include "../framework/constants.h"     // for dr_stomata, dr_boundary
-#include "ball_berry_gs.h"              // for ball_berry_gs
-#include "c3_temperature_response.h"    // for c3_temperature_response
-#include "conductance_helpers.h"        // for sequential_conductance
-#include "conductance_limited_assim.h"  // for conductance_limited_assim
-#include "FvCB_assim.h"                 // for FvCB_assim
-#include "../math/roots/root_onedim.h"  // for root_finder
+#include <algorithm>                      // for std::min
+#include <cmath>                          // for pow, sqrt
+#include <limits>                         // for std::numeric_limits
+#include "../framework/constants.h"       // for dr_stomata, dr_boundary
+#include "ball_berry_gs.h"                // for ball_berry_gs
+#include "c3_temperature_response.h"      // for c3_temperature_response
+#include "conductance_helpers.h"          // for sequential_conductance
+#include "conductance_limited_assim.h"    // for conductance_limited_assim
+#include "FvCB_assim.h"                   // for FvCB_assim
+#include "../math/roots/onedim/dekker.h"  // for dekker
 #include "c3photo.h"
 
 using physical_constants::dr_boundary;
@@ -148,10 +148,10 @@ photosynthesis_outputs c3photoC(
     double const Ci_max =
         Ca - A_min * (dr_boundary / gbw + dr_stomata / b0_adj);  // micromol / mol
 
-    // Run the secant method
+    // Run the Dekker method
     using namespace root_finding;
-    root_finder<dekker> solver{500, 1e-12, 1e-12};
-    result_t result = solver.solve(
+    dekker solve{500, 1e-12, 1e-12};
+    result_t result = solve(
         check_assim_rate,
         0.718 * Ca,
         0,

@@ -10,9 +10,9 @@
 namespace standardBML
 {
 
-multidim_roots::vec_t<2> test_function(const multidim_roots::vec_t<2>& x)
+root_multidim::vec_t<2> test_function(const root_multidim::vec_t<2>& x)
 {
-    multidim_roots::vec_t<2> y;
+    root_multidim::vec_t<2> y;
     y[0] = x[0] / (x[0] * x[0] + 1) - x[1] + 0.5;
     y[1] = 2 - x[0] - x[1];
     return y;
@@ -86,9 +86,10 @@ string_vector broyden_test::get_outputs()
 
 void broyden_test::do_operation() const
 {
-    multidim_roots::broyden<2> solver{static_cast<size_t>(max_iterations), abs_tol, rel_tol};
-    multidim_roots::vec_t<2> guess = {guess_1, guess_2};
-    auto res = solver.solve(test_function, guess);
+    using namespace root_multidim;
+    broyden<2> solver(static_cast<size_t>(max_iterations), abs_tol, rel_tol);
+    vec_t<2> guess = {guess_1, guess_2};
+    broyden<2>::result_t res = solver.solve(test_function, guess);
 
     update(x1, res.zero[0]);
     update(x2, res.zero[1]);
