@@ -108,7 +108,7 @@ class delta_TT : public direct_module
           topt_upper{get_input(input_quantities, "topt_upper")},
           tmax{get_input(input_quantities, "tmax")},
           // Get pointers to output quantities
-          delta_TT_op{get_op(output_quantities, "TTc")}
+          delta_TT_op{get_op(output_quantities, "delta_TT")}
     {
     }
     static string_vector get_inputs();
