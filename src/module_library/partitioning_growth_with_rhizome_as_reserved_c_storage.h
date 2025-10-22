@@ -27,6 +27,7 @@ class partitioning_growth_with_rhizome_as_reserved_c_storage : public direct_mod
             kRoot{get_input(input_quantities, "kRoot")},
             kRhizome{get_input(input_quantities, "kRhizome")},
             canopy_assimilation_rate{get_input(input_quantities, "canopy_assimilation_rate")},
+            LeafWS{get_input(input_quantities, "LeafWS")},
             mrc1{get_input(input_quantities, "mrc1")},
             mrc2{get_input(input_quantities, "mrc2")},
             temp{get_input(input_quantities, "temp")},
@@ -48,6 +49,7 @@ class partitioning_growth_with_rhizome_as_reserved_c_storage : public direct_mod
         const double& kStem;
         const double& kRoot;
         const double& kRhizome;
+        const double& LeafWS;
         const double& canopy_assimilation_rate;
         const double& mrc1;
         const double& mrc2;
@@ -68,6 +70,7 @@ string_vector partitioning_growth_with_rhizome_as_reserved_c_storage::get_inputs
         "kStem",
         "kRoot",
         "kRhizome",
+        "LeafWS"
         "canopy_assimilation_rate",
         "mrc1",
         "mrc2",
@@ -87,19 +90,6 @@ string_vector partitioning_growth_with_rhizome_as_reserved_c_storage::get_output
 
 void partitioning_growth_with_rhizome_as_reserved_c_storage::do_operation() const 
 {
-    // Collect inputs and make calculations
-    
-    // double kLeaf = kLeaf_ip;
-    // double kStem = kStem_ip;
-    // double kRoot = kRoot_ip;
-    // double kRhizome = kRhizome_ip;
-    // double canopy_assimilation_rate = canopy_assimilation_rate_ip;
-    // double mrc1 = mrc1_ip;
-    // double mrc2 = mrc2_ip;
-    // double temp = temp_ip;
-    
-
-    // this is where im leaving off 10/2/25
     double net_assimilation_rate_leaf;
     double net_assimilation_rate_stem; 
     double net_assimilation_rate_root;
@@ -112,7 +102,7 @@ void partitioning_growth_with_rhizome_as_reserved_c_storage::do_operation() cons
     
     // Calculate the amount of new leaf produced
     if(kLeaf > 0) {
-        net_assimilation_rate_leaf = nonrhizome_carbon_flux * kLeaf;
+        net_assimilation_rate_leaf = nonrhizome_carbon_flux * kLeaf * LeafWS;
  //     newLeafcol = resp(newLeafcol, mrc1, temp);// leaf respiration is also included in canopy assimlation, so no need to add it here again.
     }
 
