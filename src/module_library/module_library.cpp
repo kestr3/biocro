@@ -25,6 +25,7 @@
 #include "carbon_assimilation_to_biomass.h"
 #include "cumulative_carbon_dynamics.h"
 #include "cumulative_water_dynamics.h"
+#include "daylength_calculator.h"
 #include "development_index.h"
 #include "development_index_from_thermal_time.h"
 #include "example_model_mass_gain.h"
@@ -38,6 +39,8 @@
 #include "hyperbolas.h"
 #include "incident_shortwave_from_ground_par.h"
 #include "leaf_evapotranspiration.h"
+#include "leaf_evapotranspiration_check.h"
+#include "leaf_gbw_campbell.h"
 #include "leaf_gbw_nikolov.h"
 #include "leaf_shape_factor.h"
 #include "leaf_water_stress_exponential.h"
@@ -121,6 +124,7 @@ creator_map standardBML::module_library::library_entries =
      {"carbon_assimilation_to_biomass",                        &create_mc<carbon_assimilation_to_biomass>},
      {"cumulative_carbon_dynamics",                            &create_mc<cumulative_carbon_dynamics>},
      {"cumulative_water_dynamics",                             &create_mc<cumulative_water_dynamics>},
+     {"daylength_calculator",                                  &create_mc<daylength_calculator>},
      {"development_index",                                     &create_mc<development_index>},
      {"development_index_from_thermal_time",                   &create_mc<development_index_from_thermal_time>},
      {"example_model_mass_gain",                               &create_mc<example_model_mass_gain>},
@@ -136,6 +140,8 @@ creator_map standardBML::module_library::library_entries =
      {"hyperbola_2d",                                          &create_mc<hyperbola_2d>},
      {"incident_shortwave_from_ground_par",                    &create_mc<incident_shortwave_from_ground_par>},
      {"leaf_evapotranspiration",                               &create_mc<leaf_evapotranspiration>},
+     {"leaf_evapotranspiration_check",                         &create_mc<leaf_evapotranspiration_check>},
+     {"leaf_gbw_campbell",                                     &create_mc<leaf_gbw_campbell>},
      {"leaf_gbw_nikolov",                                      &create_mc<leaf_gbw_nikolov>},
      {"leaf_shape_factor",                                     &create_mc<leaf_shape_factor>},
      {"leaf_water_stress_exponential",                         &create_mc<leaf_water_stress_exponential>},

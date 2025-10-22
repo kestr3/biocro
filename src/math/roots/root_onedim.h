@@ -41,7 +41,6 @@ enum class Flag {
     invalid_bracket,
     division_by_zero,
     halley_no_cross,
-    discontinuity,
     bracket_fixed_point
 };
 
@@ -50,7 +49,8 @@ inline bool is_valid(T x)
 {
     return x.flag == Flag::valid;
 }
-inline bool successful_termination(Flag flag);
+inline bool is_successful(Flag flag);
+inline bool is_successful_relaxed(Flag flag);
 inline std::string flag_message(Flag flag);
 
 /**
@@ -131,6 +131,7 @@ struct result_t {
  * + pegasus (bracketing)
  * + anderson_bjorck (bracketing)
  * + dekker (contrapoint)
+ * + dekker-newton (contrapoint + derivative)
  *
  * Methods range in their typical robustness and speed. Speed and robustness
  * also depend on the problem. Root-bracketing methods are typically more
@@ -622,13 +623,8 @@ struct bracket_method {
             return s;
         }
 
-        if (is_close(s.left.x, s.right.x, abs_tol, abs_tol)) {
-            double delta_y = std::abs(s.left.y - s.right.y);
-            double delta_x = std::abs(s.left.x - s.right.x);
-            if (delta_y < (delta_x / rel_tol))
-                s.flag = Flag::bracket_width_zero;
-            else
-                s.flag = Flag::discontinuity;
+        if (is_close(s.left.x, s.right.x, abs_tol, rel_tol)) {
+            s.flag = Flag::bracket_width_zero;
             return s;
         }
 
@@ -953,43 +949,7 @@ struct anderson_bjorck : public illinois_type {
     }
 };
 
-/**
- * @brief The "Dekker" method. A contrapoint bracketing method. Provide a
- * valid bracket.
- *
- * @details A hybrid method combining the secant method and the bisection method.
- * Near a root, the secant method converges quickly, but for poor initial guesses,
- * the secant method can be unstable. Dekker's method saves three points between
- * iterations. The `best` current estimate for the root, the `last` best estimate,
- * and contrapoint. The `contrapoint` and the `best` estimate form the bracket.
- *
- * A new best estimate is proposed using the secant method, but only accepted if
- * the proposal lies between the `best` estimate and the midpoint between the
- * `best` estimate and the `contrapoint` (midpoint of the bracket).
-
- * A new contrapoint is selected from the new `best` estimate and the old `best`
- * estimate so that the contrapoint and best estimate have opposite signs.
- *
- * Dekker's method has a similar best-case rate of convergence to `secant` and
- * a better rate of convergence than regula falsi. It should perform better
- * against the pathologies of those methods by defaulting to the bisection method.
- *
- * As described in Brent (1973), the method has a pathology where the secant method
- * is always accepted but arbitrarily small.
- *
- * This implementation was adapted from Brent's description. See reference for
- * details.
- *
- * References:
- * - Brent, R. P. (1973), "Chapter 4: An Algorithm with Guaranteed Convergence
- *   for Finding a Zero of a Function", Algorithms for Minimization without
- *   Derivatives, Englewood Cliffs, NJ: Prentice-Hall, ISBN 0-13-022335-2
- * - Dekker, T. J. (1969), "Finding a zero by means of successive linear
- *   interpolation", in Dejon, B.; Henrici, P. (eds.), Constructive Aspects of
- *   the Fundamental Theorem of Algebra, London: Wiley-Interscience,
- *   ISBN 978-0-471-20300-1
- */
-struct dekker {
+struct contrapoint {
     struct state {
         Flag flag;
         graph_t contrapoint;
@@ -997,7 +957,7 @@ struct dekker {
         graph_t best;
 
         double midpoint;
-        double secant_proposal;
+        double proposal;
     };
 
     template <typename F>
@@ -1073,13 +1033,8 @@ struct dekker {
             return s;
         }
 
-        if (is_close(s.contrapoint.x, s.best.x, abs_tol, abs_tol)) {
-            double delta_y = std::abs(s.contrapoint.y - s.best.y);
-            double delta_x = std::abs(s.contrapoint.x - s.best.x);
-            if (delta_y < (delta_x / rel_tol))
-                s.flag = Flag::bracket_width_zero;
-            else
-                s.flag = Flag::discontinuity;
+        if (is_close(s.contrapoint.x, s.best.x, abs_tol, rel_tol)) {
+            s.flag = Flag::bracket_width_zero;
             return s;
         }
 
@@ -1095,18 +1050,117 @@ struct dekker {
     {
         return s.best.y;
     }
+};
 
+/**
+ * @brief The "Dekker" method. A contrapoint bracketing method. Provide a
+ * valid bracket.
+ *
+ * @details A hybrid method combining the secant method and the bisection method.
+ * Near a root, the secant method converges quickly, but for poor initial guesses,
+ * the secant method can be unstable. Dekker's method saves three points between
+ * iterations. The `best` current estimate for the root, the `last` best estimate,
+ * and contrapoint. The `contrapoint` and the `best` estimate form the bracket.
+ *
+ * A new best estimate is proposed using the secant method, but only accepted if
+ * the proposal lies between the `best` estimate and the midpoint between the
+ * `best` estimate and the `contrapoint` (midpoint of the bracket).
+
+ * A new contrapoint is selected from the new `best` estimate and the old `best`
+ * estimate so that the contrapoint and best estimate have opposite signs.
+ *
+ * Dekker's method has a similar best-case rate of convergence to `secant` and
+ * a better rate of convergence than regula falsi. It should perform better
+ * against the pathologies of those methods by defaulting to the bisection method.
+ *
+ * As described in Brent (1973), the method has a pathology where the secant method
+ * is always accepted but arbitrarily small.
+ *
+ * This implementation was adapted from Brent's description. See reference for
+ * details.
+ *
+ * References:
+ * - Brent, R. P. (1973), "Chapter 4: An Algorithm with Guaranteed Convergence
+ *   for Finding a Zero of a Function", Algorithms for Minimization without
+ *   Derivatives, Englewood Cliffs, NJ: Prentice-Hall, ISBN 0-13-022335-2
+ * - Dekker, T. J. (1969), "Finding a zero by means of successive linear
+ *   interpolation", in Dejon, B.; Henrici, P. (eds.), Constructive Aspects of
+ *   the Fundamental Theorem of Algebra, London: Wiley-Interscience,
+ *   ISBN 978-0-471-20300-1
+ */
+struct dekker : public contrapoint {
     template <typename F>
     inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
     {
-        s.secant_proposal = get_secant_update(s.last, s.best);
+        s.proposal = get_secant_update(s.last, s.best);
         s.midpoint = get_midpoint(s.contrapoint, s.best);
 
         // s.last not needed now;
         std::swap(s.best, s.last);
 
-        if (is_between(s.secant_proposal, s.last.x, s.midpoint)) {
-            s.best.x = s.secant_proposal;
+        if (is_between(s.proposal, s.last.x, s.midpoint)) {
+            s.best.x = s.proposal;
+        } else {
+            s.best.x = s.midpoint;
+        }
+        s.best.y = fun(s.best.x);
+
+        if (opposite_signs(s.last.y, s.best.y)) {
+            s.contrapoint = s.last;
+        }
+
+        if (smaller(s.contrapoint.y, s.best.y)) {
+            std::swap(s.contrapoint, s.best);
+        }
+
+        return s;
+    }
+};
+
+/**
+ * @brief The "Dekker-Newton" method. A contrapoint bracketing method
+ * using Newton's update. Provide a valid bracket and function object
+ * implementing the derivative.
+ *
+ * @details A hybrid method combining the newton method and the bisection method.
+ * Near a root, the newton method converges quickly, but for poor initial guesses,
+ * the newton method can be unstable. This method, adapeted from Dekker's method,
+ * saves three points between  iterations. The `best` current estimate
+ * for the root, the `last` best estimate, and contrapoint.
+ * The `contrapoint` and the `best` estimate form the bracket.
+ *
+ * A new best estimate is proposed using the secant method, but only accepted if
+ * the proposal lies between the `best` estimate and the midpoint between the
+ * `best` estimate and the `contrapoint` (midpoint of the bracket).
+
+ * A new contrapoint is selected from the new `best` estimate and the old `best`
+ * estimate so that the contrapoint and best estimate have opposite signs.
+ *
+ * This implementation was designed by Scott Oswald and based on Dekker's method
+ * description. See references for details of Dekker's or Brent's method.
+ *
+ * References:
+ * - Brent, R. P. (1973), "Chapter 4: An Algorithm with Guaranteed Convergence
+ *   for Finding a Zero of a Function", Algorithms for Minimization without
+ *   Derivatives, Englewood Cliffs, NJ: Prentice-Hall, ISBN 0-13-022335-2
+ * - Dekker, T. J. (1969), "Finding a zero by means of successive linear
+ *   interpolation", in Dejon, B.; Henrici, P. (eds.), Constructive Aspects of
+ *   the Fundamental Theorem of Algebra, London: Wiley-Interscience,
+ *   ISBN 978-0-471-20300-1
+ */
+struct dekker_newton : public contrapoint {
+    template <typename F>
+    inline state& iterate(F&& fun, state& s, double abs_tol, double rel_tol)
+    {
+        // newton update
+        s.proposal = s.best.x - s.best.y / fun.derivative(s.best.x);
+        s.midpoint = get_midpoint(s.contrapoint, s.best);
+
+        // s.last not needed now;
+        std::swap(s.best, s.last);
+
+        if (is_between(s.proposal, s.last.x, s.midpoint)) {
+            s.best.x = s.proposal;
         } else {
             s.best.x = s.midpoint;
         }
@@ -1169,16 +1223,16 @@ inline double get_secant_update(const graph_t& a, const graph_t& b)
     return (b.y * a.x - a.y * b.x) / (b.y - a.y);
 }
 
-bool successful_termination(Flag flag)
+inline bool is_successful(Flag flag)
 {
-    switch (flag) {
-        case Flag::residual_zero:
-            return true;
-        case Flag::bracket_width_zero:
-            return true;
-        default:
-            return false;
-    }
+    return (flag == Flag::residual_zero);
+}
+
+// A more relaxed version of `is_successful` that does not consider some flags
+// to be convergence failures
+inline bool is_successful_relaxed(Flag flag)
+{
+    return (flag == Flag::residual_zero || flag == Flag::bracket_width_zero);
 }
 
 std::string flag_message(Flag flag)
@@ -1187,9 +1241,9 @@ std::string flag_message(Flag flag)
         case Flag::residual_zero:
             return "Residual is zero.";
         case Flag::delta_root_zero:
-            return "Change in guess is zero.";
+            return "Change in guess is zero. Slow improvement";
         case Flag::bracket_width_zero:
-            return "Bracket width is zero.";
+            return "Bracket width is zero. Could be singularity";
         case Flag::invalid_bracket:
             return "Bracket is invalid; Function has same signs at both endpoints.";
         case Flag::max_iterations:
@@ -1198,8 +1252,6 @@ std::string flag_message(Flag flag)
             return "Division by zero occurred.";
         case Flag::halley_no_cross:
             return "Halley update failed; local quadratic does not cross zero.";
-        case Flag::discontinuity:
-            return "Found a probable discontinuity or singularity.";
         case Flag::bracket_fixed_point:
             return "Bracket stopped shrinking.";
         case Flag::valid:

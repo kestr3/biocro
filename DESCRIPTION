@@ -1,5 +1,5 @@
 Package: BioCro
-Version: 3.2.0-0
+Version: 3.2.0-4
 Date: 2025-02-25
 Title: Modular Crop Growth Simulations
 Description: A cross-platform representation of models as sets of equations
@@ -49,5 +49,5 @@ SystemRequirements: C++11, GNU make
 License: MIT + file LICENSE
 LazyData: true
 ByteCompile: TRUE
-URL: https://github.com/biocro/biocro, https://biocro.github.io
+URL: https://github.com/biocro/biocro, https://biocro.org
 Config/testthat/edition: 3

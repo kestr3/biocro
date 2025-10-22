@@ -35,11 +35,13 @@ be directly added to this file to describe the related changes.
 
 ## Minor User-Facing Changes
 
+- Added a module `daylength_calculator` which compute day length from solar position.
+
 - Added custom C++ library for the numerical approximation of the zeros of real
   valued 1D functions. See the header file `roots_onedim.h` for example usage,
   and list of available methods.
 
-- Swapped fixed point iteration for the secant method in Ci calculation. To
+- Swapped fixed point iteration for the Dekker method in Ci calculation. To
   incorporate the effect of stomatal conductance, the Ball-Berry and FvCB model
   require solving for the correct intercellular CO2 concentrations by
   identifying the root of an equation. BioCro previously used fixed point
@@ -49,6 +51,17 @@ be directly added to this file to describe the related changes.
   *Journal of Geophysical Research* https://dx.doi.org/10.1029/2012JD018059.
   This change only affects the solution at low Ci, and does not modify the
   interface of any module.
+
+- Swapped fixed point iteration for the Dekker method in energy balance
+  calculations that are used to determine the leaf temperature.
+
+- Swapped fixed point iteration for the Dekker method in the implementation of
+  the Nikolov leaf boundary layer conductance model.
+
+- Added a new model for leaf boundary layer conductance (from Campbell & Norman
+  1998). This model is now used in place of the Nikolov model for energy balance
+  calculations, since it can be solved more easily, and does not have multiple
+  solutions.
 
 - Changed how growth respiration is calculated (so the rate of growth
   respiration is zero whenever the base rate of carbon available for growth is
@@ -132,11 +145,27 @@ be directly added to this file to describe the related changes.
   growth and maintenance respiration:
   `BioCro:total_growth_and_maintenance_respiration`.
 
+- Simplified the radiation use efficiency (RUE) model such that net CO2
+  assimilation is directly proportional to the incident quantum flux of photons.
+
 - Altered `test_module` (and hence `test_module_library`) so that new module
   outputs produce a warning but don't cause an error on their own.
 
+- Altered `evaluate_module`, `partial_evaluate_module`, and
+  `module_response_curve` so that by default, module errors do not prevent
+  response curve calculations from completing. The original behavior of these
+  functions can be reproduced by setting `stop_on_exception` to `TRUE` when
+  calling them.
+
 - Following changes to the behavior of some modules, the soybean model was
-  re-parameterized; see the help file for `soybean` for complete details.
+  re-parameterized. The parameterization script is now included in the BioCro
+  repository and package. See the help file for `soybean` for complete details.
+
+- `catm_data` was updated to include the global average atmospheric CO2
+  concentration in 2024.
+
+- Links to the main BioCro documentation web site were changed from
+  `https://biocro.github.io` to `https://biocro.org`
 
 ## Internal changes
 
@@ -442,7 +471,7 @@ be directly added to this file to describe the related changes.
   removed; references to ebimodeling/biocro have been updated to point
   to biocro/biocro instead.  Most of these occurred in various places
   in the documentation.  Most links to the online documentation have
-  been replaced with links to https://biocro.github.io, with (in some
+  been replaced with links to https://biocro.org, with (in some
   cases) instructions on how to navigate to the particular section of
   the documentation of interest.  This decreases dependence on the
   precise layout of the online documentation.  Some other changes and
@@ -468,8 +497,8 @@ be directly added to this file to describe the related changes.
   triggers of the workflow so that automatic publication happens when
   a new release is published.  Additionally, a symlink is created to
   link the URL
-  https://biocro.github.io/BioCro-documentation/latest/pkgdown/ to
-  https://biocro.github.io/BioCro-documentation/<tag name>/pkgdown/,
+  https://biocro.org/BioCro-documentation/latest/pkgdown/ to
+  https://biocro.org/BioCro-documentation/<tag name>/pkgdown/,
   where <tag name> is the tag name for the new release.
 
 # Changes in BioCro Version 3.0.0
@@ -573,7 +602,7 @@ be directly added to this file to describe the related changes.
 
   PDF versions of these vignettes corresponding to the latest version of BioCro
   can be obtained online from the _Articles_ menu at the
-  [BioCro documentation website](https://biocro.github.io).
+  [BioCro documentation website](https://biocro.org).
 
 # BioCro Version 0.951
 
