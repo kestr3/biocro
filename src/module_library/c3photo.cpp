@@ -5,12 +5,11 @@
 #include "c3_temperature_response.h"    // for c3_temperature_response
 #include "conductance_limited_assim.h"  // for conductance_limited_assim
 #include "FvCB_assim.h"                 // for FvCB_assim
-#include "root_onedim.h"                // for root_finder
+#include "../math/roots/root_onedim.h"  // for root_finder
 #include "c3photo.h"
 
 using physical_constants::dr_boundary;
 using physical_constants::dr_stomata;
-
 /*
 
   The secant method is used to solve for assimilation, Ci, and stomatal conductance,
@@ -127,13 +126,15 @@ photosynthesis_outputs c3photoC(
 
     // Maximum possible Ci value
     double const Ci_max = Ca + (std::min(
-        Gstar * Vcmax / (Kc * (1 + Oi / Ko)),
-        J / (2.0 * electrons_per_oxygenation)) + RL
-    ) * (dr_boundary / gbw + dr_stomata / b0_adj);  // micromol / mol
+                                    Gstar * Vcmax / (Kc * (1 + Oi / Ko)),
+                                    J / (2.0 * electrons_per_oxygenation)) +
+                                RL) *
+                                   (dr_boundary / gbw + dr_stomata / b0_adj);  // micromol / mol
 
     // Run the secant method
-    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
-    root_algorithm::result_t result = solver.solve(
+    using namespace root_finding;
+    root_finder<dekker> solver{500, 1e-12, 1e-12};
+    result_t result = solver.solve(
         check_assim_rate,
         0.718 * Ca,
         0,

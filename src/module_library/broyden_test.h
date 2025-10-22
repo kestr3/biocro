@@ -3,17 +3,19 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "broyden_method.h"
+#include "../math/roots/broyden_method.h"
 
 #include <array>
 
 namespace standardBML
 {
 
-void test_function(std::array<double, 2>& y, const std::array<double, 2>& x)
+multidim_roots::vec_t<2> test_function(const multidim_roots::vec_t<2>& x)
 {
+    multidim_roots::vec_t<2> y;
     y[0] = x[0] / (x[0] * x[0] + 1) - x[1] + 0.5;
     y[1] = 2 - x[0] - x[1];
+    return y;
 }
 
 class broyden_test : public direct_module
@@ -84,8 +86,8 @@ string_vector broyden_test::get_outputs()
 
 void broyden_test::do_operation() const
 {
-    broyden<double, 2> solver{static_cast<size_t>(max_iterations), abs_tol, rel_tol};
-    std::array<double, 2> guess = {guess_1, guess_2};
+    multidim_roots::broyden<2> solver{static_cast<size_t>(max_iterations), abs_tol, rel_tol};
+    multidim_roots::vec_t<2> guess = {guess_1, guess_2};
     auto res = solver.solve(test_function, guess);
 
     update(x1, res.zero[0]);

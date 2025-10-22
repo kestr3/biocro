@@ -1,5 +1,5 @@
-#ifndef ROOTS_ONEDIM_H
-#define ROOTS_ONEDIM_H
+#ifndef ROOT_ONEDIM_H
+#define ROOT_ONEDIM_H
 
 #include <cmath>
 #include <limits>
@@ -9,7 +9,7 @@
  * A C++ library for solving 1D equations.
  */
 
-namespace root_algorithm
+namespace root_finding
 {
 
 /**
@@ -22,12 +22,12 @@ struct graph_t {
 
 // Helper function declarations
 inline bool is_close(
-    double x, double y, double tol, double rtol); // true if x == y
-inline bool is_zero(double x, double tol); // true if x == 0
-inline bool same_signs(double x, double y);     // true if sign(x) == sign(y)
-inline bool opposite_signs(double x, double y); // true if sign(x) != sign(y)
-inline bool smaller(double x, double y);        // true if |x| < |y|
-inline bool is_between(double x, double a, double b); // true if `x` is `[a,b]`
+    double x, double y, double tol, double rtol);      // true if x == y
+inline bool is_zero(double x, double tol);             // true if x == 0
+inline bool same_signs(double x, double y);            // true if sign(x) == sign(y)
+inline bool opposite_signs(double x, double y);        // true if sign(x) != sign(y)
+inline bool smaller(double x, double y);               // true if |x| < |y|
+inline bool is_between(double x, double a, double b);  // true if `x` is `[a,b]`
 inline double get_midpoint(const graph_t& a, const graph_t& b);
 inline double get_secant_update(const graph_t& a, const graph_t& b);
 
@@ -130,7 +130,7 @@ struct result_t {
  * + illinois (bracketing)
  * + pegasus (bracketing)
  * + anderson_bjorck (bracketing)
- * + dekekr (contrapoint)
+ * + dekker (contrapoint)
  *
  * Methods range in their typical robustness and speed. Speed and robustness
  * also depend on the problem. Root-bracketing methods are typically more
@@ -990,7 +990,6 @@ struct anderson_bjorck : public illinois_type {
  *   ISBN 978-0-471-20300-1
  */
 struct dekker {
-
     struct state {
         Flag flag;
         graph_t contrapoint;
@@ -1009,7 +1008,7 @@ struct dekker {
         s.best.x = b;
         s.contrapoint.y = fun(a);
         s.best.y = fun(b);
-        if (smaller(s.contrapoint.y, s.best.y)){
+        if (smaller(s.contrapoint.y, s.best.y)) {
             std::swap(s.best, s.contrapoint);
         }
 
@@ -1043,9 +1042,8 @@ struct dekker {
         s.contrapoint.x = contrapoint;
         s.contrapoint.y = fun(contrapoint);
 
-        if (same_signs(s.best.y, s.contrapoint.y))
-        {
-            if (same_signs(s.best.y, s.last.y)){
+        if (same_signs(s.best.y, s.contrapoint.y)) {
+            if (same_signs(s.best.y, s.last.y)) {
                 s.flag = Flag::invalid_bracket;
                 return s;
             }
@@ -1053,7 +1051,7 @@ struct dekker {
             std::swap(s.last, s.contrapoint);
         }
 
-        if (smaller(s.contrapoint.y, s.best.y)){
+        if (smaller(s.contrapoint.y, s.best.y)) {
             std::swap(s.best, s.contrapoint);
         }
 
@@ -1107,14 +1105,14 @@ struct dekker {
         // s.last not needed now;
         std::swap(s.best, s.last);
 
-        if (is_between(s.secant_proposal, s.last.x, s.midpoint)){
+        if (is_between(s.secant_proposal, s.last.x, s.midpoint)) {
             s.best.x = s.secant_proposal;
         } else {
             s.best.x = s.midpoint;
         }
         s.best.y = fun(s.best.x);
 
-        if (opposite_signs(s.last.y, s.best.y)){
+        if (opposite_signs(s.last.y, s.best.y)) {
             s.contrapoint = s.last;
         }
 
@@ -1124,9 +1122,7 @@ struct dekker {
 
         return s;
     }
-
 };
-
 
 // Helper function definitions.
 
@@ -1163,11 +1159,13 @@ inline bool is_between(double x, double a, double b)
     return ((x >= a) && (x <= b)) || ((x <= a) && (x >= b));
 }
 
-inline double get_midpoint(const graph_t& a, const graph_t& b){
+inline double get_midpoint(const graph_t& a, const graph_t& b)
+{
     return 0.5 * (a.x + b.x);
 }
 
-inline double get_secant_update(const graph_t& a, const graph_t& b){
+inline double get_secant_update(const graph_t& a, const graph_t& b)
+{
     return (b.y * a.x - a.y * b.x) / (b.y - a.y);
 }
 
@@ -1211,5 +1209,5 @@ std::string flag_message(Flag flag)
     }
 }
 
-}  // namespace root_algorithm
+}  // namespace root_finding
 #endif

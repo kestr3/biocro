@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "root_onedim.h"
+#include "../math/roots/root_onedim.h"  // for root_finder
 
 #include <functional>  // for std::function
 #include <map>
@@ -129,7 +129,7 @@ class root_onedim_test : public direct_module
     }
 
     void inline update_result(
-        const result& r, root_algorithm::result_t& result) const
+        const result& r, root_finding::result_t& result) const
     {
         update(r.root_op, result.root);
         update(r.residual_op, result.residual);
@@ -169,7 +169,7 @@ string_vector root_onedim_test::get_outputs()
 void root_onedim_test::do_operation() const
 {
     // Collect inputs and make calculations
-    using namespace root_algorithm;
+    using namespace root_finding;
     result_t result;
     root_test_function test{ecc, answer};
     size_t iter = static_cast<size_t>(max_iterations);

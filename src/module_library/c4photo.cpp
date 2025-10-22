@@ -3,7 +3,7 @@
 #include "../framework/quadratic_root.h"  // for quadratic_root_min
 #include "ball_berry_gs.h"                // for ball_berry_gs
 #include "conductance_limited_assim.h"    // for conductance_limited_assim
-#include "root_onedim.h"
+#include "../math/roots/root_onedim.h"    // for root_finder
 #include "c4photo.h"
 
 using physical_constants::dr_boundary;
@@ -121,16 +121,16 @@ photosynthesis_outputs c4photoC(
     };
 
     // Max possible Ci value
-    double const Ci_max = Ca_pa + 1e-6 * atmospheric_pressure * RT
-        * (dr_boundary / gbw + dr_stomata / bb0_adj);
+    double const Ci_max = Ca_pa + 1e-6 * atmospheric_pressure * RT * (dr_boundary / gbw + dr_stomata / bb0_adj);
 
-    // Run the illinois method
-    root_algorithm::root_finder<root_algorithm::dekker> solver{500, 1e-12, 1e-12};
-    root_algorithm::result_t result = solver.solve(
+    // Run the dekker method
+    using namespace root_finding;
+    root_finder<dekker> solver{500, 1e-12, 1e-12};
+    result_t result = solver.solve(
         check_assim_rate,
         0.5 * Ca_pa,
         0,
-        Ci_max *1.01);
+        Ci_max * 1.01);
 
     // Convert Ci units
     double const Ci = result.root / atmospheric_pressure * 1e6;  // micromol / mol
