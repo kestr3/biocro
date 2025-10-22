@@ -989,7 +989,7 @@ from?
 Essential information for each quantity---including its units, modules that
 use it as an input, and modules that calculate it as an output---can be found at
 the quantity documentation web site:
-\url{https://biocro.github.io/BioCro-documentation/quantity_docs/quantities.html}.
+\url{https://biocro.org/BioCro-documentation/quantity_docs/quantities.html}.
 Visiting this site is the easiest way to find units.
 
 The quantity documentation web site is automatically generated from the module
@@ -1081,7 +1081,7 @@ viewed locally via a user's preferred methods.
 
 \item Doxygen documentation of all the code or various subsets of the code can
 be viewed at the BioCro documentation website
-\url{https://biocro.github.io}.
+\url{https://biocro.org}.
 
 \end{itemize}
 

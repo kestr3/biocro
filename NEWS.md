@@ -161,6 +161,12 @@ be directly added to this file to describe the related changes.
   re-parameterized. The parameterization script is now included in the BioCro
   repository and package. See the help file for `soybean` for complete details.
 
+- `catm_data` was updated to include the global average atmospheric CO2
+  concentration in 2024.
+
+- Links to the main BioCro documentation web site were changed from
+  `https://biocro.github.io` to `https://biocro.org`
+
 ## Internal changes
 
 - Renamed the `resp()` function to `growth_resp_Q10()` to better indicate its
@@ -465,7 +471,7 @@ be directly added to this file to describe the related changes.
   removed; references to ebimodeling/biocro have been updated to point
   to biocro/biocro instead.  Most of these occurred in various places
   in the documentation.  Most links to the online documentation have
-  been replaced with links to https://biocro.github.io, with (in some
+  been replaced with links to https://biocro.org, with (in some
   cases) instructions on how to navigate to the particular section of
   the documentation of interest.  This decreases dependence on the
   precise layout of the online documentation.  Some other changes and
@@ -491,8 +497,8 @@ be directly added to this file to describe the related changes.
   triggers of the workflow so that automatic publication happens when
   a new release is published.  Additionally, a symlink is created to
   link the URL
-  https://biocro.github.io/BioCro-documentation/latest/pkgdown/ to
-  https://biocro.github.io/BioCro-documentation/<tag name>/pkgdown/,
+  https://biocro.org/BioCro-documentation/latest/pkgdown/ to
+  https://biocro.org/BioCro-documentation/<tag name>/pkgdown/,
   where <tag name> is the tag name for the new release.
 
 # Changes in BioCro Version 3.0.0
@@ -596,7 +602,7 @@ be directly added to this file to describe the related changes.
 
   PDF versions of these vignettes corresponding to the latest version of BioCro
   can be obtained online from the _Articles_ menu at the
-  [BioCro documentation website](https://biocro.github.io).
+  [BioCro documentation website](https://biocro.org).
 
 # BioCro Version 0.951
 
