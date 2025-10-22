@@ -102,7 +102,7 @@ void partitioning_growth_with_rhizome_as_reserved_c_storage::do_operation() cons
     
     // Calculate the amount of new leaf produced
     if(kLeaf > 0) {
-        net_assimilation_rate_leaf = nonrhizome_carbon_flux * kLeaf * LeafWS;
+        net_assimilation_rate_leaf = nonrhizome_carbon_flux * kLeaf;
  //     newLeafcol = resp(newLeafcol, mrc1, temp);// leaf respiration is also included in canopy assimlation, so no need to add it here again.
     }
 
