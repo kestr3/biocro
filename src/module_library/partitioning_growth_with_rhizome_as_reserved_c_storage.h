@@ -70,7 +70,7 @@ string_vector partitioning_growth_with_rhizome_as_reserved_c_storage::get_inputs
         "kStem",
         "kRoot",
         "kRhizome",
-        "LeafWS"
+        "LeafWS",
         "canopy_assimilation_rate",
         "mrc1",
         "mrc2",
