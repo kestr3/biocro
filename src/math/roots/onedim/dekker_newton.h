@@ -1,19 +1,23 @@
-#ifndef ROOT_DEKKER_H
-#define ROOT_DEKKER_H
+
+#ifndef ROOT_DEKKER_NEWTON_H
+#define ROOT_DEKKER_NEWTON_H
 
 #include "roots.h"
 
 namespace root_finding
 {
+
 /**
- * @brief The "Dekker" method. A contrapoint bracketing method. Provide a
- * valid bracket.
+ * @brief The "Dekker-Newton" method. A contrapoint bracketing method
+ * using Newton's update. Provide a valid bracket and function object
+ * implementing the derivative.
  *
- * @details A hybrid method combining the secant method and the bisection method.
- * Near a root, the secant method converges quickly, but for poor initial guesses,
- * the secant method can be unstable. Dekker's method saves three points between
- * iterations. The `best` current estimate for the root, the `last` best estimate,
- * and contrapoint. The `contrapoint` and the `best` estimate form the bracket.
+ * @details A hybrid method combining the newton method and the bisection method.
+ * Near a root, the newton method converges quickly, but for poor initial guesses,
+ * the newton method can be unstable. This method, adapeted from Dekker's method,
+ * saves three points between  iterations. The `best` current estimate
+ * for the root, the `last` best estimate, and contrapoint.
+ * The `contrapoint` and the `best` estimate form the bracket.
  *
  * A new best estimate is proposed using the secant method, but only accepted if
  * the proposal lies between the `best` estimate and the midpoint between the
@@ -22,15 +26,8 @@ namespace root_finding
  * A new contrapoint is selected from the new `best` estimate and the old `best`
  * estimate so that the contrapoint and best estimate have opposite signs.
  *
- * Dekker's method has a similar best-case rate of convergence to `secant` and
- * a better rate of convergence than regula falsi. It should perform better
- * against the pathologies of those methods by defaulting to the bisection method.
- *
- * As described in Brent (1973), the method has a pathology where the secant method
- * is always accepted but arbitrarily small.
- *
- * This implementation was adapted from Brent's description. See reference for
- * details.
+ * This implementation was designed by Scott Oswald and based on Dekker's method
+ * description. See references for details of Dekker's or Brent's method.
  *
  * References:
  * - Brent, R. P. (1973), "Chapter 4: An Algorithm with Guaranteed Convergence
@@ -41,7 +38,7 @@ namespace root_finding
  *   the Fundamental Theorem of Algebra, London: Wiley-Interscience,
  *   ISBN 978-0-471-20300-1
  */
-struct dekker : public root_finding_method<dekker> {
+struct dekker_newton : public root_finding_method<dekker_newton> {
     using root_finding_method::root_finding_method;
 
     graph_t contrapoint;
@@ -113,10 +110,11 @@ struct dekker : public root_finding_method<dekker> {
     template <typename F>
     bool iterate(F&& fun)
     {
-        proposal = get_secant_update(last, best);
+        // newton update
+        proposal = best.x - best.y / fun.derivative(best.x);
         midpoint = get_midpoint(contrapoint, best);
 
-        // `last` not needed now;
+        // s.last not needed now;
         std::swap(best, last);
 
         if (is_between(proposal, last.x, midpoint)) {

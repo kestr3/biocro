@@ -63,12 +63,12 @@ struct fixed_point : root_finding_method<fixed_point> {
 
     double root() const
     {
-        return x;
+        return y;
     }
 
     double residual() const
     {
-        return y;
+        return y - x;
     }
 };
 

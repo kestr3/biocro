@@ -1,17 +1,26 @@
 #ifndef ROOT_ONEDIM_TEST_H
 #define ROOT_ONEDIM_TEST_H
+#include <functional>  // for std::function
+#include <map>         // std::map
+#include <cmath>       // std::sin
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
 
 #include "../math/roots/onedim/secant.h"
-#include "../math/roots/onedim/bracket.h"
+#include "../math/roots/onedim/bisection.h"
+#include "../math/roots/onedim/regula_falsi.h"
+#include "../math/roots/onedim/ridder.h"
+#include "../math/roots/onedim/illinois.h"
+#include "../math/roots/onedim/pegasus.h"
 #include "../math/roots/onedim/newton.h"
+#include "../math/roots/onedim/halley.h"
+#include "../math/roots/onedim/steffensen.h"
 #include "../math/roots/onedim/fixed_point.h"
 #include "../math/roots/onedim/dekker.h"
+#include "../math/roots/onedim/dekker_newton.h"
+#include "../math/roots/onedim/anderson_bjorck.h"
 
-#include <functional>  // for std::function
-#include <map>
 namespace standardBML
 {
 
@@ -61,6 +70,18 @@ struct root_test_function {
     double second_derivative(double x)
     {
         return epsilon * std::sin(x);
+    }
+};
+
+struct fixed_point_test_function {
+    double epsilon;
+    double answer;
+
+    fixed_point_test_function(double ep, double a) : epsilon{ep}, answer{a} {}
+
+    double operator()(double x)
+    {
+        return answer + epsilon * std::sin(x - answer);
     }
 };
 
@@ -240,6 +261,8 @@ void root_onedim_test::do_operation() const
     using namespace root_finding;
     result_t result;
     root_test_function test{ecc, answer};
+
+    fixed_point_test_function fix_pt_test{ecc, answer};
     size_t iter = static_cast<size_t>(max_iterations);
 
     result = secant(iter, abs_tol, rel_tol)
@@ -247,7 +270,7 @@ void root_onedim_test::do_operation() const
     update_result(secant_result, result);
 
     result = fixed_point(iter, abs_tol, rel_tol)
-                 .solve(test, single_guess);
+                 .solve(fix_pt_test, single_guess);
     update_result(fixed_point_result, result);
 
     result = newton(iter, abs_tol, rel_tol)
