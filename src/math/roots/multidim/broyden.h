@@ -34,9 +34,7 @@ struct broyden : public zero_finding_method<dim, broyden<dim>> {
     {
         _zero = guess;
         _residual = fun(guess);
-        // mat_t jac = approx_jac(fun, guess);
         inv_jac = identity();
-
         return true;
     }
 
@@ -109,44 +107,6 @@ struct broyden : public zero_finding_method<dim, broyden<dim>> {
         return _zero;
     }
 
-    // vec_t& residual()
-    // {
-    //     return _residual;
-    // }
-
-    // vec_t& zero()
-    // {
-    //     return _zero;
-    // }
-
-    // template <typename F>
-    // result_t solve(F&& fun, const vec_t& guess)
-    // {
-    //     result.zero = guess;
-    //     result.residual = fun(result.zero);
-    //     mat_t jac = approx_jac(fun, result.zero);
-    //     mat_t inv_jac = invert(jac);
-
-    //     vec_t delta_x;
-    //     vec_t delta_y;
-
-    //     // temporaries for updating `inv_jac`
-
-    //     for (size_t i = 0; i <= max_iterations; ++i) {
-    //         update_x(result.zero, delta_x, result.residual, inv_jac);
-    //         // print(std::cout, result.zero);
-    //         delta_y = fun(result.zero);
-    //         update_y(result.residual, delta_y);
-    //         if (is_zero(result.residual, result.zero) || is_nan(result.zero)) {
-    //             result.iteration = i;
-    //             return result;
-    //         }
-    //         inv_jac = update_inv_jac(inv_jac, delta_y, delta_x);
-    //     }
-    //     result.iteration = max_iterations;
-    //     return result;
-    // }
-
     inline void update_x()
     {
         // these formulae are computed in a single for-loop pass
@@ -181,7 +141,6 @@ struct broyden : public zero_finding_method<dim, broyden<dim>> {
 
 
         */
-
         _tmp_c = 0;
         _tmp_b.fill(0);
 
@@ -200,30 +159,6 @@ struct broyden : public zero_finding_method<dim, broyden<dim>> {
             }
         }
     }
-
-    // void print(std::ostream& os, const vec_t& v)
-    // {
-    //     os << "[ ";
-    //     for (size_t i = 0; i < dim; ++i) {
-    //         os << v[i];
-    //         if (i < dim - 1) {
-    //             os << ", ";
-    //         }
-    //     }
-    //     os << " ]\n";
-    // }
-
-    // void print(std::ostream& os, const mat_t& v)
-    // {
-    //     os << "[ ";
-    //     for (size_t i = 0; i < dim; ++i) {
-    //         os << v[i];
-    //         if (i < dim - 1) {
-    //             os << ", ";
-    //         }
-    //     }
-    //     os << " ]\n";
-    // }
 
    private:
     template <typename F>

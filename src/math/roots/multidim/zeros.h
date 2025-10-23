@@ -2,8 +2,9 @@
 #define ROOT_MULTIDIM_H
 
 #include <array>
-#include <cmath>    // std::sqrt, std::isnan
-#include <numeric>  // std::inner_product
+#include <algorithm>  // std::swap
+#include <cmath>      // std::sqrt, std::isnan
+#include <numeric>    // std::inner_product
 
 // #include <iostream>
 
@@ -65,7 +66,7 @@ struct zero_finding_method {
             is_valid = static_cast<Method*>(this)->iterate(std::forward<F>(fun));
 
             if (is_valid) {
-                is_valid = static_cast<Method*>(this)->has_converged();
+                is_valid = !(static_cast<Method*>(this)->has_converged());
             }
         }
         flag = Flag::max_iterations;
