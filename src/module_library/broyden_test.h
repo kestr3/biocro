@@ -3,7 +3,7 @@
 
 #include "../framework/module.h"
 #include "../framework/state_map.h"
-#include "../math/roots/broyden_method.h"
+#include "../math/roots/multidim/broyden.h"
 
 #include <array>
 
@@ -87,9 +87,9 @@ string_vector broyden_test::get_outputs()
 void broyden_test::do_operation() const
 {
     using namespace root_multidim;
-    broyden<2> solver(static_cast<size_t>(max_iterations), abs_tol, rel_tol);
+    broyden<2> solve(static_cast<size_t>(max_iterations), abs_tol, rel_tol);
     vec_t<2> guess = {guess_1, guess_2};
-    broyden<2>::result_t res = solver.solve(test_function, guess);
+    result_t<2> res = solve(test_function, guess);
 
     update(x1, res.zero[0]);
     update(x2, res.zero[1]);

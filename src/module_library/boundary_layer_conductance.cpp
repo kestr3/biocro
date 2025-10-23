@@ -185,7 +185,7 @@ double leaf_boundary_layer_conductance_nikolov(
     );
 
     // Throw exception if not converged
-    if (!root_finding::is_successful_relaxed(result.flag)) {
+    if (!root_finding::is_successful(result.flag)) {
         throw std::runtime_error(
             "gbv_free solver reports failed convergence with termination flag:\n    " +
             root_finding::flag_message(result.flag));

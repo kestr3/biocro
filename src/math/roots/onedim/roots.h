@@ -29,7 +29,8 @@ enum class Flag {
     invalid_bracket,
     division_by_zero,
     halley_no_cross,
-    bracket_fixed_point
+    bracket_fixed_point,
+    function_is_nonfinite
 };
 
 // Helper function declarations
@@ -40,8 +41,7 @@ inline bool smaller(double x, double y);                              // true if
 inline bool is_between(double x, double a, double b);                 // true if `x` is `[a,b]`
 inline double get_midpoint(const graph_t& a, const graph_t& b);       // return (a.x + b.x)/2
 inline double get_secant_update(const graph_t& a, const graph_t& b);  // computes secant formula; may return NaN
-inline bool is_successful(Flag flag);
-inline bool is_successful_relaxed(Flag flag);
+inline bool is_successful(Flag flag);                                 // assuming continuous function.
 inline std::string flag_message(Flag flag);
 
 /**
@@ -261,6 +261,11 @@ struct root_finding_method {
             // is_valid == true indicates successful iteration
             is_valid = static_cast<Method*>(this)->iterate(std::forward<F>(func));
 
+            // check if residual is NaN
+            is_valid = std::isfinite(static_cast<Method*>(this)->residual());
+            if (!is_valid)
+                flag = Flag::function_is_nonfinite;
+
             if (is_valid)
                 // check for convergence; method specific implementation.
                 is_valid = !(static_cast<Method*>(this)->has_converged());
@@ -330,14 +335,10 @@ inline double get_secant_update(const graph_t& a, const graph_t& b)
     return (b.y * a.x - a.y * b.x) / (b.y - a.y);
 }
 
+// If the function is continuous, then bracket_width_zero always indicates
+// success. Bracketing methods identify where a sign-change occurs, and functions
+// with discontinuities can have sign-changes which are not true roots.
 inline bool is_successful(Flag flag)
-{
-    return (flag == Flag::residual_zero);
-}
-
-// A more relaxed version of `is_successful` that does not consider some flags
-// to be convergence failures
-inline bool is_successful_relaxed(Flag flag)
 {
     return (flag == Flag::residual_zero || flag == Flag::bracket_width_zero);
 }
@@ -361,6 +362,8 @@ std::string flag_message(Flag flag)
             return "Halley update failed; local quadratic does not cross zero.";
         case Flag::bracket_fixed_point:
             return "Bracket stopped shrinking.";
+        case Flag::function_is_nonfinite:
+            return "Function returned a nonfinite value: NaN, Inf, -Inf.";
         default:
             return "Flag not recognized.";
     }
