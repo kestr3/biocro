@@ -159,7 +159,7 @@ inline mat_t<dim> identity()
 template <size_t dim>
 inline mat_t<dim> invert(const mat_t<dim>& A)
 {
-    mat_t<dim> out = identity();
+    mat_t<dim> out = identity<dim>();
     double b;
     // gauss seidel method
     for (size_t iteration = 0; iteration < 100; ++iteration) {
@@ -174,7 +174,7 @@ inline mat_t<dim> invert(const mat_t<dim>& A)
                 out[i][k] /= A[i][i];
 
                 if (std::isnan(out[i][k])) {
-                    return identity();
+                    return identity<dim>();
                 }
             }
         }
