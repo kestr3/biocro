@@ -120,6 +120,81 @@ struct zero_finding_method {
     }
 };
 
+// template <typename F>
+// mat_t approx_jac(F&& fun, const vec_t& x)
+// {
+//     vec_t x0 = x;
+//     mat_t jac;
+//     vec_t y0 = fun(x);
+//     vec_t y1;
+//     double constexpr eps = 1e-10;
+//     for (size_t i = 0; i < dim; ++i) {
+//         x0[i] += eps;
+//         if (i > 0) {
+//             x0[i - 1] -= eps;
+//         }
+//         y1 = fun(x0);
+//         for (size_t j = 0; j < dim; ++j) {
+//             jac[j][i] = (y1[j] - y0[j]) / eps;
+//         }
+//     }
+
+//     return jac;
+// }
+
+template <size_t dim>
+inline mat_t<dim> identity()
+{
+    mat_t<dim> out;
+    for (size_t i = 0; i < dim; ++i) {
+        for (size_t j = 0; j < dim; ++j) {
+            out[i][j] = 0;
+            if (i == j)
+                out[i][j] = 1;
+        }
+    }
+    return out;
+}
+
+template <size_t dim>
+inline mat_t<dim> invert(const mat_t<dim>& A)
+{
+    mat_t<dim> out = identity();
+    double b;
+    // gauss seidel method
+    for (size_t iteration = 0; iteration < 100; ++iteration) {
+        for (size_t i = 0; i < dim; ++i) {
+            for (size_t k = 0; k < dim; ++k) {
+                b = i == k ? 1 : 0;
+                out[i][k] = b;
+                for (size_t j = 0; j < dim; ++j) {
+                    if (j != i)
+                        out[i][k] -= A[i][j] * out[j][k];
+                }
+                out[i][k] /= A[i][i];
+
+                if (std::isnan(out[i][k])) {
+                    return identity();
+                }
+            }
+        }
+    }
+    return out;
+}
+
+template <>
+inline mat_t<2> invert(const mat_t<2>& A)
+{
+    mat_t<2> out;
+    // analytic formula
+    double det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+    out[0][0] = A[1][1] / det;
+    out[0][1] = -A[0][1] / det;
+    out[1][0] = -A[1][0] / det;
+    out[1][1] = A[0][0] / det;
+    return out;
+}
+
 // template <size_t dim>
 // vec_t<dim>& operator+=(vec_t<dim>& x, const vec_t<dim>& y)
 // {
