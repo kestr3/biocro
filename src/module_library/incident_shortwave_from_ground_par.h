@@ -76,7 +76,7 @@ string_vector incident_shortwave_from_ground_par::get_inputs()
         "irradiance_direct_fraction",   // dimensionless
         "irradiance_diffuse_fraction",  // dimensionless
         "par_energy_fraction",          // dimensionless
-        "par_energy_content"            // J / micromol
+        "par_energy_content",           // J / micromol
         "solardiff"                     // micromol / (m^2 diffused) / s 
     };
 }
