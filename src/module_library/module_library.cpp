@@ -12,6 +12,7 @@
 #include "partitioning_growth_with_rhizome_as_reserved_c_storage.h"
 #include "miscanthus_senescence.h"
 #include "delta_TT.h"
+#include "solar_zenith_angle.h"
 #include "aba_decay.h"
 #include "ball_berry.h"
 #include "biomass_leaf_n_limitation.h"
@@ -107,6 +108,7 @@ creator_map standardBML::module_library::library_entries =
      {"partitioning_growth_with_rhizome_as_reserved_c_storage",&create_mc<partitioning_growth_with_rhizome_as_reserved_c_storage>},
      {"miscanthus_senescence",                                 &create_mc<miscanthus_senescence>},
      {"delta_TT",                                              &create_mc<delta_TT>},
+     {"solar_zenith_angle",                                    &create_mc<solar_zenith_angle>},
      {"aba_decay",                                             &create_mc<aba_decay>},
      {"ball_berry",                                            &create_mc<ball_berry>},
      {"biomass_leaf_n_limitation",                             &create_mc<biomass_leaf_n_limitation>},
