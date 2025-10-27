@@ -63,7 +63,7 @@ string_vector solar_zenith_angle::get_outputs()
 double cos_zenith_angle(const double latitude, const int day_of_year,
                         const double hour_of_day)
 {  
-    const double pi = 3.1415;
+    constexpr double pi = 3.1415926;
     constexpr double radians_per_degree = pi/180;
     constexpr int solar_noon = 12;
     constexpr double radians_rotation_per_hour = 15 * radians_per_degree;
