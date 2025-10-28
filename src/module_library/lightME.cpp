@@ -78,7 +78,7 @@ Light_model lightME(
     // If the sun is near the horizon, take the limit as cosine_zenith_angle
     // approaches 0 (which is 0).
     double const diffuse_transmittance =
-        cosine_zenith_angle <= 0 ? 1
+        cosine_zenith_angle <= 0 ? 0
                                  : atmospheric_scattering *
                                        (1 - direct_transmittance) *
                                        cosine_zenith_angle;
@@ -88,8 +88,8 @@ Light_model lightME(
     // If the sun is near the horizon, take the limit as cosine_zenith_angle
     // approaches 0 (which is 0).
     double const direct_fraction =
-        //cosine_zenith_angle <= 0 ? 0
-                                  direct_transmittance /
+        cosine_zenith_angle <= 0 ? 0
+                                  :direct_transmittance /
                                        (direct_transmittance + diffuse_transmittance);
 
     // The remaining irradiance is diffuse (dimensionless).
