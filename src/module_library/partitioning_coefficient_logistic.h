@@ -73,12 +73,12 @@ class partitioning_coefficient_logistic : public direct_module
 
           // Get references to input quantities
           alphaLeaf{get_input(input_quantities, "alphaLeaf")},
-          alphaRhizome{get_input(input_quantities, "alphaRhizome")},
+          //alphaRhizome{get_input(input_quantities, "alphaRhizome")}, kc removed
           alphaRoot{get_input(input_quantities, "alphaRoot")},
           alphaShell{get_input(input_quantities, "alphaShell")},
           alphaStem{get_input(input_quantities, "alphaStem")},
           betaLeaf{get_input(input_quantities, "betaLeaf")},
-          betaRhizome{get_input(input_quantities, "betaRhizome")},
+          //betaRhizome{get_input(input_quantities, "betaRhizome")}, kc removed
           betaRoot{get_input(input_quantities, "betaRoot")},
           betaShell{get_input(input_quantities, "betaShell")},
           betaStem{get_input(input_quantities, "betaStem")},
@@ -102,12 +102,12 @@ class partitioning_coefficient_logistic : public direct_module
    private:
     // Pointers to input quantities
     const double& alphaLeaf;
-    const double& alphaRhizome;
+    //const double& alphaRhizome;
     const double& alphaRoot;
     const double& alphaShell;
     const double& alphaStem;
     const double& betaLeaf;
-    const double& betaRhizome;
+    //const double& betaRhizome;
     const double& betaRoot;
     const double& betaShell;
     const double& betaStem;
@@ -131,12 +131,12 @@ string_vector partitioning_coefficient_logistic::get_inputs()
 {
     return {
         "alphaLeaf",        // dimensionless
-        "alphaRhizome",     // dimensionless
+        //"alphaRhizome",     // dimensionless
         "alphaRoot",        // dimensionless
         "alphaShell",       // dimensionless
         "alphaStem",        // dimensionless
         "betaLeaf",         // dimensionless
-        "betaRhizome",      // dimensionless
+        //"betaRhizome",      // dimensionless
         "betaRoot",         // dimensionless
         "betaShell",        // dimensionless
         "betaStem",         // dimensionless
