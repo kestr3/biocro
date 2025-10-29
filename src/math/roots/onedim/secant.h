@@ -53,7 +53,7 @@ struct secant : public root_finding_method<secant> {
     template <typename F>
     bool iterate(F&& fun)
     {
-        double x = get_secant_update(best, lest);
+        double x = get_secant_update(best, last);
         if (!std::isfinite(x)) {
             flag = Flag::division_by_zero;
             return false;
