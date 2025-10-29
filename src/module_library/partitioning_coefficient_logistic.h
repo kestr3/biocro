@@ -174,7 +174,7 @@ void partitioning_coefficient_logistic::do_operation() const
     double const root_strength{strength_term(alphaRoot, betaRoot, DVI)};
     double const shell_strength{strength_term(alphaShell, betaShell, DVI)};
     double const stem_strength{strength_term(alphaStem, betaStem, DVI)};
-    double constexpr grain_strength{0}; /// Kc changed from 1 to 0
+    double const grain_strength{0}; /// Kc changed from 1 to 0
 
     // The rhizome is treated different from the other tissues. When the plant
     // is in its emergence stage (DVI < 0), the rhizome acts like a carbon
@@ -182,7 +182,7 @@ void partitioning_coefficient_logistic::do_operation() const
     // follows the same rules as the other tissues.
     double const rhizome_strength{DVI < kRhizome_emr_DVI
                                       ? 0
-                                      : 1}; //strength_term(alphaRhizome, betaRhizome, DVI)}; kc changed
+                                      : 1.0}; //strength_term(alphaRhizome, betaRhizome, DVI)}; kc changed
 
     // Calculate the total sink strength
     double const total_strength =
