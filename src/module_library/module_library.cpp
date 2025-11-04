@@ -104,6 +104,7 @@
 #include "two_layer_soil_profile.h"
 #include "varying_Jmax25.h"
 #include "water_vapor_properties_from_air_temperature.h"
+#include "miscanthus_senescence.h"
 
 creator_map standardBML::module_library::library_entries =
 {
@@ -206,5 +207,6 @@ creator_map standardBML::module_library::library_entries =
      {"total_growth_and_maintenance_respiration",              &create_mc<total_growth_and_maintenance_respiration>},
      {"two_layer_soil_profile",                                &create_mc<two_layer_soil_profile>},
      {"varying_Jmax25",                                        &create_mc<varying_Jmax25>},
-     {"water_vapor_properties_from_air_temperature",           &create_mc<water_vapor_properties_from_air_temperature>}
+     {"water_vapor_properties_from_air_temperature",           &create_mc<water_vapor_properties_from_air_temperature>},
+     {"miscanthus_senescence",                                 &create_mc<miscanthus_senescence>}
 };
