@@ -238,12 +238,12 @@ void partitioning_growth_calculator::do_operation() const
     double const base_rate_shell{kShell > 0 ? canopy_assim * kShell : 0};
     double const Shell_gr_rate{growth_resp_Q10(base_rate_shell, grc_shell, temp, Tref)};
 
-    double const net_assimilation_rate_grain{kGrain >0 ? base_rate_grain - Grain_gr_rate : 0};
-    double const net_assimilation_rate_leaf{kLeaf >0 ? base_rate_leaf - Leaf_gr_rate - Leaf_WS_loss_rate : 0};
-    double const net_assimilation_rate_rhizome{kRhizome >0 ? base_rate_rhizome - Rhizome_gr_rate : 0};
-    double const net_assimilation_rate_root{kRoot >0 ? base_rate_root - Root_gr_rate : 0};
-    double const net_assimilation_rate_shell{kShell >0 ? base_rate_shell - Shell_gr_rate : 0};
-    double const net_assimilation_rate_stem{kStem >0 ? base_rate_stem - Stem_gr_rate : 0};  
+    double const net_assimilation_rate_grain{base_rate_grain>Grain_gr_rate ? base_rate_grain - Grain_gr_rate : 0};
+    double const net_assimilation_rate_leaf{base_rate_leaf>Leaf_gr_rate? base_rate_leaf - Leaf_gr_rate - Leaf_WS_loss_rate : 0};
+    double const net_assimilation_rate_rhizome{base_rate_rhizome>Rhizome_gr_rate ? base_rate_rhizome - Rhizome_gr_rate : 0};
+    double const net_assimilation_rate_root{base_rate_root>Root_gr_rate ? base_rate_root - Root_gr_rate : 0};
+    double const net_assimilation_rate_shell{base_rate_shell>Shell_gr_rate ? base_rate_shell - Shell_gr_rate : 0};
+    double const net_assimilation_rate_stem{base_rate_stem>Stem_gr_rate ? base_rate_stem - Stem_gr_rate : 0};  
 
     update(Grain_gr_rate_op, Grain_gr_rate);
     update(Leaf_gr_rate_op, Leaf_gr_rate);
