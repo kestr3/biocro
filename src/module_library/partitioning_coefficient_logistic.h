@@ -85,6 +85,8 @@ class partitioning_coefficient_logistic : public direct_module
           DVI{get_input(input_quantities, "DVI")},
           kRhizome_emr{get_input(input_quantities, "kRhizome_emr")},
           kRhizome_emr_DVI{get_input(input_quantities, "kRhizome_emr_DVI")},
+          kLeaf_emr{get_input(input_quantities, "kLeaf_emr")},
+          kStem_emr{get_input(input_quantities, "kStem_emr")},
 
           // Get pointers to output quantities
           kGrain_op{get_op(output_quantities, "kGrain")},
@@ -114,6 +116,8 @@ class partitioning_coefficient_logistic : public direct_module
     const double& DVI;
     const double& kRhizome_emr;
     const double& kRhizome_emr_DVI;
+    const double& kLeaf_emr;
+    const double& kStem_emr;
 
     // Pointers to output quantities
     double* kGrain_op;
@@ -142,7 +146,9 @@ string_vector partitioning_coefficient_logistic::get_inputs()
         "betaStem",         // dimensionless
         "DVI",              // dimensionless
         "kRhizome_emr",     // dimensionless
-        "kRhizome_emr_DVI"  // dimensionless
+        "kRhizome_emr_DVI",  // dimensionless
+        "kLeaf_emr",
+        "kStem_emr"
     };
 }
 
@@ -162,46 +168,76 @@ void partitioning_coefficient_logistic::do_operation() const
 {
     // Check for error conditions; kRhizome_emr should be zero or negative,
     // since it applies when the rhizome is acting as a carbon source.
-    if (kRhizome_emr > 0.0) {
-        throw std::range_error("Thrown in partitioning_coefficient_logistic: kRhizome_emr is positive.");
-    }
+    // if (kRhizome_emr > 0.0) {
+    //     throw std::range_error("Thrown in partitioning_coefficient_logistic: kRhizome_emr is positive.");
+    // }
 
-    // Determine partitioning coefficients using multinomial logistic equations
-    // from Osborne et al., 2015 JULES-crop https://doi.org/10.5194/gmd-8-1139-2015
+    // // Determine partitioning coefficients using multinomial logistic equations
+    // // from Osborne et al., 2015 JULES-crop https://doi.org/10.5194/gmd-8-1139-2015
 
-    // Calculate the sink strength of each tissue (relative to grain)
+    // // Calculate the sink strength of each tissue (relative to grain)
+    // double const leaf_strength{strength_term(alphaLeaf, betaLeaf, DVI)};
+    // double const root_strength{strength_term(alphaRoot, betaRoot, DVI)};
+    // double const shell_strength{strength_term(alphaShell, betaShell, DVI)};
+    // double const stem_strength{strength_term(alphaStem, betaStem, DVI)};
+    // double const grain_strength{0}; /// Kc changed from 1 to 0
+
+    // // The rhizome is treated different from the other tissues. When the plant
+    // // is in its emergence stage (DVI < 0), the rhizome acts like a carbon
+    // // source. In this case, its demand for carbon is zero. Otherwise, it
+    // // follows the same rules as the other tissues.
+    // double const rhizome_strength{DVI < kRhizome_emr_DVI
+    //                                   ? 0
+    //                                   : 1.0}; //strength_term(alphaRhizome, betaRhizome, DVI)}; kc changed
+
+    // // Calculate the total sink strength
+    // double const total_strength =
+    //     leaf_strength + rhizome_strength + root_strength + shell_strength +
+    //     stem_strength + grain_strength;
+
+    // // The k values are the fraction of total demand from each tissue
+    // double const kGrain{grain_strength / total_strength};  // dimensionless
+    // double const kLeaf{leaf_strength / total_strength};    // dimensionless
+    // double const kRoot{root_strength / total_strength};    // dimensionless
+    // double const kShell{shell_strength / total_strength};  // dimensionless
+    // double const kStem{stem_strength / total_strength};    // dimensionless
+
+    // // The rhizome is treated different from the other tissues. When DVI < 0,
+    // // its k value is given by kRhizome_emr. Otherwise, it follows the same
+    // // rules as the other tissues.
+    // double const kRhizome{DVI < kRhizome_emr_DVI
+    //                           ? kRhizome_emr
+    //                           : rhizome_strength / total_strength};  // dimensionless
+
+    //kc added to create piecewise
+        //Calculate the sink strength of each tissue (relative to grain)
+    double kLeaf, kRoot, kShell, kStem, kRhizome, kGrain;
     double const leaf_strength{strength_term(alphaLeaf, betaLeaf, DVI)};
     double const root_strength{strength_term(alphaRoot, betaRoot, DVI)};
     double const shell_strength{strength_term(alphaShell, betaShell, DVI)};
     double const stem_strength{strength_term(alphaStem, betaStem, DVI)};
+    double const rhizome_strength{1};
     double const grain_strength{0}; /// Kc changed from 1 to 0
-
-    // The rhizome is treated different from the other tissues. When the plant
-    // is in its emergence stage (DVI < 0), the rhizome acts like a carbon
-    // source. In this case, its demand for carbon is zero. Otherwise, it
-    // follows the same rules as the other tissues.
-    double const rhizome_strength{DVI < kRhizome_emr_DVI
-                                      ? 0
-                                      : 1.0}; //strength_term(alphaRhizome, betaRhizome, DVI)}; kc changed
-
-    // Calculate the total sink strength
     double const total_strength =
-        leaf_strength + rhizome_strength + root_strength + shell_strength +
-        stem_strength + grain_strength;
+         leaf_strength + rhizome_strength + root_strength + shell_strength +
+         stem_strength + grain_strength;
 
-    // The k values are the fraction of total demand from each tissue
-    double const kGrain{grain_strength / total_strength};  // dimensionless
-    double const kLeaf{leaf_strength / total_strength};    // dimensionless
-    double const kRoot{root_strength / total_strength};    // dimensionless
-    double const kShell{shell_strength / total_strength};  // dimensionless
-    double const kStem{stem_strength / total_strength};    // dimensionless
-
-    // The rhizome is treated different from the other tissues. When DVI < 0,
-    // its k value is given by kRhizome_emr. Otherwise, it follows the same
-    // rules as the other tissues.
-    double const kRhizome{DVI < kRhizome_emr_DVI
-                              ? kRhizome_emr
-                              : rhizome_strength / total_strength};  // dimensionless
+    if (DVI<0) {
+        kLeaf = kLeaf_emr; //dimensionless
+        kStem = kStem_emr; //dimensionless
+        kRoot = 1.0 - kLeaf - kStem;
+        kRhizome = kRhizome_emr; //dimensionless
+        kGrain = 0;
+        kShell = 0;
+    }
+    else {
+        kLeaf = leaf_strength / total_strength;    // dimensionless
+        kStem = stem_strength / total_strength;    // dimensionless
+        kRoot = root_strength / total_strength;    // dimensionless
+        kRhizome = rhizome_strength / total_strength;
+        kGrain = grain_strength / total_strength;  // dimensionless
+        kShell = shell_strength / total_strength;  // dimensionless
+    }
 
     // Update the output quantities
     update(kGrain_op, kGrain);      // dimensionless
